@@ -13,6 +13,7 @@ interface LoginFormData {
 interface FormErrors {
   emailOrUsername?: string;
   password?: string;
+  [key: string]: string | undefined;
 }
 
 const LoginForm = () => {

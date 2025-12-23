@@ -24,6 +24,7 @@ interface FormErrors {
   password?: string;
   confirmPassword?: string;
   fullName?: string;
+  [key: string]: string | undefined;
 }
 
 const RegisterForm = () => {
