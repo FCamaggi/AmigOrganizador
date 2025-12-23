@@ -52,16 +52,25 @@ export const updateDayAvailability = async (req, res) => {
                 });
             }
 
-            // Validar que start sea antes que end
+            // Validar formato HH:MM y que no sean iguales (permite turnos nocturnos que cruzan medianoche)
+            const timeRegex = /^([01]\d|2[0-3]):([0-5]\d)$/;
+            if (!timeRegex.test(slot.start) || !timeRegex.test(slot.end)) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Formato de hora inválido. Use HH:MM (00:00-23:59)'
+                });
+            }
+
             const [startHour, startMin] = slot.start.split(':').map(Number);
             const [endHour, endMin] = slot.end.split(':').map(Number);
             const startMinutes = startHour * 60 + startMin;
             const endMinutes = endHour * 60 + endMin;
 
-            if (startMinutes >= endMinutes) {
+            // Solo validar que no sean exactamente iguales (permite turnos nocturnos como 20:00-08:00)
+            if (startMinutes === endMinutes) {
                 return res.status(400).json({
                     success: false,
-                    message: 'La hora de inicio debe ser antes que la hora de fin'
+                    message: 'La hora de inicio y fin no pueden ser iguales'
                 });
             }
         }
@@ -212,6 +221,70 @@ export const importSchedule = async (req, res) => {
                 success: false,
                 message: 'Datos de importación inválidos'
             });
+        }
+
+        // Validar estructura completa antes de guardar
+        const timeRegex = /^([01]\d|2[0-3]):([0-5]\d)$/;
+        const days = new Set();
+
+        for (const dayAvail of availability) {
+            // Validar día
+            if (!dayAvail.day || dayAvail.day < 1 || dayAvail.day > 31) {
+                return res.status(400).json({
+                    success: false,
+                    message: `Día inválido: ${dayAvail.day}. Debe estar entre 1 y 31`
+                });
+            }
+
+            // Validar días duplicados
+            if (days.has(dayAvail.day)) {
+                return res.status(400).json({
+                    success: false,
+                    message: `Día duplicado encontrado: ${dayAvail.day}`
+                });
+            }
+            days.add(dayAvail.day);
+
+            // Validar slots
+            if (!Array.isArray(dayAvail.slots)) {
+                return res.status(400).json({
+                    success: false,
+                    message: `Slots debe ser un array para el día ${dayAvail.day}`
+                });
+            }
+
+            for (const slot of dayAvail.slots) {
+                if (!slot.start || !slot.end) {
+                    return res.status(400).json({
+                        success: false,
+                        message: `Cada slot debe tener start y end (día ${dayAvail.day})`
+                    });
+                }
+
+                // Validar formato HH:MM
+                if (!timeRegex.test(slot.start) || !timeRegex.test(slot.end)) {
+                    return res.status(400).json({
+                        success: false,
+                        message: `Formato de hora inválido en día ${dayAvail.day}. Use HH:MM (00:00-23:59)`
+                    });
+                }
+
+                // Validar que no sean iguales
+                if (slot.start === slot.end) {
+                    return res.status(400).json({
+                        success: false,
+                        message: `La hora de inicio y fin no pueden ser iguales (día ${dayAvail.day})`
+                    });
+                }
+
+                // Validar color si existe
+                if (slot.color && !/^#[0-9A-Fa-f]{6}$/.test(slot.color)) {
+                    return res.status(400).json({
+                        success: false,
+                        message: `Color inválido en día ${dayAvail.day}. Use formato hexadecimal #RRGGBB`
+                    });
+                }
+            }
         }
 
         const schedule = await Schedule.getOrCreate(userId, parseInt(year), parseInt(month));
