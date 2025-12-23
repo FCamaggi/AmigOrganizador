@@ -48,7 +48,7 @@ export const useAuthStore = create<AuthState>((set) => ({
         error: null,
       });
       return data;
-    } catch (error) {
+    } catch (error: any) {
       const message =
         error.response?.data?.message || 'Error al iniciar sesión';
       set({
@@ -72,7 +72,7 @@ export const useAuthStore = create<AuthState>((set) => ({
         error: null,
       });
       return data;
-    } catch (error) {
+    } catch (error: any) {
       const message =
         error.response?.data?.message || 'Error al registrar usuario';
       set({

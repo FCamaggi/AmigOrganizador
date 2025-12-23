@@ -1,4 +1,4 @@
-import { useState, FormEvent, ChangeEvent } from 'react';
+import { useState, type FormEvent, type ChangeEvent } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuthStore } from '../../store/authStore';
 import { textColors } from '../../styles/design-system';
@@ -10,7 +10,7 @@ import {
   isValidUsername,
 } from '../../utils/validators';
 
-interface FormData {
+interface RegisterFormData {
   email: string;
   username: string;
   password: string;
@@ -30,7 +30,7 @@ const RegisterForm = () => {
   const navigate = useNavigate();
   const { register, loading, error, clearError } = useAuthStore();
 
-  const [formData, setFormData] = useState<FormData>({
+  const [formData, setFormData] = useState<RegisterFormData>({
     email: '',
     username: '',
     password: '',

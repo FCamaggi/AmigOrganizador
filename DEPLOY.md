@@ -76,6 +76,7 @@ FRONTEND_URL=https://tu-sitio.netlify.app
 ```
 
 ⚠️ **IMPORTANTE**:
+
 - Usa la misma MONGODB_URI de tu `.env` local
 - Genera un JWT_SECRET nuevo para producción (puede ser cualquier string aleatorio largo)
 - Reemplaza FRONTEND_URL con la URL real de Netlify
@@ -113,15 +114,18 @@ FRONTEND_URL=https://tu-sitio.netlify.app
 ## ✅ Verificar el Deployment
 
 ### Frontend
+
 - Abre `https://tu-sitio.netlify.app`
 - Deberías ver la página de login
 - Abre DevTools (F12) → Network → verifica que no haya errores CORS
 
 ### Backend
+
 - Abre `https://amigorganizador-backend.onrender.com/api/health`
 - Deberías ver: `{"status":"OK","timestamp":"..."}`
 
 ### Funcionalidad Completa
+
 1. Registra un usuario nuevo
 2. Inicia sesión
 3. Crea un grupo
@@ -132,18 +136,22 @@ FRONTEND_URL=https://tu-sitio.netlify.app
 ## 🐛 Troubleshooting
 
 ### Error CORS
+
 - Verifica que `FRONTEND_URL` en Render coincida exactamente con la URL de Netlify
 - No incluyas `/` al final de las URLs
 
 ### Backend no responde
+
 - Render en plan Free duerme después de 15 min de inactividad
 - La primera petición puede tardar 30-60 segundos en despertar
 
 ### Build falla en Netlify
+
 - Verifica que `VITE_API_URL` esté configurada
 - Revisa los logs en: Deploys → Failed deploy → View logs
 
 ### Build falla en Render
+
 - Verifica que todas las variables de entorno estén configuradas
 - Revisa los logs en: Logs (pestaña superior)
 

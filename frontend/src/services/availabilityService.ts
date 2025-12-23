@@ -12,11 +12,7 @@ export interface MemberAvailability {
 export interface DayAvailability {
   day: number;
   availableMembers: MemberAvailability[];
-  unavailableMembers: {
-    userId: string;
-    username: string;
-    fullName?: string;
-  }[];
+  unavailableMembers: MemberAvailability[];
   availabilityPercentage: number;
   timeSlots: TimeSlot[];
 }

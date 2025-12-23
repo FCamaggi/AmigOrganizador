@@ -16,7 +16,7 @@ export const authService = {
   /**
    * Iniciar sesión
    */
-  async login(credentials) {
+  async login(credentials: { email: string; password: string }) {
     const response = await api.post('/auth/login', credentials);
     if (response.data.token) {
       localStorage.setItem('token', response.data.token);

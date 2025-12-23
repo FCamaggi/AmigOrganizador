@@ -1,11 +1,11 @@
-import { useState, FormEvent, ChangeEvent } from 'react';
+import { useState, type FormEvent, type ChangeEvent } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuthStore } from '../../store/authStore';
 import { textColors } from '../../styles/design-system';
 import Input from '../common/Input';
 import Button from '../common/Button';
 
-interface FormData {
+interface LoginFormData {
   emailOrUsername: string;
   password: string;
 }
@@ -19,7 +19,7 @@ const LoginForm = () => {
   const navigate = useNavigate();
   const { login, loading, error, clearError } = useAuthStore();
 
-  const [formData, setFormData] = useState<FormData>({
+  const [formData, setFormData] = useState<LoginFormData>({
     emailOrUsername: '',
     password: '',
   });
