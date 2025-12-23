@@ -79,29 +79,29 @@ const Schedule = () => {
     <div className="min-h-screen bg-neutral-50">
       <Navbar />
       
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+      <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 py-3 sm:py-6 space-y-4 sm:space-y-6">
         {/* Header Card */}
         <Card variant="gradient" padding="lg">
-          <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
+          <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 sm:gap-6">
             <div className="flex-1">
-              <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-2">
                 📅 Mi Horario
               </h1>
-              <p className="text-white/90 text-lg">
+              <p className="text-white/90 text-base sm:text-lg">
                 Gestiona tu disponibilidad de forma fácil y rápida
               </p>
               
               {/* Stats */}
-              <div className="mt-4 flex flex-wrap gap-3">
-                <div className="bg-white/20 backdrop-blur-sm px-4 py-2 rounded-lg">
-                  <div className="flex items-center gap-2">
-                    <span className="text-white/80 text-sm">Días configurados:</span>
+              <div className="mt-3 sm:mt-4 flex flex-wrap gap-2 sm:gap-3">
+                <div className="bg-white/20 backdrop-blur-sm px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg">
+                  <div className="flex items-center gap-1.5 sm:gap-2">
+                    <span className="text-white/80 text-xs sm:text-sm">Días configurados:</span>
                     <Badge variant="success">{totalDaysWithSchedule}</Badge>
                   </div>
                 </div>
-                <div className="bg-white/20 backdrop-blur-sm px-4 py-2 rounded-lg">
-                  <div className="flex items-center gap-2">
-                    <span className="text-white/80 text-sm">Franjas horarias:</span>
+                <div className="bg-white/20 backdrop-blur-sm px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg">
+                  <div className="flex items-center gap-1.5 sm:gap-2">
+                    <span className="text-white/80 text-xs sm:text-sm">Franjas horarias:</span>
                     <Badge variant="primary">{totalSlots}</Badge>
                   </div>
                 </div>
@@ -109,13 +109,13 @@ const Schedule = () => {
             </div>
 
             {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full lg:w-auto">
               <Button
                 onClick={() => setIsQuickModalOpen(true)}
                 variant="secondary"
                 size="md"
                 icon={
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                   </svg>
                 }

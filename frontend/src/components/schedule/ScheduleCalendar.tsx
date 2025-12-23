@@ -194,21 +194,26 @@ const ScheduleCalendar = ({ onSelectDay }: ScheduleCalendarProps) => {
     const label = format(toolbar.date, 'MMMM yyyy', { locale: es });
 
     return (
-      <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6">
-        <Button onClick={goToToday} variant="outline" size="sm">
+      <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-4 sm:mb-6">
+        <Button onClick={goToToday} variant="outline" size="sm" className="hidden sm:block">
           📅 Hoy
         </Button>
 
-        <h2 className="text-2xl font-bold text-neutral-800 capitalize flex items-center gap-2">
+        <h2 className="text-xl sm:text-2xl font-bold text-neutral-800 capitalize flex items-center gap-2">
           {label}
         </h2>
 
         <div className="flex gap-2">
           <Button onClick={goToBack} variant="secondary" size="sm">
-            ← Anterior
+            <span className="hidden sm:inline">← Anterior</span>
+            <span className="sm:hidden">←</span>
+          </Button>
+          <Button onClick={goToToday} variant="outline" size="sm" className="sm:hidden">
+            📅
           </Button>
           <Button onClick={goToNext} variant="secondary" size="sm">
-            Siguiente →
+            <span className="hidden sm:inline">Siguiente →</span>
+            <span className="sm:hidden">→</span>
           </Button>
         </div>
       </div>
@@ -222,10 +227,10 @@ const ScheduleCalendar = ({ onSelectDay }: ScheduleCalendarProps) => {
     const hasSchedule = dayAvail && dayAvail.slots.length > 0;
 
     return (
-      <div className={`relative h-full ${hasSchedule ? 'bg-primary-50/30' : ''}`}>
+      <div className={`relative h-full ${hasSchedule ? 'bg-primary-50/30' : ''}`} style={{ pointerEvents: 'none' }}>
         {children}
         {hasSchedule && (
-          <div className="absolute top-1 right-1">
+          <div className="absolute top-1 right-1 pointer-events-none">
             <Badge variant="primary">
               {dayAvail.slots.length}
             </Badge>
@@ -265,25 +270,25 @@ const ScheduleCalendar = ({ onSelectDay }: ScheduleCalendarProps) => {
         </div>
       )}
 
-      {/* Leyenda */}
-      <div className="mb-6 flex flex-wrap gap-3 p-4 bg-neutral-50 rounded-xl border border-neutral-200">
-        <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded bg-neutral-200 border-2 border-neutral-300"></div>
-          <span className="text-sm font-medium text-neutral-700">Sin horarios</span>
+      {/* Leyenda - Más compacta en móvil */}
+      <div className="mb-4 sm:mb-6 flex flex-wrap gap-2 sm:gap-3 p-3 sm:p-4 bg-neutral-50 rounded-xl border border-neutral-200">
+        <div className="flex items-center gap-1.5 sm:gap-2">
+          <div className="w-5 h-5 sm:w-6 sm:h-6 rounded bg-neutral-200 border-2 border-neutral-300"></div>
+          <span className="text-xs sm:text-sm font-medium text-neutral-700">Sin horarios</span>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded bg-indigo-500 border-2 border-indigo-600"></div>
-          <span className="text-sm font-medium text-neutral-700">Con horarios</span>
+        <div className="flex items-center gap-1.5 sm:gap-2">
+          <div className="w-5 h-5 sm:w-6 sm:h-6 rounded bg-indigo-500 border-2 border-indigo-600"></div>
+          <span className="text-xs sm:text-sm font-medium text-neutral-700">Con horarios</span>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded border border-dashed border-neutral-400 bg-neutral-100 flex items-center justify-center text-xs text-neutral-600">
+        <div className="flex items-center gap-1.5 sm:gap-2">
+          <div className="w-5 h-5 sm:w-6 sm:h-6 rounded border border-dashed border-neutral-400 bg-neutral-100 flex items-center justify-center text-xs text-neutral-600">
             +X
           </div>
-          <span className="text-sm font-medium text-neutral-700">Más eventos</span>
+          <span className="text-xs sm:text-sm font-medium text-neutral-700">Más eventos</span>
         </div>
       </div>
 
-      <div className="calendar-container bg-white rounded-xl">
+      <div className="calendar-container bg-white rounded-xl overflow-x-auto">
         <Calendar
           localizer={localizer}
           events={events}
@@ -302,7 +307,7 @@ const ScheduleCalendar = ({ onSelectDay }: ScheduleCalendarProps) => {
           }}
           views={['month']}
           defaultView="month"
-          style={{ height: 850 }}
+          style={{ height: 850, minHeight: '70vh' }}
           messages={{
             next: 'Siguiente',
             previous: 'Anterior',
@@ -320,16 +325,17 @@ const ScheduleCalendar = ({ onSelectDay }: ScheduleCalendarProps) => {
         />
       </div>
 
-      {/* Tip */}
-      <div className="mt-6 p-4 bg-gradient-to-r from-primary-50 to-accent-50 border border-primary-200 rounded-xl">
-        <div className="flex items-start gap-3">
-          <svg className="w-5 h-5 text-primary-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+      {/* Tip - Más corto en móvil */}
+      <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-gradient-to-r from-primary-50 to-accent-50 border border-primary-200 rounded-xl">
+        <div className="flex items-start gap-2 sm:gap-3">
+          <svg className="w-4 h-4 sm:w-5 sm:h-5 text-primary-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
             <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
           </svg>
           <div>
-            <p className="text-sm font-semibold text-primary-900 mb-1">💡 Consejo</p>
-            <p className="text-sm text-primary-800">
-              Haz clic en cualquier día para editar su horario. Cada evento puede tener su propio color. Si hay más de 3 eventos, verás un indicador "+X más".
+            <p className="text-xs sm:text-sm font-semibold text-primary-900 mb-1">💡 Consejo</p>
+            <p className="text-xs sm:text-sm text-primary-800">
+              <span className="hidden sm:inline">Haz clic en cualquier día para editar su horario. Cada evento puede tener su propio color. Si hay más de 3 eventos, verás un indicador "+X más".</span>
+              <span className="sm:hidden">Toca cualquier día para editar horarios y agregar eventos con colores personalizados.</span>
             </p>
           </div>
         </div>
