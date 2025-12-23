@@ -136,6 +136,15 @@ body {
   overflow: hidden;
 }
 
+/* Aumentar altura de las celdas para que quepan 3+ eventos */
+.calendar-container .rbc-month-row {
+  min-height: 140px;
+}
+
+.calendar-container .rbc-row-content {
+  min-height: 110px;
+}
+
 .calendar-container .rbc-day-bg:hover {
   background-color: #f3f4f6;
   cursor: pointer;

@@ -153,6 +153,8 @@ const ScheduleCalendar = ({ onSelectDay }: ScheduleCalendarProps) => {
           padding: '2px 4px',
           textAlign: 'center' as const,
           fontStyle: 'italic',
+          cursor: 'default',
+          pointerEvents: 'none' as const,
         },
       };
     }
@@ -300,7 +302,7 @@ const ScheduleCalendar = ({ onSelectDay }: ScheduleCalendarProps) => {
           }}
           views={['month']}
           defaultView="month"
-          style={{ height: 650 }}
+          style={{ height: 850 }}
           messages={{
             next: 'Siguiente',
             previous: 'Anterior',
