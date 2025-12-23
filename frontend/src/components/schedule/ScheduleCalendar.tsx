@@ -28,8 +28,10 @@ interface CalendarEvent {
   end: Date;
   resource: {
     day: number;
-    slots: Array<{ start: string; end: string }>;
+    slots: Array<{ start: string; end: string; title?: string; color?: string }>;
     note?: string;
+    color?: string;
+    isMoreIndicator?: boolean;
   };
 }
 
@@ -62,30 +64,53 @@ const ScheduleCalendar = ({ onSelectDay }: ScheduleCalendarProps) => {
       return [];
     }
 
-    return currentSchedule.availability.map((dayAvail) => {
+    // Crear un evento separado por cada slot
+    const allEvents: CalendarEvent[] = [];
+    
+    currentSchedule.availability.forEach((dayAvail) => {
       const date = new Date(
         currentSchedule.year,
         currentSchedule.month - 1,
         dayAvail.day
       );
 
-      // Mostrar título del evento o las horas si no hay título
-      const slotsText =
-        dayAvail.slots.length > 0
-          ? dayAvail.slots.map((s) => s.title || `${s.start}-${s.end}`).join(', ')
-          : 'Libre';
+      if (dayAvail.slots.length > 0) {
+        // Mostrar solo los primeros 3 eventos
+        const visibleSlots = dayAvail.slots.slice(0, 3);
+        const remainingCount = dayAvail.slots.length - 3;
 
-      return {
-        title: slotsText,
-        start: date,
-        end: date,
-        resource: {
-          day: dayAvail.day,
-          slots: dayAvail.slots,
-          note: dayAvail.note,
-        },
-      };
+        visibleSlots.forEach((slot) => {
+          allEvents.push({
+            title: slot.title || `${slot.start}-${slot.end}`,
+            start: date,
+            end: date,
+            resource: {
+              day: dayAvail.day,
+              slots: dayAvail.slots,
+              note: dayAvail.note,
+              color: slot.color,
+            },
+          });
+        });
+
+        // Agregar evento "+X más" si hay más de 3 slots
+        if (remainingCount > 0) {
+          allEvents.push({
+            title: `+${remainingCount} más`,
+            start: date,
+            end: date,
+            resource: {
+              day: dayAvail.day,
+              slots: dayAvail.slots,
+              note: dayAvail.note,
+              isMoreIndicator: true,
+            },
+          });
+        }
+      }
     });
+
+    return allEvents;
   }, [currentSchedule]);
 
   useEffect(() => {
@@ -114,41 +139,39 @@ const ScheduleCalendar = ({ onSelectDay }: ScheduleCalendarProps) => {
   };
 
   const eventStyleGetter = (event: CalendarEvent) => {
-    const hasSlots = event.resource.slots.length > 0;
-    const slotsCount = event.resource.slots.length;
-
-    // Colores según cantidad de slots
-    let backgroundColor = '#e5e7eb'; // gris (sin slots)
-    let borderColor = '#d1d5db';
-    let color = '#6b7280';
-
-    if (hasSlots) {
-      if (slotsCount === 1) {
-        backgroundColor = '#93c5fd'; // azul claro
-        borderColor = '#60a5fa';
-        color = '#1e40af';
-      } else if (slotsCount === 2) {
-        backgroundColor = '#6366f1'; // índigo
-        borderColor = '#4f46e5';
-        color = 'white';
-      } else {
-        backgroundColor = '#8b5cf6'; // púrpura
-        borderColor = '#7c3aed';
-        color = 'white';
-      }
+    // Si es el indicador "+X más", usar estilo especial
+    if (event.resource.isMoreIndicator) {
+      return {
+        style: {
+          backgroundColor: '#f3f4f6',
+          borderColor: '#9ca3af',
+          color: '#6b7280',
+          borderRadius: '6px',
+          border: '1px dashed #9ca3af',
+          fontSize: '0.70rem',
+          fontWeight: '500',
+          padding: '2px 4px',
+          textAlign: 'center' as const,
+          fontStyle: 'italic',
+        },
+      };
     }
 
+    // Usar el color personalizado del evento
+    const eventColor = event.resource.color || '#6366f1';
+    
     return {
       style: {
-        backgroundColor,
-        borderColor,
-        color,
-        borderRadius: '8px',
-        border: `2px solid ${borderColor}`,
-        fontSize: '0.75rem',
+        backgroundColor: eventColor,
+        borderColor: eventColor,
+        color: 'white',
+        borderRadius: '6px',
+        border: `2px solid ${eventColor}`,
+        fontSize: '0.70rem',
         fontWeight: '600',
-        padding: '4px 6px',
-        textAlign: 'center' as const,
+        padding: '2px 6px',
+        textAlign: 'left' as const,
+        marginBottom: '2px',
       },
     };
   };
@@ -247,16 +270,14 @@ const ScheduleCalendar = ({ onSelectDay }: ScheduleCalendarProps) => {
           <span className="text-sm font-medium text-neutral-700">Sin horarios</span>
         </div>
         <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded bg-blue-300 border-2 border-blue-400"></div>
-          <span className="text-sm font-medium text-neutral-700">1 horario</span>
-        </div>
-        <div className="flex items-center gap-2">
           <div className="w-6 h-6 rounded bg-indigo-500 border-2 border-indigo-600"></div>
-          <span className="text-sm font-medium text-neutral-700">2 horarios</span>
+          <span className="text-sm font-medium text-neutral-700">Con horarios</span>
         </div>
         <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded bg-purple-500 border-2 border-purple-600"></div>
-          <span className="text-sm font-medium text-neutral-700">3+ horarios</span>
+          <div className="w-6 h-6 rounded border border-dashed border-neutral-400 bg-neutral-100 flex items-center justify-center text-xs text-neutral-600">
+            +X
+          </div>
+          <span className="text-sm font-medium text-neutral-700">Más eventos</span>
         </div>
       </div>
 
@@ -306,7 +327,7 @@ const ScheduleCalendar = ({ onSelectDay }: ScheduleCalendarProps) => {
           <div>
             <p className="text-sm font-semibold text-primary-900 mb-1">💡 Consejo</p>
             <p className="text-sm text-primary-800">
-              Haz clic en cualquier día para editar su horario. Los colores indican la cantidad de franjas horarias configuradas.
+              Haz clic en cualquier día para editar su horario. Cada evento puede tener su propio color. Si hay más de 3 eventos, verás un indicador "+X más".
             </p>
           </div>
         </div>

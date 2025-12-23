@@ -4,6 +4,7 @@ export interface TimeSlot {
   start: string;
   end: string;
   title?: string;
+  color?: string;
 }
 
 interface TimeSlotPickerProps {
@@ -104,13 +105,13 @@ const TimeSlotPicker = ({
 
   const handleSlotChange = (
     index: number,
-    field: 'start' | 'end' | 'title',
+    field: 'start' | 'end' | 'title' | 'color',
     value: string
   ) => {
     setError('');
     const newSlots = [...slots];
     
-    if (field === 'title') {
+    if (field === 'title' || field === 'color') {
       newSlots[index][field] = value;
     } else {
       newSlots[index][field] = value;
@@ -225,20 +226,37 @@ const TimeSlotPicker = ({
               className="p-3 bg-neutral-50 rounded-xl border border-neutral-200 hover:border-primary-300 transition-colors space-y-3"
             >
               {/* Título del evento */}
-              <div>
-                <label className="block text-xs text-neutral-600 mb-1">
-                  Título del evento (opcional)
-                </label>
-                <input
-                  type="text"
-                  value={slot.title || ''}
-                  onChange={(e) =>
-                    handleSlotChange(index, 'title', e.target.value)
-                  }
-                  placeholder="Ej: Trabajo, Clase, Reunión..."
-                  className="w-full px-3 py-2 bg-white border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm"
-                  maxLength={100}
-                />
+              <div className="grid grid-cols-[1fr,auto] gap-3">
+                <div>
+                  <label className="block text-xs text-neutral-600 mb-1">
+                    Título del evento (opcional)
+                  </label>
+                  <input
+                    type="text"
+                    value={slot.title || ''}
+                    onChange={(e) =>
+                      handleSlotChange(index, 'title', e.target.value)
+                    }
+                    placeholder="Ej: Trabajo, Clase, Reunión..."
+                    className="w-full px-3 py-2 bg-white border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm"
+                    maxLength={100}
+                  />
+                </div>
+                
+                {/* Color picker */}
+                <div>
+                  <label className="block text-xs text-neutral-600 mb-1">
+                    Color
+                  </label>
+                  <input
+                    type="color"
+                    value={slot.color || '#6366f1'}
+                    onChange={(e) =>
+                      handleSlotChange(index, 'color', e.target.value)
+                    }
+                    className="w-12 h-10 bg-white border border-neutral-300 rounded-lg cursor-pointer"
+                  />
+                </div>
               </div>
               
               {/* Horarios */}

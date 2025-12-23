@@ -4,6 +4,7 @@ export interface TimeSlot {
   start: string; // Formato HH:MM
   end: string; // Formato HH:MM
   title?: string; // Título del evento
+  color?: string; // Color del evento (hex)
 }
 
 export interface DayAvailability {
