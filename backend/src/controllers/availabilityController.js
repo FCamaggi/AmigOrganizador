@@ -242,6 +242,15 @@ function calculateDailyAvailability(schedules, daysInMonth, memberCount, groupMe
         dayData.availabilityPercentage = Math.round(
             (dayData.availableMembers.length / memberCount) * 100
         );
+        
+        dayData.calculationDetails = {
+            mode: 'daily',
+            formula: '(Miembros sin eventos / Total miembros) × 100',
+            calculation: `(${dayData.availableMembers.length} / ${memberCount}) × 100 = ${dayData.availabilityPercentage}%`,
+            totalMembers: memberCount,
+            membersWithoutEvents: dayData.availableMembers.length,
+            membersWithEvents: dayData.unavailableMembers.length
+        };
     });
 
     return Object.values(availabilityMap).sort((a, b) => a.day - b.day);
@@ -323,6 +332,7 @@ function calculateHourlyAvailability(schedules, daysInMonth, memberCount, groupM
         // Encontrar bloques de tiempo comunes (al menos 2 horas seguidas con >50% disponibilidad)
         const commonTimeSlots = [];
         let blockStart = null;
+        let blockHours = [];
         
         for (let hour = 0; hour < 24; hour++) {
             const percentage = hourlyPercentages[hour];
@@ -330,32 +340,84 @@ function calculateHourlyAvailability(schedules, daysInMonth, memberCount, groupM
             if (percentage >= 50) {
                 if (blockStart === null) {
                     blockStart = hour;
+                    blockHours = [];
                 }
+                blockHours.push(percentage);
             } else {
-                if (blockStart !== null && hour - blockStart >= 2) {
+                if (blockStart !== null && blockHours.length >= 2) {
+                    // Calcular promedio del bloque y mínimo de personas
+                    const avgBlockPercentage = blockHours.reduce((sum, p) => sum + p, 0) / blockHours.length;
+                    const minPeopleInBlock = Math.min(...blockHours.map(p => Math.round(memberCount * (p / 100))));
+                    
                     commonTimeSlots.push({
                         start: minutesToTime(blockStart * 60),
                         end: minutesToTime(hour * 60),
-                        availableCount: Math.round(memberCount * (hourlyPercentages[blockStart] / 100))
+                        availableCount: minPeopleInBlock,
+                        avgPercentage: Math.round(avgBlockPercentage)
                     });
                 }
                 blockStart = null;
+                blockHours = [];
             }
         }
         
         // Cerrar último bloque si existe
-        if (blockStart !== null && 24 - blockStart >= 2) {
+        if (blockStart !== null && blockHours.length >= 2) {
+            const avgBlockPercentage = blockHours.reduce((sum, p) => sum + p, 0) / blockHours.length;
+            const minPeopleInBlock = Math.min(...blockHours.map(p => Math.round(memberCount * (p / 100))));
+            
             commonTimeSlots.push({
                 start: minutesToTime(blockStart * 60),
                 end: '23:59',
-                availableCount: Math.round(memberCount * (hourlyPercentages[blockStart] / 100))
+                availableCount: minPeopleInBlock,
+                avgPercentage: Math.round(avgBlockPercentage)
             });
         }
 
-        // Obtener miembros disponibles/no disponibles basado en promedio del día
+        // Obtener miembros disponibles/no disponibles con detalles de horas libres
         const memberAvailability = schedules.map(schedule => {
             const dayAvailability = schedule.availability.find(a => a.day === day);
             const hasEvents = dayAvailability && dayAvailability.slots && dayAvailability.slots.length > 0;
+            
+            // Calcular bloques de horas libres para este miembro
+            const freeHoursBlocks = [];
+            let currentBlock = null;
+            
+            for (let hour = 0; hour < 24; hour++) {
+                const isFree = hourlyMap[hour].availableMembers.some(
+                    m => m.userId.toString() === schedule.user._id.toString()
+                );
+                
+                if (isFree) {
+                    if (currentBlock === null) {
+                        currentBlock = { start: hour, end: hour + 1 };
+                    } else {
+                        currentBlock.end = hour + 1;
+                    }
+                } else {
+                    if (currentBlock !== null) {
+                        freeHoursBlocks.push({
+                            start: minutesToTime(currentBlock.start * 60),
+                            end: minutesToTime(currentBlock.end * 60),
+                            hours: currentBlock.end - currentBlock.start
+                        });
+                        currentBlock = null;
+                    }
+                }
+            }
+            
+            // Cerrar último bloque si existe
+            if (currentBlock !== null) {
+                freeHoursBlocks.push({
+                    start: minutesToTime(currentBlock.start * 60),
+                    end: '23:59',
+                    hours: currentBlock.end - currentBlock.start
+                });
+            }
+            
+            const totalHoursFree = hourlyMap.filter(h => 
+                h.availableMembers.some(m => m.userId.toString() === schedule.user._id.toString())
+            ).length;
             
             return {
                 member: {
@@ -363,12 +425,13 @@ function calculateHourlyAvailability(schedules, daysInMonth, memberCount, groupM
                     username: schedule.user.username || schedule.user.email,
                     fullName: schedule.user.fullName,
                     slots: dayAvailability?.slots || [],
-                    note: dayAvailability?.note
+                    note: dayAvailability?.note,
+                    hoursFree: totalHoursFree,
+                    freeBlocks: freeHoursBlocks,
+                    percentageFree: Math.round((totalHoursFree / 24) * 100)
                 },
                 available: !hasEvents,
-                hoursFree: hourlyMap.filter(h => 
-                    h.availableMembers.some(m => m.userId.toString() === schedule.user._id.toString())
-                ).length
+                hoursFree: totalHoursFree
             };
         });
 
@@ -378,7 +441,17 @@ function calculateHourlyAvailability(schedules, daysInMonth, memberCount, groupM
             unavailableMembers: memberAvailability.filter(m => !m.available).map(m => m.member),
             availabilityPercentage: Math.round(avgPercentage),
             timeSlots: commonTimeSlots,
-            hourlyData: hourlyMap // Info adicional para detalle
+            calculationDetails: {
+                mode: 'hourly',
+                formula: 'Promedio de % de disponibilidad por hora',
+                hourlyPercentages: hourlyPercentages.map((p, h) => ({ 
+                    hour: h, 
+                    percentage: Math.round(p),
+                    availableCount: Math.round(memberCount * (p / 100))
+                })),
+                totalMembers: memberCount,
+                allMembers: memberAvailability.map(m => m.member)
+            }
         };
     }
 
@@ -503,14 +576,26 @@ function calculateCustomAvailability(schedules, daysInMonth, memberCount, groupM
             ((availableCount + (partialAvailableCount * 0.5)) / memberCount) * 100
         );
 
+        // Enriquecer member info con detalles de bloques
+        const enrichedMembers = memberFreeBlocks.map(memberData => ({
+            ...memberData.member,
+            freeBlocks: memberData.freeBlocks.map(b => ({
+                start: minutesToTime(b.start),
+                end: minutesToTime(b.end),
+                hours: b.hours
+            })),
+            maxFreeBlock: Math.max(0, ...memberData.freeBlocks.map(b => b.hours)),
+            qualifies: Math.max(0, ...memberData.freeBlocks.map(b => b.hours)) >= minHours
+        }));
+
         availabilityMap[day] = {
             day,
-            availableMembers: memberFreeBlocks
-                .filter(m => Math.max(0, ...m.freeBlocks.map(b => b.hours)) >= minHours)
-                .map(m => m.member),
-            unavailableMembers: memberFreeBlocks
-                .filter(m => Math.max(0, ...m.freeBlocks.map(b => b.hours)) < minHours)
-                .map(m => m.member),
+            availableMembers: enrichedMembers
+                .filter(m => m.qualifies)
+                .map(m => m),
+            unavailableMembers: enrichedMembers
+                .filter(m => !m.qualifies)
+                .map(m => m),
             availabilityPercentage: percentage,
             timeSlots: commonBlocks.map(block => ({
                 start: minutesToTime(block.start),
@@ -518,7 +603,17 @@ function calculateCustomAvailability(schedules, daysInMonth, memberCount, groupM
                 hours: block.hours,
                 memberCount: block.memberCount
             })),
-            minHoursRequired: minHours
+            minHoursRequired: minHours,
+            calculationDetails: {
+                mode: 'custom',
+                formula: '((Miembros con ≥minHoras) + (Miembros con ≥50% × 0.5)) / Total × 100',
+                calculation: `((${availableCount} + (${partialAvailableCount} × 0.5)) / ${memberCount}) × 100 = ${percentage}%`,
+                totalMembers: memberCount,
+                membersQualifying: availableCount,
+                membersPartial: partialAvailableCount,
+                minHoursRequired: minHours,
+                allMembers: enrichedMembers
+            }
         };
     }
 
