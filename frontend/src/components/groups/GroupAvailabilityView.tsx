@@ -127,13 +127,25 @@ const GroupAvailabilityView = ({
           Disponibilidad de {groupName}
         </h2>
         <div className="flex gap-2">
-          <Button variant="secondary" onClick={handlePreviousMonth} className="flex-1 sm:flex-none text-xs sm:text-sm justify-center">
+          <Button
+            variant="secondary"
+            onClick={handlePreviousMonth}
+            className="flex-1 sm:flex-none text-xs sm:text-sm justify-center"
+          >
             ← Anterior
           </Button>
-          <Button variant="secondary" onClick={handleCurrentMonth} className="flex-1 sm:flex-none text-xs sm:text-sm justify-center">
+          <Button
+            variant="secondary"
+            onClick={handleCurrentMonth}
+            className="flex-1 sm:flex-none text-xs sm:text-sm justify-center"
+          >
             Hoy
           </Button>
-          <Button variant="secondary" onClick={handleNextMonth} className="flex-1 sm:flex-none text-xs sm:text-sm justify-center">
+          <Button
+            variant="secondary"
+            onClick={handleNextMonth}
+            className="flex-1 sm:flex-none text-xs sm:text-sm justify-center"
+          >
             Siguiente →
           </Button>
         </div>
@@ -156,9 +168,18 @@ const GroupAvailabilityView = ({
 
           {showModeInfo && (
             <div className="bg-primary-50 p-3 sm:p-4 rounded-lg text-xs sm:text-sm text-neutral-700 space-y-2">
-              <p><strong>📅 Día a Día:</strong> Marca disponible si la persona no tiene eventos ese día.</p>
-              <p><strong>⏰ Hora a Hora:</strong> Calcula % según horas libres en común. Muestra bloques de tiempo disponibles.</p>
-              <p><strong>🎯 Personalizado:</strong> Solo marca disponibilidad si el grupo puede reunirse X horas seguidas mínimo.</p>
+              <p>
+                <strong>📅 Día a Día:</strong> Marca disponible si la persona no
+                tiene eventos ese día.
+              </p>
+              <p>
+                <strong>⏰ Hora a Hora:</strong> Calcula % según horas libres en
+                común. Muestra bloques de tiempo disponibles.
+              </p>
+              <p>
+                <strong>🎯 Personalizado:</strong> Solo marca disponibilidad si
+                el grupo puede reunirse X horas seguidas mínimo.
+              </p>
             </div>
           )}
 
@@ -176,7 +197,9 @@ const GroupAvailabilityView = ({
             >
               <div className="text-xl sm:text-2xl mb-1">📅</div>
               <div className="text-xs sm:text-sm font-semibold">Día a Día</div>
-              <div className="text-xs text-neutral-500 mt-1">Sin eventos = disponible</div>
+              <div className="text-xs text-neutral-500 mt-1">
+                Sin eventos = disponible
+              </div>
             </button>
 
             <button
@@ -191,8 +214,12 @@ const GroupAvailabilityView = ({
               }`}
             >
               <div className="text-xl sm:text-2xl mb-1">⏰</div>
-              <div className="text-xs sm:text-sm font-semibold">Hora a Hora</div>
-              <div className="text-xs text-neutral-500 mt-1">Intersección horaria</div>
+              <div className="text-xs sm:text-sm font-semibold">
+                Hora a Hora
+              </div>
+              <div className="text-xs text-neutral-500 mt-1">
+                Intersección horaria
+              </div>
             </button>
 
             <button
@@ -207,7 +234,9 @@ const GroupAvailabilityView = ({
               }`}
             >
               <div className="text-xl sm:text-2xl mb-1">🎯</div>
-              <div className="text-xs sm:text-sm font-semibold">Personalizado</div>
+              <div className="text-xs sm:text-sm font-semibold">
+                Personalizado
+              </div>
               <div className="text-xs text-neutral-500 mt-1">Horas mínimas</div>
             </button>
           </div>
@@ -231,7 +260,8 @@ const GroupAvailabilityView = ({
                 </span>
               </div>
               <p className="text-xs text-neutral-600 mt-2">
-                Solo se marcarán días donde el grupo pueda reunirse al menos {minHours} horas seguidas.
+                Solo se marcarán días donde el grupo pueda reunirse al menos{' '}
+                {minHours} horas seguidas.
               </p>
             </div>
           )}
@@ -264,26 +294,34 @@ const GroupAvailabilityView = ({
             <div className="text-xl sm:text-2xl font-bold text-green-700">
               {availability.stats.daysWithFullAvailability}
             </div>
-            <div className="text-xs sm:text-sm text-neutral-600">100% disponibles</div>
+            <div className="text-xs sm:text-sm text-neutral-600">
+              100% disponibles
+            </div>
           </div>
           <div className="bg-amber-50 p-3 sm:p-4 rounded-xl shadow-soft text-center">
             <div className="text-xl sm:text-2xl font-bold text-amber-700">
               {availability.stats.daysWithPartialAvailability}
             </div>
-            <div className="text-xs sm:text-sm text-neutral-600">Parcialmente</div>
+            <div className="text-xs sm:text-sm text-neutral-600">
+              Parcialmente
+            </div>
           </div>
           <div className="bg-neutral-50 p-3 sm:p-4 rounded-xl shadow-soft text-center">
             <div className="text-xl sm:text-2xl font-bold text-neutral-600">
               {availability.stats.daysWithNoAvailability}
             </div>
-            <div className="text-xs sm:text-sm text-neutral-600">Sin disponibilidad</div>
+            <div className="text-xs sm:text-sm text-neutral-600">
+              Sin disponibilidad
+            </div>
           </div>
           <div className="bg-primary-50 p-3 sm:p-4 rounded-xl shadow-soft text-center col-span-2 sm:col-span-1">
             <div className="text-xl sm:text-2xl font-bold text-primary-700">
               {availability.stats.schedulesSubmitted}/
               {availability.stats.memberCount}
             </div>
-            <div className="text-xs sm:text-sm text-neutral-600">Horarios enviados</div>
+            <div className="text-xs sm:text-sm text-neutral-600">
+              Horarios enviados
+            </div>
           </div>
         </div>
       )}
@@ -320,7 +358,9 @@ const GroupAvailabilityView = ({
                 className={`aspect-square rounded-lg sm:rounded-xl font-semibold text-xs sm:text-sm transition-all min-h-[44px] ${getColorClass(
                   percentage
                 )} ${
-                  isSelected ? 'ring-2 ring-primary-500 ring-offset-1 sm:ring-offset-2' : ''
+                  isSelected
+                    ? 'ring-2 ring-primary-500 ring-offset-1 sm:ring-offset-2'
+                    : ''
                 } ${percentage > 0 ? 'cursor-pointer' : 'cursor-default'}`}
                 disabled={percentage === 0}
               >
@@ -371,8 +411,138 @@ const GroupAvailabilityView = ({
           <h3 className="text-base sm:text-lg lg:text-xl font-bold text-neutral-800 mb-3 sm:mb-4">
             {format(new Date(year, month - 1, selectedDay.day), "d 'de' MMMM", {
               locale: es,
-            })}
+            })}{' '}
+            - {selectedDay.availabilityPercentage}% Disponibilidad
           </h3>
+
+          {/* Detalles del Cálculo */}
+          {selectedDay.calculationDetails && (
+            <Card
+              variant="elevated"
+              padding="md"
+              className="mb-4 sm:mb-6 bg-blue-50"
+            >
+              <h4 className="text-sm sm:text-base font-bold text-blue-900 mb-2 flex items-center gap-2">
+                📊 Cómo se calculó el {selectedDay.availabilityPercentage}%
+              </h4>
+              <div className="space-y-2 text-xs sm:text-sm text-neutral-700">
+                <p>
+                  <strong>Fórmula:</strong>{' '}
+                  {selectedDay.calculationDetails.formula}
+                </p>
+                {selectedDay.calculationDetails.calculation && (
+                  <p>
+                    <strong>Cálculo:</strong>{' '}
+                    {selectedDay.calculationDetails.calculation}
+                  </p>
+                )}
+
+                {analysisMode === 'daily' && (
+                  <div className="mt-2 p-2 bg-white rounded">
+                    <p>
+                      • Miembros sin eventos:{' '}
+                      {selectedDay.calculationDetails.membersWithoutEvents}
+                    </p>
+                    <p>
+                      • Miembros con eventos:{' '}
+                      {selectedDay.calculationDetails.membersWithEvents}
+                    </p>
+                    <p>
+                      • Total de miembros:{' '}
+                      {selectedDay.calculationDetails.totalMembers}
+                    </p>
+                  </div>
+                )}
+
+                {analysisMode === 'hourly' &&
+                  selectedDay.calculationDetails.allMembers && (
+                    <div className="mt-2 space-y-2">
+                      <p className="font-semibold">Horas libres por persona:</p>
+                      {selectedDay.calculationDetails.allMembers.map(
+                        (member) => (
+                          <div
+                            key={member.userId}
+                            className="p-2 bg-white rounded"
+                          >
+                            <p className="font-medium">
+                              {member.fullName || member.username}
+                            </p>
+                            <p>
+                              • Horas libres: {member.hoursFree}/24 (
+                              {member.percentageFree}%)
+                            </p>
+                            {member.freeBlocks &&
+                              member.freeBlocks.length > 0 && (
+                                <p className="text-xs">
+                                  • Bloques:{' '}
+                                  {member.freeBlocks
+                                    .map(
+                                      (b) => `${b.start}-${b.end} (${b.hours}h)`
+                                    )
+                                    .join(', ')}
+                                </p>
+                              )}
+                          </div>
+                        )
+                      )}
+                    </div>
+                  )}
+
+                {analysisMode === 'custom' &&
+                  selectedDay.calculationDetails.allMembers && (
+                    <div className="mt-2 space-y-2">
+                      <p>
+                        • Mínimo requerido:{' '}
+                        {selectedDay.calculationDetails.minHoursRequired}h
+                        seguidas
+                      </p>
+                      <p>
+                        • Califican completo:{' '}
+                        {selectedDay.calculationDetails.membersQualifying}
+                      </p>
+                      <p>
+                        • Califican parcial (50%):{' '}
+                        {selectedDay.calculationDetails.membersPartial}
+                      </p>
+
+                      <p className="font-semibold mt-2">
+                        Bloques libres por persona:
+                      </p>
+                      {selectedDay.calculationDetails.allMembers.map(
+                        (member) => (
+                          <div
+                            key={member.userId}
+                            className="p-2 bg-white rounded"
+                          >
+                            <p className="font-medium">
+                              {member.fullName || member.username}
+                            </p>
+                            <p>
+                              • Bloque máximo: {member.maxFreeBlock?.toFixed(1)}
+                              h
+                            </p>
+                            <p>
+                              • Califica: {member.qualifies ? '✅ Sí' : '❌ No'}
+                            </p>
+                            {member.freeBlocks &&
+                              member.freeBlocks.length > 0 && (
+                                <p className="text-xs">
+                                  • Bloques:{' '}
+                                  {member.freeBlocks
+                                    .map(
+                                      (b) => `${b.start}-${b.end} (${b.hours}h)`
+                                    )
+                                    .join(', ')}
+                                </p>
+                              )}
+                          </div>
+                        )
+                      )}
+                    </div>
+                  )}
+              </div>
+            </Card>
+          )}
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
             {/* Miembros disponibles */}
@@ -425,7 +595,10 @@ const GroupAvailabilityView = ({
                       {member.slots && member.slots.length > 0 && (
                         <div className="mt-1 sm:mt-2 space-y-1">
                           {member.slots.map((slot, idx) => (
-                            <p key={idx} className="text-xs sm:text-sm text-neutral-600 truncate">
+                            <p
+                              key={idx}
+                              className="text-xs sm:text-sm text-neutral-600 truncate"
+                            >
                               🔒 {slot.title || `${slot.start} - ${slot.end}`}
                             </p>
                           ))}
@@ -447,9 +620,12 @@ const GroupAvailabilityView = ({
           {selectedDay.timeSlots && selectedDay.timeSlots.length > 0 && (
             <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-primary-50 rounded-xl">
               <h4 className="text-xs sm:text-sm font-semibold text-primary-900 mb-2 sm:mb-3">
-                {analysisMode === 'daily' && '🎯 Horarios en común para todos los disponibles'}
-                {analysisMode === 'hourly' && '⏰ Bloques de tiempo disponibles (≥2h, >50% del grupo)'}
-                {analysisMode === 'custom' && `🎯 Bloques disponibles de ${minHours}+ horas seguidas`}
+                {analysisMode === 'daily' &&
+                  '🎯 Horarios en común para todos los disponibles'}
+                {analysisMode === 'hourly' &&
+                  '⏰ Bloques de tiempo disponibles (≥2h, >50% del grupo)'}
+                {analysisMode === 'custom' &&
+                  `🎯 Bloques disponibles de ${minHours}+ horas seguidas`}
               </h4>
               <div className="flex flex-wrap gap-2">
                 {selectedDay.timeSlots.map((slot, idx) => (
@@ -480,12 +656,14 @@ const GroupAvailabilityView = ({
               </div>
               {analysisMode === 'hourly' && (
                 <p className="text-xs text-neutral-600 mt-3">
-                  💡 Estos son bloques de al menos 2 horas donde más del 50% del grupo está disponible.
+                  💡 Estos son bloques de al menos 2 horas donde más del 50% del
+                  grupo está disponible.
                 </p>
               )}
               {analysisMode === 'custom' && (
                 <p className="text-xs text-neutral-600 mt-3">
-                  💡 Estos bloques cumplen con el mínimo de {minHours} horas seguidas requerido.
+                  💡 Estos bloques cumplen con el mínimo de {minHours} horas
+                  seguidas requerido.
                 </p>
               )}
             </div>

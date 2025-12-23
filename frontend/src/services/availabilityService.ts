@@ -7,6 +7,13 @@ export interface EnhancedTimeSlot extends TimeSlot {
   hours?: number;
   availableCount?: number;
   memberCount?: number;
+  avgPercentage?: number;
+}
+
+export interface FreeBlock {
+  start: string;
+  end: string;
+  hours: number;
 }
 
 export interface MemberAvailability {
@@ -15,6 +22,29 @@ export interface MemberAvailability {
   fullName?: string;
   slots: TimeSlot[];
   note?: string;
+  hoursFree?: number;
+  freeBlocks?: FreeBlock[];
+  percentageFree?: number;
+  maxFreeBlock?: number;
+  qualifies?: boolean;
+}
+
+export interface CalculationDetails {
+  mode: string;
+  formula: string;
+  calculation?: string;
+  totalMembers: number;
+  membersWithoutEvents?: number;
+  membersWithEvents?: number;
+  membersQualifying?: number;
+  membersPartial?: number;
+  minHoursRequired?: number;
+  hourlyPercentages?: Array<{
+    hour: number;
+    percentage: number;
+    availableCount: number;
+  }>;
+  allMembers?: MemberAvailability[];
 }
 
 export interface DayAvailability {
@@ -24,7 +54,7 @@ export interface DayAvailability {
   availabilityPercentage: number;
   timeSlots: EnhancedTimeSlot[];
   minHoursRequired?: number;
-  hourlyData?: any;
+  calculationDetails?: CalculationDetails;
 }
 
 export interface GroupAvailabilityStats {
