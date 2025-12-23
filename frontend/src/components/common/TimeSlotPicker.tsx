@@ -19,10 +19,12 @@ interface TimeSlotPickerProps {
 // Plantillas predefinidas para slots comunes
 const QUICK_PRESETS = [
   { label: 'Todo el día', start: '00:00', end: '23:59' },
-  { label: 'Mañana', start: '08:00', end: '12:00' },
-  { label: 'Tarde', start: '14:00', end: '18:00' },
-  { label: 'Noche', start: '19:00', end: '23:00' },
-  { label: 'Horario laboral', start: '09:00', end: '17:00' },
+  { label: 'Turno Día (Enfermería)', start: '08:00', end: '20:00' },
+  { label: 'Turno Noche (Enfermería)', start: '20:00', end: '08:00' },
+  { label: 'Turno 24h', start: '08:00', end: '08:00' },
+  { label: 'Tarde', start: '13:00', end: '22:00' },
+  { label: 'Mañana', start: '08:00', end: '13:00' },
+  { label: 'Oficina', start: '09:00', end: '17:00' },
 ];
 
 // Generar opciones de hora cada 15 minutos
