@@ -242,7 +242,7 @@ function calculateDailyAvailability(schedules, daysInMonth, memberCount, groupMe
         dayData.availabilityPercentage = Math.round(
             (dayData.availableMembers.length / memberCount) * 100
         );
-        
+
         dayData.calculationDetails = {
             mode: 'daily',
             formula: '(Miembros sin eventos / Total miembros) × 100',
@@ -288,7 +288,7 @@ function calculateHourlyAvailability(schedules, daysInMonth, memberCount, groupM
                 dayAvailability.slots.forEach(slot => {
                     const startMinutes = timeToMinutes(slot.start);
                     const endMinutes = timeToMinutes(slot.end);
-                    
+
                     // Manejar turnos que cruzan medianoche
                     if (endMinutes <= startMinutes && slot.start === slot.end) {
                         // Turno 24h
@@ -324,7 +324,7 @@ function calculateHourlyAvailability(schedules, daysInMonth, memberCount, groupM
 
         // Calcular porcentaje basado en horas con disponibilidad común
         // Fórmula: Promedio de (miembros disponibles / total miembros) por hora
-        const hourlyPercentages = hourlyMap.map(hour => 
+        const hourlyPercentages = hourlyMap.map(hour =>
             (hour.availableMembers.length / memberCount) * 100
         );
         const avgPercentage = hourlyPercentages.reduce((sum, p) => sum + p, 0) / 24;
@@ -333,10 +333,10 @@ function calculateHourlyAvailability(schedules, daysInMonth, memberCount, groupM
         const commonTimeSlots = [];
         let blockStart = null;
         let blockHours = [];
-        
+
         for (let hour = 0; hour < 24; hour++) {
             const percentage = hourlyPercentages[hour];
-            
+
             if (percentage >= 50) {
                 if (blockStart === null) {
                     blockStart = hour;
@@ -348,7 +348,7 @@ function calculateHourlyAvailability(schedules, daysInMonth, memberCount, groupM
                     // Calcular promedio del bloque y mínimo de personas
                     const avgBlockPercentage = blockHours.reduce((sum, p) => sum + p, 0) / blockHours.length;
                     const minPeopleInBlock = Math.min(...blockHours.map(p => Math.round(memberCount * (p / 100))));
-                    
+
                     commonTimeSlots.push({
                         start: minutesToTime(blockStart * 60),
                         end: minutesToTime(hour * 60),
@@ -360,12 +360,12 @@ function calculateHourlyAvailability(schedules, daysInMonth, memberCount, groupM
                 blockHours = [];
             }
         }
-        
+
         // Cerrar último bloque si existe
         if (blockStart !== null && blockHours.length >= 2) {
             const avgBlockPercentage = blockHours.reduce((sum, p) => sum + p, 0) / blockHours.length;
             const minPeopleInBlock = Math.min(...blockHours.map(p => Math.round(memberCount * (p / 100))));
-            
+
             commonTimeSlots.push({
                 start: minutesToTime(blockStart * 60),
                 end: '23:59',
@@ -378,16 +378,16 @@ function calculateHourlyAvailability(schedules, daysInMonth, memberCount, groupM
         const memberAvailability = schedules.map(schedule => {
             const dayAvailability = schedule.availability.find(a => a.day === day);
             const hasEvents = dayAvailability && dayAvailability.slots && dayAvailability.slots.length > 0;
-            
+
             // Calcular bloques de horas libres para este miembro
             const freeHoursBlocks = [];
             let currentBlock = null;
-            
+
             for (let hour = 0; hour < 24; hour++) {
                 const isFree = hourlyMap[hour].availableMembers.some(
                     m => m.userId.toString() === schedule.user._id.toString()
                 );
-                
+
                 if (isFree) {
                     if (currentBlock === null) {
                         currentBlock = { start: hour, end: hour + 1 };
@@ -405,7 +405,7 @@ function calculateHourlyAvailability(schedules, daysInMonth, memberCount, groupM
                     }
                 }
             }
-            
+
             // Cerrar último bloque si existe
             if (currentBlock !== null) {
                 freeHoursBlocks.push({
@@ -414,11 +414,11 @@ function calculateHourlyAvailability(schedules, daysInMonth, memberCount, groupM
                     hours: currentBlock.end - currentBlock.start
                 });
             }
-            
-            const totalHoursFree = hourlyMap.filter(h => 
+
+            const totalHoursFree = hourlyMap.filter(h =>
                 h.availableMembers.some(m => m.userId.toString() === schedule.user._id.toString())
             ).length;
-            
+
             return {
                 member: {
                     userId: schedule.user._id,
@@ -444,8 +444,8 @@ function calculateHourlyAvailability(schedules, daysInMonth, memberCount, groupM
             calculationDetails: {
                 mode: 'hourly',
                 formula: 'Promedio de % de disponibilidad por hora',
-                hourlyPercentages: hourlyPercentages.map((p, h) => ({ 
-                    hour: h, 
+                hourlyPercentages: hourlyPercentages.map((p, h) => ({
+                    hour: h,
                     percentage: Math.round(p),
                     availableCount: Math.round(memberCount * (p / 100))
                 })),
@@ -492,7 +492,7 @@ function calculateCustomAvailability(schedules, daysInMonth, memberCount, groupM
                 .map(slot => {
                     const startMinutes = timeToMinutes(slot.start);
                     const endMinutes = timeToMinutes(slot.end);
-                    
+
                     // Manejar cruces de medianoche
                     if (startMinutes === endMinutes) {
                         return [{ start: 0, end: 24 * 60 }]; // Turno 24h = todo ocupado
@@ -522,7 +522,7 @@ function calculateCustomAvailability(schedules, daysInMonth, memberCount, groupM
             // Calcular bloques libres
             const freeBlocks = [];
             let currentStart = 0;
-            
+
             mergedBusy.forEach(busy => {
                 if (currentStart < busy.start) {
                     const duration = (busy.start - currentStart) / 60;
@@ -534,7 +534,7 @@ function calculateCustomAvailability(schedules, daysInMonth, memberCount, groupM
                 }
                 currentStart = busy.end;
             });
-            
+
             // Agregar último bloque si existe
             if (currentStart < 24 * 60) {
                 const duration = (24 * 60 - currentStart) / 60;
@@ -562,7 +562,7 @@ function calculateCustomAvailability(schedules, daysInMonth, memberCount, groupM
 
         memberFreeBlocks.forEach(memberData => {
             const maxFreeBlock = Math.max(0, ...memberData.freeBlocks.map(b => b.hours));
-            
+
             if (maxFreeBlock >= minHours) {
                 availableCount++;
             } else if (maxFreeBlock >= minHours * 0.5) {
@@ -629,7 +629,7 @@ function findCommonFreeBlocks(memberFreeBlocks, minHours) {
 
     // Obtener todos los bloques y crear lista de eventos (inicio/fin)
     const events = [];
-    
+
     memberFreeBlocks.forEach((memberData, memberIndex) => {
         memberData.freeBlocks.forEach(block => {
             events.push({ time: block.start, type: 'start', memberIndex });
@@ -647,20 +647,20 @@ function findCommonFreeBlocks(memberFreeBlocks, minHours) {
 
     events.forEach(event => {
         const prevCount = activeMembersSet.size;
-        
+
         if (event.type === 'start') {
             activeMembersSet.add(event.memberIndex);
         } else {
             activeMembersSet.delete(event.memberIndex);
         }
-        
+
         const newCount = activeMembersSet.size;
 
         // Si todos están disponibles y acabamos de alcanzar ese estado
         if (newCount === memberFreeBlocks.length && prevCount < memberFreeBlocks.length) {
             blockStart = event.time;
         }
-        
+
         // Si ya no todos están disponibles y teníamos un bloque
         if (newCount < memberFreeBlocks.length && prevCount === memberFreeBlocks.length && blockStart !== null) {
             const duration = (event.time - blockStart) / 60;
