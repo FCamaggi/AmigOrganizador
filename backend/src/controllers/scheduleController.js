@@ -44,6 +44,10 @@ export const updateDayAvailability = async (req, res) => {
         }
 
         // Validar formato de slots
+        // Interpretación automática de turnos:
+        // - start < end: Mismo día (ej: 08:00-20:00 = 12 horas)
+        // - start > end: Cruza medianoche (ej: 20:00-08:00 = 12 horas al día siguiente)
+        // - start === end: Turno completo de 24 horas (ej: 08:00-08:00 = 24 horas)
         for (const slot of slots) {
             if (!slot.start || !slot.end) {
                 return res.status(400).json({
@@ -52,25 +56,12 @@ export const updateDayAvailability = async (req, res) => {
                 });
             }
 
-            // Validar formato HH:MM y que no sean iguales (permite turnos nocturnos que cruzan medianoche)
+            // Validar formato HH:MM
             const timeRegex = /^([01]\d|2[0-3]):([0-5]\d)$/;
             if (!timeRegex.test(slot.start) || !timeRegex.test(slot.end)) {
                 return res.status(400).json({
                     success: false,
                     message: 'Formato de hora inválido. Use HH:MM (00:00-23:59)'
-                });
-            }
-
-            const [startHour, startMin] = slot.start.split(':').map(Number);
-            const [endHour, endMin] = slot.end.split(':').map(Number);
-            const startMinutes = startHour * 60 + startMin;
-            const endMinutes = endHour * 60 + endMin;
-
-            // Solo validar que no sean exactamente iguales (permite turnos nocturnos como 20:00-08:00)
-            if (startMinutes === endMinutes) {
-                return res.status(400).json({
-                    success: false,
-                    message: 'La hora de inicio y fin no pueden ser iguales'
                 });
             }
         }
@@ -262,18 +253,14 @@ export const importSchedule = async (req, res) => {
                 }
 
                 // Validar formato HH:MM
+                // Interpretación automática:
+                // - start < end: Mismo día (08:00-20:00)
+                // - start > end: Cruza medianoche (20:00-08:00)
+                // - start === end: Turno 24h (08:00-08:00)
                 if (!timeRegex.test(slot.start) || !timeRegex.test(slot.end)) {
                     return res.status(400).json({
                         success: false,
                         message: `Formato de hora inválido en día ${dayAvail.day}. Use HH:MM (00:00-23:59)`
-                    });
-                }
-
-                // Validar que no sean iguales
-                if (slot.start === slot.end) {
-                    return res.status(400).json({
-                        success: false,
-                        message: `La hora de inicio y fin no pueden ser iguales (día ${dayAvail.day})`
                     });
                 }
 
