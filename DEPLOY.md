@@ -171,7 +171,7 @@ Ambas plataformas tienen **auto-deploy** activado por defecto:
 
 Guarda estas URLs para usar tu app:
 
-- **Frontend**: `https://tu-sitio.netlify.app`
+- **Frontend**: `https://amigorganizador.netlify.app`
 - **Backend**: `https://amigorganizador-backend.onrender.com`
 - **Repositorio**: `https://github.com/FCamaggi/AmigOrganizador`
 
