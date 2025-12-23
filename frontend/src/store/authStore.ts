@@ -16,7 +16,7 @@ export interface AuthState {
   error: string | null;
   setUser: (user: User) => void;
   login: (credentials: {
-    email: string;
+    emailOrUsername: string;
     password: string;
   }) => Promise<{ user: User; token: string }>;
   register: (userData: {
