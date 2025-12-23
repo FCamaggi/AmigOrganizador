@@ -25,6 +25,11 @@ const dayAvailabilitySchema = new mongoose.Schema({
             type: String,
             trim: true,
             maxlength: 100
+        },
+        color: {
+            type: String,
+            trim: true,
+            match: /^#[0-9A-Fa-f]{6}$/
         }
     }],
     note: {

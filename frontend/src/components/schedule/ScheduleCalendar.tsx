@@ -40,7 +40,7 @@ interface ScheduleCalendarProps {
 }
 
 const ScheduleCalendar = ({ onSelectDay }: ScheduleCalendarProps) => {
-  const { currentSchedule, loading, error, fetchSchedule, clearError, selectedDate } =
+  const { currentSchedule, loading, error, clearError, selectedDate, setSelectedDate } =
     useScheduleStore();
   const [currentDate, setCurrentDate] = useState(selectedDate);
 
@@ -49,15 +49,17 @@ const ScheduleCalendar = ({ onSelectDay }: ScheduleCalendarProps) => {
     setCurrentDate(selectedDate);
   }, [selectedDate]);
 
-  const loadSchedule = useCallback(async () => {
+  // Cargar horario inicial
+  useEffect(() => {
     const year = currentDate.getFullYear();
     const month = currentDate.getMonth() + 1;
-    try {
-      await fetchSchedule(year, month);
-    } catch (error) {
-      console.error('Error loading schedule:', error);
+    // Solo cargar si el store no tiene el mes correcto cargado
+    if (!currentSchedule || 
+        currentSchedule.year !== year || 
+        currentSchedule.month !== month) {
+      setSelectedDate(currentDate);
     }
-  }, [currentDate, fetchSchedule]);
+  }, []);
 
   const events = useMemo(() => {
     if (!currentSchedule) {
@@ -113,10 +115,6 @@ const ScheduleCalendar = ({ onSelectDay }: ScheduleCalendarProps) => {
     return allEvents;
   }, [currentSchedule]);
 
-  useEffect(() => {
-    loadSchedule();
-  }, [loadSchedule]);
-
   const handleSelectSlot = (slotInfo: SlotInfo) => {
     const selectedDate = slotInfo.start;
     const day = selectedDate.getDate();
@@ -136,6 +134,8 @@ const ScheduleCalendar = ({ onSelectDay }: ScheduleCalendarProps) => {
 
   const handleNavigate = (newDate: Date) => {
     setCurrentDate(newDate);
+    // Actualizar selectedDate en el store para que las ediciones se guarden en el mes correcto
+    setSelectedDate(newDate);
   };
 
   const eventStyleGetter = (event: CalendarEvent) => {
