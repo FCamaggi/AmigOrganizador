@@ -145,7 +145,16 @@ export const useScheduleStore = create<ScheduleState>((set, get) => ({
         availability: data.availability,
       });
 
-      set({ currentSchedule: schedule, loading: false });
+      // Actualizar selectedDate al mes/año importado y hacer fetch
+      const importedDate = new Date(data.year, data.month - 1, 1);
+      set({ 
+        currentSchedule: schedule, 
+        selectedDate: importedDate,
+        loading: false 
+      });
+      
+      // Refrescar para asegurar que tenemos los datos más recientes
+      await get().fetchSchedule(data.year, data.month);
     } catch (error) {
       const message = (error as Error).message || 'Error al importar horario';
       set({ error: message, loading: false });
