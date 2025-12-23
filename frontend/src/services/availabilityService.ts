@@ -1,6 +1,14 @@
 import api from './api';
 import type { TimeSlot } from './scheduleService';
 
+export type AnalysisMode = 'daily' | 'hourly' | 'custom';
+
+export interface EnhancedTimeSlot extends TimeSlot {
+  hours?: number;
+  availableCount?: number;
+  memberCount?: number;
+}
+
 export interface MemberAvailability {
   userId: string;
   username: string;
@@ -14,7 +22,9 @@ export interface DayAvailability {
   availableMembers: MemberAvailability[];
   unavailableMembers: MemberAvailability[];
   availabilityPercentage: number;
-  timeSlots: TimeSlot[];
+  timeSlots: EnhancedTimeSlot[];
+  minHoursRequired?: number;
+  hourlyData?: any;
 }
 
 export interface GroupAvailabilityStats {
@@ -43,10 +53,12 @@ export const availabilityService = {
   async getGroupAvailability(
     groupId: string,
     month: number,
-    year: number
+    year: number,
+    mode: AnalysisMode = 'daily',
+    minHours?: number
   ): Promise<GroupAvailability> {
     const response = await api.get(`/availability/group/${groupId}`, {
-      params: { month, year },
+      params: { month, year, mode, minHours },
     });
     return response.data.data;
   },

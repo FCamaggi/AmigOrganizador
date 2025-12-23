@@ -5,8 +5,10 @@ import { availabilityService } from '../../services/availabilityService';
 import type {
   GroupAvailability,
   DayAvailability,
+  AnalysisMode,
 } from '../../services/availabilityService';
 import Button from '../common/Button';
+import Card from '../common/Card';
 
 interface GroupAvailabilityViewProps {
   groupId: string;
@@ -24,6 +26,9 @@ const GroupAvailabilityView = ({
   const [selectedDay, setSelectedDay] = useState<DayAvailability | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [analysisMode, setAnalysisMode] = useState<AnalysisMode>('daily');
+  const [minHours, setMinHours] = useState(6);
+  const [showModeInfo, setShowModeInfo] = useState(false);
 
   const month = currentDate.getMonth() + 1;
   const year = currentDate.getFullYear();
@@ -35,7 +40,9 @@ const GroupAvailabilityView = ({
       const data = await availabilityService.getGroupAvailability(
         groupId,
         month,
-        year
+        year,
+        analysisMode,
+        minHours
       );
       setAvailability(data);
     } catch (err) {
@@ -49,7 +56,7 @@ const GroupAvailabilityView = ({
   useEffect(() => {
     fetchAvailability();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [groupId, month, year]);
+  }, [groupId, month, year, analysisMode, minHours]);
 
   const handlePreviousMonth = () => {
     setCurrentDate(new Date(year, month - 2, 1));
@@ -131,6 +138,105 @@ const GroupAvailabilityView = ({
           </Button>
         </div>
       </div>
+
+      {/* Selector de Modo de Análisis */}
+      <Card padding="md">
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm sm:text-base font-semibold text-neutral-800">
+              🔍 Modo de Análisis
+            </h3>
+            <button
+              onClick={() => setShowModeInfo(!showModeInfo)}
+              className="text-primary-600 text-xs sm:text-sm font-medium hover:underline"
+            >
+              {showModeInfo ? 'Ocultar info' : 'Ver explicación'}
+            </button>
+          </div>
+
+          {showModeInfo && (
+            <div className="bg-primary-50 p-3 sm:p-4 rounded-lg text-xs sm:text-sm text-neutral-700 space-y-2">
+              <p><strong>📅 Día a Día:</strong> Marca disponible si la persona no tiene eventos ese día.</p>
+              <p><strong>⏰ Hora a Hora:</strong> Calcula % según horas libres en común. Muestra bloques de tiempo disponibles.</p>
+              <p><strong>🎯 Personalizado:</strong> Solo marca disponibilidad si el grupo puede reunirse X horas seguidas mínimo.</p>
+            </div>
+          )}
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+            <button
+              onClick={() => {
+                setAnalysisMode('daily');
+                setSelectedDay(null);
+              }}
+              className={`p-3 sm:p-4 rounded-lg border-2 transition-all ${
+                analysisMode === 'daily'
+                  ? 'border-primary-500 bg-primary-50 text-primary-700'
+                  : 'border-neutral-200 bg-white text-neutral-600 hover:border-neutral-300'
+              }`}
+            >
+              <div className="text-xl sm:text-2xl mb-1">📅</div>
+              <div className="text-xs sm:text-sm font-semibold">Día a Día</div>
+              <div className="text-xs text-neutral-500 mt-1">Sin eventos = disponible</div>
+            </button>
+
+            <button
+              onClick={() => {
+                setAnalysisMode('hourly');
+                setSelectedDay(null);
+              }}
+              className={`p-3 sm:p-4 rounded-lg border-2 transition-all ${
+                analysisMode === 'hourly'
+                  ? 'border-primary-500 bg-primary-50 text-primary-700'
+                  : 'border-neutral-200 bg-white text-neutral-600 hover:border-neutral-300'
+              }`}
+            >
+              <div className="text-xl sm:text-2xl mb-1">⏰</div>
+              <div className="text-xs sm:text-sm font-semibold">Hora a Hora</div>
+              <div className="text-xs text-neutral-500 mt-1">Intersección horaria</div>
+            </button>
+
+            <button
+              onClick={() => {
+                setAnalysisMode('custom');
+                setSelectedDay(null);
+              }}
+              className={`p-3 sm:p-4 rounded-lg border-2 transition-all ${
+                analysisMode === 'custom'
+                  ? 'border-primary-500 bg-primary-50 text-primary-700'
+                  : 'border-neutral-200 bg-white text-neutral-600 hover:border-neutral-300'
+              }`}
+            >
+              <div className="text-xl sm:text-2xl mb-1">🎯</div>
+              <div className="text-xs sm:text-sm font-semibold">Personalizado</div>
+              <div className="text-xs text-neutral-500 mt-1">Horas mínimas</div>
+            </button>
+          </div>
+
+          {analysisMode === 'custom' && (
+            <div className="bg-amber-50 p-3 sm:p-4 rounded-lg">
+              <label className="block text-xs sm:text-sm font-semibold text-neutral-800 mb-2">
+                ⏱️ Horas seguidas mínimas para reunión:
+              </label>
+              <div className="flex items-center gap-3">
+                <input
+                  type="range"
+                  min="1"
+                  max="12"
+                  value={minHours}
+                  onChange={(e) => setMinHours(parseInt(e.target.value))}
+                  className="flex-1"
+                />
+                <span className="text-xl sm:text-2xl font-bold text-primary-600 min-w-[3rem] text-center">
+                  {minHours}h
+                </span>
+              </div>
+              <p className="text-xs text-neutral-600 mt-2">
+                Solo se marcarán días donde el grupo pueda reunirse al menos {minHours} horas seguidas.
+              </p>
+            </div>
+          )}
+        </div>
+      </Card>
 
       {/* Mes actual */}
       <div className="text-center">
@@ -338,21 +444,50 @@ const GroupAvailabilityView = ({
           </div>
 
           {/* Franjas horarias comunes */}
-          {selectedDay.timeSlots.length > 0 && (
+          {selectedDay.timeSlots && selectedDay.timeSlots.length > 0 && (
             <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-primary-50 rounded-xl">
               <h4 className="text-xs sm:text-sm font-semibold text-primary-900 mb-2 sm:mb-3">
-                🎯 Horarios en común para todos los disponibles:
+                {analysisMode === 'daily' && '🎯 Horarios en común para todos los disponibles'}
+                {analysisMode === 'hourly' && '⏰ Bloques de tiempo disponibles (≥2h, >50% del grupo)'}
+                {analysisMode === 'custom' && `🎯 Bloques disponibles de ${minHours}+ horas seguidas`}
               </h4>
               <div className="flex flex-wrap gap-2">
                 {selectedDay.timeSlots.map((slot, idx) => (
-                  <span
+                  <div
                     key={idx}
-                    className="px-3 sm:px-4 py-1.5 sm:py-2 bg-primary-100 text-primary-700 text-xs sm:text-sm font-semibold rounded-lg"
+                    className="px-3 sm:px-4 py-2 bg-primary-100 text-primary-700 rounded-lg"
                   >
-                    {slot.start} - {slot.end}
-                  </span>
+                    <div className="text-xs sm:text-sm font-semibold">
+                      {slot.start} - {slot.end}
+                    </div>
+                    {slot.hours !== undefined && (
+                      <div className="text-xs text-primary-600 mt-0.5">
+                        {slot.hours.toFixed(1)}h
+                      </div>
+                    )}
+                    {slot.availableCount !== undefined && (
+                      <div className="text-xs text-primary-600 mt-0.5">
+                        {slot.availableCount} personas
+                      </div>
+                    )}
+                    {slot.memberCount !== undefined && (
+                      <div className="text-xs text-primary-600 mt-0.5">
+                        Todos ({slot.memberCount})
+                      </div>
+                    )}
+                  </div>
                 ))}
               </div>
+              {analysisMode === 'hourly' && (
+                <p className="text-xs text-neutral-600 mt-3">
+                  💡 Estos son bloques de al menos 2 horas donde más del 50% del grupo está disponible.
+                </p>
+              )}
+              {analysisMode === 'custom' && (
+                <p className="text-xs text-neutral-600 mt-3">
+                  💡 Estos bloques cumplen con el mínimo de {minHours} horas seguidas requerido.
+                </p>
+              )}
             </div>
           )}
         </div>
