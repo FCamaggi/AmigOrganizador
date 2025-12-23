@@ -368,9 +368,7 @@ const GroupAvailabilityView = ({
               >
                 <div className="flex flex-col items-center justify-center h-full">
                   <div className="text-sm sm:text-base lg:text-lg">{day}</div>
-                  {percentage > 0 && (
-                    <div className="text-xs font-bold">{percentage}%</div>
-                  )}
+                  <div className="text-xs font-bold">{percentage}%</div>
                 </div>
               </button>
             );
@@ -386,7 +384,7 @@ const GroupAvailabilityView = ({
         <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2 sm:gap-4 text-xs sm:text-sm">
           <div className="flex items-center gap-2">
             <div className="w-5 h-5 sm:w-6 sm:h-6 bg-neutral-100 rounded flex-shrink-0"></div>
-            <span className="text-neutral-600">Sin datos</span>
+            <span className="text-neutral-600">0%</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-5 h-5 sm:w-6 sm:h-6 bg-red-100 rounded flex-shrink-0"></div>
