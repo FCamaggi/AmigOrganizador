@@ -114,19 +114,19 @@ const RegisterForm = () => {
   };
 
   return (
-    <div className="w-full max-w-md mx-auto">
+    <div className="w-full max-w-md mx-auto px-4 sm:px-0">
       <div className="card">
-        <h2 className={`text-3xl font-bold text-center mb-8 ${textColors.heading}`}>
+        <h2 className={`text-2xl sm:text-3xl font-bold text-center mb-6 sm:mb-8 ${textColors.heading}`}>
           Crear Cuenta
         </h2>
 
         {error && (
-          <div className="mb-6 p-4 bg-danger-50 border border-danger-200 text-danger-700 rounded-xl">
+          <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-danger-50 border border-danger-200 text-danger-700 rounded-xl text-sm">
             {error}
           </div>
         )}
 
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
           <Input
             label="Email"
             type="email"
@@ -185,13 +185,13 @@ const RegisterForm = () => {
             type="submit"
             variant="primary"
             loading={loading}
-            className="w-full mt-6"
+            className="w-full"
           >
             Registrarse
           </Button>
         </form>
 
-        <div className="mt-8 text-center text-sm text-neutral-600">
+        <div className="mt-6 sm:mt-8 text-center text-xs sm:text-sm text-neutral-600">
           ¿Ya tienes cuenta?{' '}
           <Link
             to="/login"

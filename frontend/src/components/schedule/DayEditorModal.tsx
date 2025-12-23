@@ -112,13 +112,14 @@ const DayEditorModal = ({
       headerGradient
       closeOnOverlayClick={false}
       footer={
-        <div className="flex gap-3 justify-end">
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 justify-end">
           {existingAvailability && existingAvailability.slots.length > 0 && (
             <Button
               type="button"
               onClick={handleDelete}
               variant="danger"
               disabled={loading}
+              className="w-full sm:w-auto"
             >
               Eliminar Todo
             </Button>
@@ -128,6 +129,7 @@ const DayEditorModal = ({
             onClick={handleClose}
             variant="secondary"
             disabled={loading}
+            className="w-full sm:w-auto"
           >
             Cancelar
           </Button>
@@ -136,6 +138,7 @@ const DayEditorModal = ({
             onClick={handleSubmit}
             variant="primary"
             loading={loading}
+            className="w-full sm:w-auto"
           >
             Guardar Cambios
           </Button>
