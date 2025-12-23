@@ -628,48 +628,81 @@ function calculateCustomAvailability(schedules, daysInMonth, memberCount, groupM
         // Encontrar intersecciones de bloques libres de al menos minHours
         const commonBlocks = findCommonFreeBlocks(memberFreeBlocks, minHours);
 
-        // Calcular % basado en:
-        // - 100% si todos pueden reunirse minHours
-        // - Reducción proporcional si algunos pueden menos
+        // NUEVA LÓGICA: % basado en intersecciones REALES
+        // - 100% si existe al menos 1 bloque donde TODOS pueden reunirse ≥ minHours
+        // - Proporcional si hay bloques con menos personas o menos horas
+        // - 0% si no hay intersecciones viables
+        
+        let percentage = 0;
         let availableCount = 0;
         let partialAvailableCount = 0;
 
-        memberFreeBlocks.forEach(memberData => {
-            const maxFreeBlock = Math.max(0, ...memberData.freeBlocks.map(b => b.hours));
-
-            if (maxFreeBlock >= minHours) {
-                availableCount++;
-            } else if (maxFreeBlock >= minHours * 0.5) {
-                // Cuenta parcialmente si tiene al menos 50% del tiempo mínimo
-                partialAvailableCount++;
+        if (commonBlocks.length > 0) {
+            // Hay bloques donde TODOS están libres simultáneamente
+            const totalCommonHours = commonBlocks.reduce((sum, block) => sum + block.hours, 0);
+            
+            // Si hay al menos 1 bloque que cumple minHours → 100%
+            if (totalCommonHours >= minHours) {
+                percentage = 100;
+                availableCount = memberCount; // TODOS califican
+            } else {
+                // Hay bloques comunes pero no alcanzan las horas mínimas
+                // % proporcional: (horas comunes / horas mínimas) * 100
+                percentage = Math.round((totalCommonHours / minHours) * 100);
+                partialAvailableCount = memberCount;
             }
-        });
-
-        // Fórmula: 100% peso completo + 50% peso parcial
-        const percentage = Math.round(
-            ((availableCount + (partialAvailableCount * 0.5)) / memberCount) * 100
-        );
+        } else {
+            // NO hay bloques comunes → buscar cuántos podrían reunirse parcialmente
+            // (relajando el requisito de "todos")
+            memberFreeBlocks.forEach(memberData => {
+                const maxFreeBlock = Math.max(0, ...memberData.freeBlocks.map(b => b.hours));
+                
+                if (maxFreeBlock >= minHours) {
+                    availableCount++;
+                } else if (maxFreeBlock >= minHours * 0.5) {
+                    partialAvailableCount++;
+                }
+            });
+            
+            // Si nadie tiene las horas mínimas, el % es muy bajo
+            // Fórmula: (individuos con tiempo / total) * 50% máximo
+            percentage = Math.round(
+                ((availableCount + (partialAvailableCount * 0.5)) / memberCount) * 50
+            );
+        }
 
         // Enriquecer member info con detalles de bloques
-        const enrichedMembers = memberFreeBlocks.map(memberData => ({
-            ...memberData.member,
-            freeBlocks: memberData.freeBlocks.map(b => ({
-                start: minutesToTime(b.start),
-                end: minutesToTime(b.end),
-                hours: b.hours
-            })),
-            maxFreeBlock: Math.max(0, ...memberData.freeBlocks.map(b => b.hours)),
-            qualifies: Math.max(0, ...memberData.freeBlocks.map(b => b.hours)) >= minHours
-        }));
+        const enrichedMembers = memberFreeBlocks.map(memberData => {
+            const maxFreeBlock = Math.max(0, ...memberData.freeBlocks.map(b => b.hours));
+            
+            // Un miembro "califica" si:
+            // 1. Hay bloques comunes Y tiene las horas en esos bloques (siempre true si commonBlocks existe)
+            // 2. O si no hay bloques comunes, tiene individualmente las horas mínimas
+            const qualifies = commonBlocks.length > 0 
+                ? true  // Si hay bloques comunes, TODOS están en esos bloques
+                : maxFreeBlock >= minHours;
+
+            return {
+                ...memberData.member,
+                freeBlocks: memberData.freeBlocks.map(b => ({
+                    start: minutesToTime(b.start),
+                    end: minutesToTime(b.end),
+                    hours: b.hours
+                })),
+                maxFreeBlock,
+                qualifies,
+                inCommonBlocks: commonBlocks.length > 0
+            };
+        });
 
         availabilityMap[day] = {
             day,
-            availableMembers: enrichedMembers
-                .filter(m => m.qualifies)
-                .map(m => m),
-            unavailableMembers: enrichedMembers
-                .filter(m => !m.qualifies)
-                .map(m => m),
+            availableMembers: commonBlocks.length > 0
+                ? enrichedMembers  // Si hay bloques comunes, TODOS están disponibles en ese horario
+                : enrichedMembers.filter(m => m.qualifies),
+            unavailableMembers: commonBlocks.length > 0
+                ? []  // Si hay bloques comunes, nadie está "no disponible"
+                : enrichedMembers.filter(m => !m.qualifies),
             availabilityPercentage: percentage,
             timeSlots: commonBlocks.map(block => ({
                 start: minutesToTime(block.start),
@@ -680,11 +713,17 @@ function calculateCustomAvailability(schedules, daysInMonth, memberCount, groupM
             minHoursRequired: minHours,
             calculationDetails: {
                 mode: 'custom',
-                formula: '((Miembros con ≥minHoras) + (Miembros con ≥50% × 0.5)) / Total × 100',
-                calculation: `((${availableCount} + (${partialAvailableCount} × 0.5)) / ${memberCount}) × 100 = ${percentage}%`,
+                formula: commonBlocks.length > 0
+                    ? 'Si hay bloques donde TODOS coinciden ≥ minHoras → 100%'
+                    : 'Sin bloques comunes → ((individuos con tiempo / total) × 50%) máx',
+                calculation: commonBlocks.length > 0
+                    ? `Bloques comunes: ${commonBlocks.length} (${commonBlocks.reduce((sum, b) => sum + b.hours, 0).toFixed(1)}h totales) → ${percentage}%`
+                    : `Sin intersección. Disponibilidad individual: (${availableCount} + ${partialAvailableCount}×0.5) / ${memberCount} × 50% = ${percentage}%`,
                 totalMembers: memberCount,
                 membersQualifying: availableCount,
                 membersPartial: partialAvailableCount,
+                hasCommonBlocks: commonBlocks.length > 0,
+                commonBlocksCount: commonBlocks.length,
                 minHoursRequired: minHours,
                 allMembers: enrichedMembers
             }
