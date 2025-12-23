@@ -44,6 +44,8 @@ const GroupAvailabilityView = ({
         analysisMode,
         minHours
       );
+      console.log('📊 Availability data received:', data);
+      console.log('📊 First day details:', data.availability[0]);
       setAvailability(data);
     } catch (err) {
       setError('Error al cargar la disponibilidad del grupo');
