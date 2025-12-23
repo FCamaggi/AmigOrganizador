@@ -38,9 +38,14 @@ interface ScheduleCalendarProps {
 }
 
 const ScheduleCalendar = ({ onSelectDay }: ScheduleCalendarProps) => {
-  const [currentDate, setCurrentDate] = useState(new Date());
-  const { currentSchedule, loading, error, fetchSchedule, clearError } =
+  const { currentSchedule, loading, error, fetchSchedule, clearError, selectedDate } =
     useScheduleStore();
+  const [currentDate, setCurrentDate] = useState(selectedDate);
+
+  // Sincronizar con selectedDate del store (por ejemplo, cuando se importa un horario)
+  useEffect(() => {
+    setCurrentDate(selectedDate);
+  }, [selectedDate]);
 
   const loadSchedule = useCallback(async () => {
     const year = currentDate.getFullYear();
