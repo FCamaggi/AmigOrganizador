@@ -40,12 +40,12 @@ export const getGroupAvailability = async (req, res) => {
 
         // Obtener todos los horarios de los miembros para el mes especificado
         const memberIds = group.members.map(member => member.user._id);
-        
+
         // Crear schedules vacíos para miembros que no tienen uno (para contar como "enviado")
         for (const memberId of memberIds) {
             await Schedule.getOrCreate(memberId, parseInt(year), parseInt(month));
         }
-        
+
         const schedules = await Schedule.find({
             user: { $in: memberIds },
             month: parseInt(month),
@@ -74,7 +74,7 @@ export const getGroupAvailability = async (req, res) => {
             for (let day = 1; day <= daysInMonth; day++) {
                 const dayAvailability = schedule.availability.find(a => a.day === day);
                 const hasEvents = dayAvailability && dayAvailability.slots && dayAvailability.slots.length > 0;
-                
+
                 const memberInfo = {
                     userId: schedule.user._id,
                     username: schedule.user.username || schedule.user.email,
@@ -102,7 +102,7 @@ export const getGroupAvailability = async (req, res) => {
                     // Buscar el schedule de este miembro
                     const memberSchedule = schedules.find(s => s.user._id.toString() === member.user._id.toString());
                     const dayAvailability = memberSchedule?.availability.find(a => a.day === parseInt(day));
-                    
+
                     return {
                         userId: member.user._id,
                         username: member.user.username || member.user.email,

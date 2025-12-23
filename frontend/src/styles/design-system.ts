@@ -89,15 +89,15 @@ export const textColors = {
   secondary: 'text-neutral-700',
   tertiary: 'text-neutral-600',
   disabled: 'text-neutral-400',
-  
+
   // Texto sobre fondo oscuro/gradientes
   onDark: 'text-white',
   onDarkSecondary: 'text-white/90',
-  
+
   // Labels y títulos de formularios
   label: 'text-neutral-900',
   heading: 'text-neutral-900',
-  
+
   // Estados
   error: 'text-danger-600',
   success: 'text-success-600',

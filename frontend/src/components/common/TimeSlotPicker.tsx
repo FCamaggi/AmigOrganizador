@@ -110,12 +110,12 @@ const TimeSlotPicker = ({
   ) => {
     setError('');
     const newSlots = [...slots];
-    
+
     if (field === 'title' || field === 'color') {
       newSlots[index][field] = value;
     } else {
       newSlots[index][field] = value;
-      
+
       // Validar el slot modificado solo si cambiaron las horas
       const validationError = validateSlot(newSlots[index]);
       if (validationError) {
@@ -137,7 +137,7 @@ const TimeSlotPicker = ({
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3 sm:space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between">
         <label className="block text-sm font-semibold text-neutral-700">
@@ -148,7 +148,7 @@ const TimeSlotPicker = ({
             <button
               type="button"
               onClick={handleClearAll}
-              className="text-xs text-danger-600 hover:text-danger-700 font-medium"
+              className="text-xs text-danger-600 hover:text-danger-700 font-medium min-h-[44px] px-2"
             >
               Limpiar todo
             </button>
@@ -156,10 +156,10 @@ const TimeSlotPicker = ({
           <button
             type="button"
             onClick={handleAddSlot}
-            className="text-xs text-primary-600 hover:text-primary-700 font-medium flex items-center gap-1"
+            className="text-xs text-primary-600 hover:text-primary-700 font-medium flex items-center gap-1 min-h-[44px] px-2"
           >
             <svg
-              className="w-4 h-4"
+              className="w-3 h-3 sm:w-4 sm:h-4"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -186,10 +186,10 @@ const TimeSlotPicker = ({
                 key={preset.label}
                 type="button"
                 onClick={() => handleApplyPreset(preset)}
-                className="px-3 py-1.5 text-xs font-medium bg-primary-50 text-primary-700 rounded-lg hover:bg-primary-100 transition-colors border border-primary-200"
+                className="px-2 sm:px-3 py-2 text-xs font-medium bg-primary-50 text-primary-700 rounded-lg hover:bg-primary-100 transition-colors border border-primary-200 min-h-[44px]"
               >
                 {preset.label}
-                <span className="ml-2 text-primary-500">
+                <span className="ml-1 sm:ml-2 text-primary-500 text-xs">
                   {preset.start} - {preset.end}
                 </span>
               </button>
@@ -200,9 +200,9 @@ const TimeSlotPicker = ({
 
       {/* Slots List */}
       {slots.length === 0 ? (
-        <div className="text-center py-8 bg-neutral-50 rounded-xl border-2 border-dashed border-neutral-200">
+        <div className="text-center py-6 sm:py-8 bg-neutral-50 rounded-xl border-2 border-dashed border-neutral-200">
           <svg
-            className="mx-auto w-12 h-12 text-neutral-300 mb-2"
+            className="mx-auto w-10 h-10 sm:w-12 sm:h-12 text-neutral-300 mb-2"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -214,20 +214,20 @@ const TimeSlotPicker = ({
               d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
             />
           </svg>
-          <p className="text-sm text-neutral-500">
+          <p className="text-xs sm:text-sm text-neutral-500">
             No hay franjas horarias. Agrega una o usa una plantilla.
           </p>
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-2 sm:space-y-3">
           {slots.map((slot, index) => (
             <div
               key={index}
-              className="p-3 bg-neutral-50 rounded-xl border border-neutral-200 hover:border-primary-300 transition-colors space-y-3"
+              className="p-3 sm:p-4 bg-neutral-50 rounded-xl border border-neutral-200 hover:border-primary-300 transition-colors space-y-3"
             >
               {/* Título del evento */}
-              <div className="grid grid-cols-[1fr,auto] gap-3">
-                <div>
+              <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+                <div className="flex-1">
                   <label className="block text-xs text-neutral-600 mb-1">
                     Título del evento (opcional)
                   </label>
@@ -242,9 +242,9 @@ const TimeSlotPicker = ({
                     maxLength={100}
                   />
                 </div>
-                
+
                 {/* Color picker */}
-                <div>
+                <div className="w-full sm:w-auto">
                   <label className="block text-xs text-neutral-600 mb-1">
                     Color
                   </label>
@@ -254,13 +254,13 @@ const TimeSlotPicker = ({
                     onChange={(e) =>
                       handleSlotChange(index, 'color', e.target.value)
                     }
-                    className="w-12 h-10 bg-white border border-neutral-300 rounded-lg cursor-pointer"
+                    className="w-full sm:w-16 h-10 bg-white border border-neutral-300 rounded-lg cursor-pointer"
                   />
                 </div>
               </div>
-              
+
               {/* Horarios */}
-              <div className="flex items-center gap-3">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
                 {/* Start Time */}
                 <div className="flex-1">
                   <label className="block text-xs text-neutral-600 mb-1">
@@ -282,7 +282,7 @@ const TimeSlotPicker = ({
                 </div>
 
                 {/* Separator */}
-                <div className="pt-6">
+                <div className="hidden sm:block pt-6">
                   <svg
                     className="w-4 h-4 text-neutral-400"
                     fill="none"
@@ -322,7 +322,7 @@ const TimeSlotPicker = ({
                 <button
                   type="button"
                   onClick={() => handleRemoveSlot(index)}
-                  className="mt-6 p-2 text-danger-500 hover:text-danger-700 hover:bg-danger-50 rounded-lg transition-colors"
+                  className="sm:mt-6 p-2 text-danger-500 hover:text-danger-700 hover:bg-danger-50 rounded-lg transition-colors min-h-[44px] flex items-center justify-center"
                   aria-label="Eliminar franja"
                 >
                   <svg

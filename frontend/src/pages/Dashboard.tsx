@@ -39,7 +39,9 @@ const Dashboard = () => {
                   className="block p-4 sm:p-6 bg-gradient-to-br from-primary-500 to-primary-600 text-white rounded-xl sm:rounded-2xl shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-1"
                 >
                   <div className="text-2xl sm:text-3xl mb-1 sm:mb-2">📅</div>
-                  <h4 className="text-lg sm:text-xl font-semibold mb-1">Mi Horario</h4>
+                  <h4 className="text-lg sm:text-xl font-semibold mb-1">
+                    Mi Horario
+                  </h4>
                   <p className="text-primary-100 text-xs sm:text-sm">
                     Gestiona tu disponibilidad mensual
                   </p>
@@ -50,7 +52,9 @@ const Dashboard = () => {
                   className="block p-4 sm:p-6 bg-gradient-to-br from-accent-500 to-accent-600 text-white rounded-xl sm:rounded-2xl shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-1"
                 >
                   <div className="text-2xl sm:text-3xl mb-1 sm:mb-2">👥</div>
-                  <h4 className="text-lg sm:text-xl font-semibold mb-1">Mis Grupos</h4>
+                  <h4 className="text-lg sm:text-xl font-semibold mb-1">
+                    Mis Grupos
+                  </h4>
                   <p className="text-accent-100 text-xs sm:text-sm">
                     Organiza horarios con tus amigos
                   </p>
@@ -61,7 +65,9 @@ const Dashboard = () => {
                   className="block p-4 sm:p-6 bg-gradient-to-br from-neutral-600 to-neutral-700 text-white rounded-xl sm:rounded-2xl shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-1"
                 >
                   <div className="text-2xl sm:text-3xl mb-1 sm:mb-2">⚙️</div>
-                  <h4 className="text-lg sm:text-xl font-semibold mb-1">Mi Perfil</h4>
+                  <h4 className="text-lg sm:text-xl font-semibold mb-1">
+                    Mi Perfil
+                  </h4>
                   <p className="text-neutral-200 text-xs sm:text-sm">
                     Configuración y preferencias
                   </p>

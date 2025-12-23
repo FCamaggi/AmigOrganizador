@@ -11,9 +11,9 @@ export const isValidEmail = (email: string) => {
  * Mínimo 8 caracteres, al menos una mayúscula y un número
  */
 export const isValidPassword = (password: string) => {
-  return password.length >= 8 && 
-         /[A-Z]/.test(password) && 
-         /[0-9]/.test(password);
+  return (
+    password.length >= 8 && /[A-Z]/.test(password) && /[0-9]/.test(password)
+  );
 };
 
 /**

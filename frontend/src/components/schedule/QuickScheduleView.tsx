@@ -117,13 +117,13 @@ const QuickScheduleView = ({ onApply }: QuickScheduleViewProps) => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Templates predefinidas */}
       <div>
-        <h3 className="text-lg font-semibold text-neutral-800 mb-3">
+        <h3 className="text-base sm:text-lg font-semibold text-neutral-800 mb-2 sm:mb-3">
           Plantillas Rápidas
         </h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
           <Card
             variant={
               selectedTemplate === 'workWeek' ? 'interactive' : 'elevated'
@@ -134,9 +134,9 @@ const QuickScheduleView = ({ onApply }: QuickScheduleViewProps) => {
             )}
             onClick={() => handleTemplateSelect('workWeek')}
           >
-            <div className="text-3xl mb-2">💼</div>
-            <h4 className="font-semibold text-neutral-800">Jornada Completa</h4>
-            <p className="text-sm text-neutral-600 mt-1">Lun-Vie, 9:00-17:00</p>
+            <div className="text-2xl sm:text-3xl mb-1 sm:mb-2">💼</div>
+            <h4 className="text-sm sm:text-base font-semibold text-neutral-800">Jornada Completa</h4>
+            <p className="text-xs sm:text-sm text-neutral-600 mt-1">Lun-Vie, 9:00-17:00</p>
           </Card>
 
           <Card
@@ -149,9 +149,9 @@ const QuickScheduleView = ({ onApply }: QuickScheduleViewProps) => {
             )}
             onClick={() => handleTemplateSelect('partTime')}
           >
-            <div className="text-3xl mb-2">⏰</div>
-            <h4 className="font-semibold text-neutral-800">Media Jornada</h4>
-            <p className="text-sm text-neutral-600 mt-1">
+            <div className="text-2xl sm:text-3xl mb-1 sm:mb-2">⏰</div>
+            <h4 className="text-sm sm:text-base font-semibold text-neutral-800">Media Jornada</h4>
+            <p className="text-xs sm:text-sm text-neutral-600 mt-1">
               Lun-Vie, 14:00-18:00
             </p>
           </Card>
@@ -166,9 +166,9 @@ const QuickScheduleView = ({ onApply }: QuickScheduleViewProps) => {
             )}
             onClick={() => handleTemplateSelect('evenings')}
           >
-            <div className="text-3xl mb-2">🌙</div>
-            <h4 className="font-semibold text-neutral-800">Noches</h4>
-            <p className="text-sm text-neutral-600 mt-1">
+            <div className="text-2xl sm:text-3xl mb-1 sm:mb-2">🌙</div>
+            <h4 className="text-sm sm:text-base font-semibold text-neutral-800">Noches</h4>
+            <p className="text-xs sm:text-sm text-neutral-600 mt-1">
               Lun-Vie, 18:00-22:00
             </p>
           </Card>
@@ -183,9 +183,9 @@ const QuickScheduleView = ({ onApply }: QuickScheduleViewProps) => {
             )}
             onClick={() => handleTemplateSelect('weekends')}
           >
-            <div className="text-3xl mb-2">🎉</div>
-            <h4 className="font-semibold text-neutral-800">Fin de Semana</h4>
-            <p className="text-sm text-neutral-600 mt-1">
+            <div className="text-2xl sm:text-3xl mb-1 sm:mb-2">🎉</div>
+            <h4 className="text-sm sm:text-base font-semibold text-neutral-800">Fin de Semana</h4>
+            <p className="text-xs sm:text-sm text-neutral-600 mt-1">
               Sáb-Dom, 10:00-20:00
             </p>
           </Card>
@@ -194,22 +194,22 @@ const QuickScheduleView = ({ onApply }: QuickScheduleViewProps) => {
 
       {/* Selector de días */}
       <div>
-        <h3 className="text-lg font-semibold text-neutral-800 mb-3">
+        <h3 className="text-base sm:text-lg font-semibold text-neutral-800 mb-2 sm:mb-3">
           Días de la Semana
         </h3>
-        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-2">
           {DAYS_OF_WEEK.map((day) => (
             <button
               key={day.key}
               onClick={() => handleDayToggle(day.key)}
               className={cn(
-                'p-4 rounded-xl border-2 transition-all font-semibold text-center',
+                'p-3 sm:p-4 rounded-xl border-2 transition-all font-semibold text-center min-h-[72px] sm:min-h-[80px]',
                 selectedDays.has(day.key)
                   ? 'bg-primary-50 border-primary-500 text-primary-700'
                   : 'bg-white border-neutral-200 text-neutral-600 hover:border-neutral-300'
               )}
             >
-              <div className="text-sm">{day.short}</div>
+              <div className="text-xs sm:text-sm">{day.short}</div>
               <div className="text-xs mt-1 opacity-70">{day.label}</div>
             </button>
           ))}
@@ -222,8 +222,8 @@ const QuickScheduleView = ({ onApply }: QuickScheduleViewProps) => {
           variant="elevated"
           className="bg-primary-50 border border-primary-200"
         >
-          <h4 className="font-semibold text-primary-900 mb-3 flex items-center gap-2">
-            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+          <h4 className="text-sm sm:text-base font-semibold text-primary-900 mb-2 sm:mb-3 flex items-center gap-2">
+            <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="currentColor" viewBox="0 0 20 20">
               <path
                 fillRule="evenodd"
                 d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
@@ -232,13 +232,13 @@ const QuickScheduleView = ({ onApply }: QuickScheduleViewProps) => {
             </svg>
             Vista Previa
           </h4>
-          <div className="space-y-2 text-sm text-primary-800">
+          <div className="space-y-1 sm:space-y-2 text-xs sm:text-sm text-primary-800">
             {Array.from(selectedDays).map((dayKey) => {
               const day = DAYS_OF_WEEK.find((d) => d.key === dayKey);
               const slots = customTemplate[dayKey] || [];
               return (
-                <div key={dayKey} className="flex items-center gap-2">
-                  <span className="font-semibold w-24">{day?.label}:</span>
+                <div key={dayKey} className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+                  <span className="font-semibold sm:w-24">{day?.label}:</span>
                   <span className="text-primary-600">
                     {slots.map((s) => `${s.start}-${s.end}`).join(', ')}
                   </span>
@@ -250,15 +250,16 @@ const QuickScheduleView = ({ onApply }: QuickScheduleViewProps) => {
       )}
 
       {/* Actions */}
-      <div className="flex gap-3 justify-end">
+      <div className="flex gap-2 sm:gap-3 justify-stretch sm:justify-end">
         <Button
           onClick={handleApplyTemplate}
           variant="primary"
           loading={loading}
           disabled={selectedDays.size === 0}
+          className="flex-1 sm:flex-none justify-center"
           icon={
             <svg
-              className="w-5 h-5"
+              className="w-4 h-4 sm:w-5 sm:h-5"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -277,7 +278,7 @@ const QuickScheduleView = ({ onApply }: QuickScheduleViewProps) => {
       </div>
 
       {/* Help */}
-      <div className="bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-sm text-neutral-600">
+      <div className="bg-neutral-50 border border-neutral-200 rounded-xl p-3 sm:p-4 text-xs sm:text-sm text-neutral-600">
         <p className="font-semibold mb-2">💡 Cómo funciona:</p>
         <ul className="space-y-1 ml-4 list-disc">
           <li>Selecciona una plantilla predefinida o personaliza tus días</li>

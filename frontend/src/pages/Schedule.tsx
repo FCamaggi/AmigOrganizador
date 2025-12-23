@@ -20,7 +20,8 @@ const Schedule = () => {
     useState<DayAvailability | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>('calendar');
 
-  const { exportSchedule, importSchedule, loading, currentSchedule } = useScheduleStore();
+  const { exportSchedule, importSchedule, loading, currentSchedule } =
+    useScheduleStore();
 
   const handleSelectDay = (date: Date, availability?: DayAvailability) => {
     setSelectedDate(date);
@@ -66,19 +67,20 @@ const Schedule = () => {
   };
 
   // Calcular estadísticas
-  const totalDaysWithSchedule = currentSchedule?.availability.filter(
-    (day) => day.slots.length > 0
-  ).length || 0;
+  const totalDaysWithSchedule =
+    currentSchedule?.availability.filter((day) => day.slots.length > 0)
+      .length || 0;
 
-  const totalSlots = currentSchedule?.availability.reduce(
-    (sum, day) => sum + day.slots.length,
-    0
-  ) || 0;
+  const totalSlots =
+    currentSchedule?.availability.reduce(
+      (sum, day) => sum + day.slots.length,
+      0
+    ) || 0;
 
   return (
     <div className="min-h-screen bg-neutral-50">
       <Navbar />
-      
+
       <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 py-3 sm:py-6 space-y-4 sm:space-y-6">
         {/* Header Card */}
         <Card variant="gradient" padding="lg">
@@ -90,18 +92,22 @@ const Schedule = () => {
               <p className="text-white/90 text-base sm:text-lg">
                 Gestiona tu disponibilidad de forma fácil y rápida
               </p>
-              
+
               {/* Stats */}
               <div className="mt-3 sm:mt-4 flex flex-wrap gap-2 sm:gap-3">
                 <div className="bg-white/20 backdrop-blur-sm px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg">
                   <div className="flex items-center gap-1.5 sm:gap-2">
-                    <span className="text-white/80 text-xs sm:text-sm">Días configurados:</span>
+                    <span className="text-white/80 text-xs sm:text-sm">
+                      Días configurados:
+                    </span>
                     <Badge variant="success">{totalDaysWithSchedule}</Badge>
                   </div>
                 </div>
                 <div className="bg-white/20 backdrop-blur-sm px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg">
                   <div className="flex items-center gap-1.5 sm:gap-2">
-                    <span className="text-white/80 text-xs sm:text-sm">Franjas horarias:</span>
+                    <span className="text-white/80 text-xs sm:text-sm">
+                      Franjas horarias:
+                    </span>
                     <Badge variant="primary">{totalSlots}</Badge>
                   </div>
                 </div>
@@ -115,8 +121,18 @@ const Schedule = () => {
                 variant="secondary"
                 size="md"
                 icon={
-                  <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  <svg
+                    className="w-4 h-4 sm:w-5 sm:h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M13 10V3L4 14h7v7l9-11h-7z"
+                    />
                   </svg>
                 }
               >
@@ -129,8 +145,18 @@ const Schedule = () => {
                 disabled={loading}
                 className="bg-white/10 hover:bg-white/20 text-white border-white/30"
                 icon={
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                    />
                   </svg>
                 }
               >
@@ -143,8 +169,18 @@ const Schedule = () => {
                 disabled={loading}
                 className="bg-white/10 hover:bg-white/20 text-white border-white/30"
                 icon={
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"
+                    />
                   </svg>
                 }
               >
@@ -189,8 +225,16 @@ const Schedule = () => {
             <Card variant="elevated" padding="lg">
               <div className="flex items-start gap-3 mb-4">
                 <div className="w-10 h-10 bg-primary-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                  <svg className="w-6 h-6 text-primary-600" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                  <svg
+                    className="w-6 h-6 text-primary-600"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                      clipRule="evenodd"
+                    />
                   </svg>
                 </div>
                 <div>
@@ -209,7 +253,9 @@ const Schedule = () => {
                     1
                   </div>
                   <div>
-                    <p className="font-semibold text-neutral-900 mb-1">Haz clic en un día</p>
+                    <p className="font-semibold text-neutral-900 mb-1">
+                      Haz clic en un día
+                    </p>
                     <p className="text-sm text-neutral-600">
                       Selecciona cualquier día del calendario para editarlo
                     </p>
@@ -221,7 +267,9 @@ const Schedule = () => {
                     2
                   </div>
                   <div>
-                    <p className="font-semibold text-neutral-900 mb-1">Agrega horarios</p>
+                    <p className="font-semibold text-neutral-900 mb-1">
+                      Agrega horarios
+                    </p>
                     <p className="text-sm text-neutral-600">
                       Usa presets rápidos o define horarios manualmente
                     </p>
@@ -233,7 +281,9 @@ const Schedule = () => {
                     3
                   </div>
                   <div>
-                    <p className="font-semibold text-neutral-900 mb-1">Elimina si es necesario</p>
+                    <p className="font-semibold text-neutral-900 mb-1">
+                      Elimina si es necesario
+                    </p>
                     <p className="text-sm text-neutral-600">
                       Usa el botón "Eliminar Todo" para limpiar un día
                     </p>
@@ -245,7 +295,9 @@ const Schedule = () => {
                     4
                   </div>
                   <div>
-                    <p className="font-semibold text-neutral-900 mb-1">Guarda automáticamente</p>
+                    <p className="font-semibold text-neutral-900 mb-1">
+                      Guarda automáticamente
+                    </p>
                     <p className="text-sm text-neutral-600">
                       Tus cambios se sincronizan en tiempo real
                     </p>

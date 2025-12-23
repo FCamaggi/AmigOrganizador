@@ -75,11 +75,7 @@ const Navbar = () => {
             >
               {user?.fullName || user?.username}
             </Link>
-            <Button
-              onClick={handleLogout}
-              variant="outline"
-              size="sm"
-            >
+            <Button onClick={handleLogout} variant="outline" size="sm">
               Salir
             </Button>
           </div>

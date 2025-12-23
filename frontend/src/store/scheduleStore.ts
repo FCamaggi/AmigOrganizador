@@ -147,10 +147,10 @@ export const useScheduleStore = create<ScheduleState>((set, get) => ({
 
       // Actualizar selectedDate y currentSchedule juntos
       const importedDate = new Date(data.year, data.month - 1, 1);
-      set({ 
-        currentSchedule: schedule, 
+      set({
+        currentSchedule: schedule,
         selectedDate: importedDate,
-        loading: false 
+        loading: false,
       });
     } catch (error) {
       const message = (error as Error).message || 'Error al importar horario';

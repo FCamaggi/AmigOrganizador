@@ -11,11 +11,14 @@ import Badge from '../components/common/Badge';
 
 // Configurar moment en español manualmente
 moment.updateLocale('es', {
-  months: 'Enero_Febrero_Marzo_Abril_Mayo_Junio_Julio_Agosto_Septiembre_Octubre_Noviembre_Diciembre'.split('_'),
+  months:
+    'Enero_Febrero_Marzo_Abril_Mayo_Junio_Julio_Agosto_Septiembre_Octubre_Noviembre_Diciembre'.split(
+      '_'
+    ),
   monthsShort: 'Ene_Feb_Mar_Abr_May_Jun_Jul_Ago_Sep_Oct_Nov_Dic'.split('_'),
   weekdays: 'Domingo_Lunes_Martes_Miércoles_Jueves_Viernes_Sábado'.split('_'),
   weekdaysShort: 'Dom_Lun_Mar_Mié_Jue_Vie_Sáb'.split('_'),
-  weekdaysMin: 'Do_Lu_Ma_Mi_Ju_Vi_Sá'.split('_')
+  weekdaysMin: 'Do_Lu_Ma_Mi_Ju_Vi_Sá'.split('_'),
 });
 
 const localizer = momentLocalizer(moment);
@@ -40,8 +43,12 @@ const MonthlyCalendar = () => {
 
   const loadEvents = useCallback(async () => {
     try {
-      const startOfMonth = moment(currentDate).startOf('month').format('YYYY-MM-DD');
-      const endOfMonth = moment(currentDate).endOf('month').format('YYYY-MM-DD');
+      const startOfMonth = moment(currentDate)
+        .startOf('month')
+        .format('YYYY-MM-DD');
+      const endOfMonth = moment(currentDate)
+        .endOf('month')
+        .format('YYYY-MM-DD');
       await fetchEvents(startOfMonth, endOfMonth);
     } catch (error) {
       console.error('Error loading events:', error);
@@ -103,7 +110,13 @@ const MonthlyCalendar = () => {
     };
   };
 
-  const DayCell = ({ children, value }: { children: React.ReactNode; value: Date }) => {
+  const DayCell = ({
+    children,
+    value,
+  }: {
+    children: React.ReactNode;
+    value: Date;
+  }) => {
     const dayEvents = calendarEvents.filter((event) =>
       moment(event.start).isSame(value, 'day')
     );
@@ -115,9 +128,7 @@ const MonthlyCalendar = () => {
         {children}
         {dayEvents.length > 3 && (
           <div className="px-2 py-1">
-            <Badge variant="neutral">
-              +{dayEvents.length - 3} más
-            </Badge>
+            <Badge variant="neutral">+{dayEvents.length - 3} más</Badge>
           </div>
         )}
       </div>

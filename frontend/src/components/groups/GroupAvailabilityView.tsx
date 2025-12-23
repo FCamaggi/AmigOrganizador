@@ -113,20 +113,20 @@ const GroupAvailabilityView = ({
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Header con navegación */}
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-neutral-800">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0">
+        <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-neutral-800">
           Disponibilidad de {groupName}
         </h2>
         <div className="flex gap-2">
-          <Button variant="secondary" onClick={handlePreviousMonth}>
+          <Button variant="secondary" onClick={handlePreviousMonth} className="flex-1 sm:flex-none text-xs sm:text-sm justify-center">
             ← Anterior
           </Button>
-          <Button variant="secondary" onClick={handleCurrentMonth}>
+          <Button variant="secondary" onClick={handleCurrentMonth} className="flex-1 sm:flex-none text-xs sm:text-sm justify-center">
             Hoy
           </Button>
-          <Button variant="secondary" onClick={handleNextMonth}>
+          <Button variant="secondary" onClick={handleNextMonth} className="flex-1 sm:flex-none text-xs sm:text-sm justify-center">
             Siguiente →
           </Button>
         </div>
@@ -134,62 +134,62 @@ const GroupAvailabilityView = ({
 
       {/* Mes actual */}
       <div className="text-center">
-        <h3 className="text-xl font-semibold text-neutral-700">
+        <h3 className="text-base sm:text-lg lg:text-xl font-semibold text-neutral-700">
           {format(currentDate, 'MMMM yyyy', { locale: es })}
         </h3>
       </div>
 
       {error && (
-        <div className="p-4 bg-red-50 border border-red-200 rounded-xl text-red-700">
+        <div className="p-3 sm:p-4 bg-red-50 border border-red-200 rounded-xl text-sm sm:text-base text-red-700">
           {error}
         </div>
       )}
 
       {/* Estadísticas */}
       {availability && (
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-          <div className="bg-white p-4 rounded-xl shadow-soft text-center">
-            <div className="text-2xl font-bold text-primary-600">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3 lg:gap-4">
+          <div className="bg-white p-3 sm:p-4 rounded-xl shadow-soft text-center">
+            <div className="text-xl sm:text-2xl font-bold text-primary-600">
               {availability.stats.averageAvailability}%
             </div>
-            <div className="text-sm text-neutral-600">Promedio</div>
+            <div className="text-xs sm:text-sm text-neutral-600">Promedio</div>
           </div>
-          <div className="bg-green-50 p-4 rounded-xl shadow-soft text-center">
-            <div className="text-2xl font-bold text-green-700">
+          <div className="bg-green-50 p-3 sm:p-4 rounded-xl shadow-soft text-center">
+            <div className="text-xl sm:text-2xl font-bold text-green-700">
               {availability.stats.daysWithFullAvailability}
             </div>
-            <div className="text-sm text-neutral-600">100% disponibles</div>
+            <div className="text-xs sm:text-sm text-neutral-600">100% disponibles</div>
           </div>
-          <div className="bg-amber-50 p-4 rounded-xl shadow-soft text-center">
-            <div className="text-2xl font-bold text-amber-700">
+          <div className="bg-amber-50 p-3 sm:p-4 rounded-xl shadow-soft text-center">
+            <div className="text-xl sm:text-2xl font-bold text-amber-700">
               {availability.stats.daysWithPartialAvailability}
             </div>
-            <div className="text-sm text-neutral-600">Parcialmente</div>
+            <div className="text-xs sm:text-sm text-neutral-600">Parcialmente</div>
           </div>
-          <div className="bg-neutral-50 p-4 rounded-xl shadow-soft text-center">
-            <div className="text-2xl font-bold text-neutral-600">
+          <div className="bg-neutral-50 p-3 sm:p-4 rounded-xl shadow-soft text-center">
+            <div className="text-xl sm:text-2xl font-bold text-neutral-600">
               {availability.stats.daysWithNoAvailability}
             </div>
-            <div className="text-sm text-neutral-600">Sin disponibilidad</div>
+            <div className="text-xs sm:text-sm text-neutral-600">Sin disponibilidad</div>
           </div>
-          <div className="bg-primary-50 p-4 rounded-xl shadow-soft text-center">
-            <div className="text-2xl font-bold text-primary-700">
+          <div className="bg-primary-50 p-3 sm:p-4 rounded-xl shadow-soft text-center col-span-2 sm:col-span-1">
+            <div className="text-xl sm:text-2xl font-bold text-primary-700">
               {availability.stats.schedulesSubmitted}/
               {availability.stats.memberCount}
             </div>
-            <div className="text-sm text-neutral-600">Horarios enviados</div>
+            <div className="text-xs sm:text-sm text-neutral-600">Horarios enviados</div>
           </div>
         </div>
       )}
 
       {/* Calendario */}
-      <div className="bg-white rounded-2xl shadow-soft p-6">
+      <div className="bg-white rounded-xl sm:rounded-2xl shadow-soft p-3 sm:p-4 lg:p-6">
         {/* Días de la semana */}
-        <div className="grid grid-cols-7 gap-2 mb-2">
+        <div className="grid grid-cols-7 gap-1 sm:gap-2 mb-2">
           {['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'].map((day) => (
             <div
               key={day}
-              className="text-center text-sm font-semibold text-neutral-600 py-2"
+              className="text-center text-xs sm:text-sm font-semibold text-neutral-600 py-1 sm:py-2"
             >
               {day}
             </div>
@@ -197,7 +197,7 @@ const GroupAvailabilityView = ({
         </div>
 
         {/* Días del mes */}
-        <div className="grid grid-cols-7 gap-2">
+        <div className="grid grid-cols-7 gap-1 sm:gap-2">
           {calendarDays.map((dayInfo, index) => {
             if (!dayInfo) {
               return <div key={`empty-${index}`} className="aspect-square" />;
@@ -211,15 +211,15 @@ const GroupAvailabilityView = ({
               <button
                 key={day}
                 onClick={() => setSelectedDay(data || null)}
-                className={`aspect-square rounded-xl font-semibold text-sm transition-all ${getColorClass(
+                className={`aspect-square rounded-lg sm:rounded-xl font-semibold text-xs sm:text-sm transition-all min-h-[44px] ${getColorClass(
                   percentage
                 )} ${
-                  isSelected ? 'ring-2 ring-primary-500 ring-offset-2' : ''
+                  isSelected ? 'ring-2 ring-primary-500 ring-offset-1 sm:ring-offset-2' : ''
                 } ${percentage > 0 ? 'cursor-pointer' : 'cursor-default'}`}
                 disabled={percentage === 0}
               >
                 <div className="flex flex-col items-center justify-center h-full">
-                  <div className="text-lg">{day}</div>
+                  <div className="text-sm sm:text-base lg:text-lg">{day}</div>
                   {percentage > 0 && (
                     <div className="text-xs font-bold">{percentage}%</div>
                   )}
@@ -231,59 +231,61 @@ const GroupAvailabilityView = ({
       </div>
 
       {/* Leyenda */}
-      <div className="bg-white rounded-xl shadow-soft p-4">
-        <h4 className="text-sm font-semibold text-neutral-700 mb-3">
+      <div className="bg-white rounded-xl shadow-soft p-3 sm:p-4">
+        <h4 className="text-xs sm:text-sm font-semibold text-neutral-700 mb-2 sm:mb-3">
           Leyenda:
         </h4>
-        <div className="flex flex-wrap gap-4 text-sm">
+        <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2 sm:gap-4 text-xs sm:text-sm">
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 bg-neutral-100 rounded"></div>
+            <div className="w-5 h-5 sm:w-6 sm:h-6 bg-neutral-100 rounded flex-shrink-0"></div>
             <span className="text-neutral-600">Sin datos</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 bg-red-100 rounded"></div>
-            <span className="text-neutral-600">{'<50% disponible'}</span>
+            <div className="w-5 h-5 sm:w-6 sm:h-6 bg-red-100 rounded flex-shrink-0"></div>
+            <span className="text-neutral-600">{'<50%'}</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 bg-amber-100 rounded"></div>
-            <span className="text-neutral-600">50-74% disponible</span>
+            <div className="w-5 h-5 sm:w-6 sm:h-6 bg-amber-100 rounded flex-shrink-0"></div>
+            <span className="text-neutral-600">50-74%</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 bg-green-100 rounded"></div>
-            <span className="text-neutral-600">75-99% disponible</span>
+            <div className="w-5 h-5 sm:w-6 sm:h-6 bg-green-100 rounded flex-shrink-0"></div>
+            <span className="text-neutral-600">75-99%</span>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="w-6 h-6 bg-green-200 rounded"></div>
-            <span className="text-neutral-600">100% disponible</span>
+          <div className="flex items-center gap-2 col-span-2 sm:col-span-1">
+            <div className="w-5 h-5 sm:w-6 sm:h-6 bg-green-200 rounded flex-shrink-0"></div>
+            <span className="text-neutral-600">100%</span>
           </div>
         </div>
       </div>
 
       {/* Detalle del día seleccionado */}
       {selectedDay && (
-        <div className="bg-white rounded-2xl shadow-soft p-6">
-          <h3 className="text-xl font-bold text-neutral-800 mb-4">
+        <div className="bg-white rounded-xl sm:rounded-2xl shadow-soft p-4 sm:p-6">
+          <h3 className="text-base sm:text-lg lg:text-xl font-bold text-neutral-800 mb-3 sm:mb-4">
             {format(new Date(year, month - 1, selectedDay.day), "d 'de' MMMM", {
               locale: es,
             })}
           </h3>
 
-          <div className="grid md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
             {/* Miembros disponibles */}
             <div>
-              <h4 className="text-sm font-semibold text-green-700 mb-3">
+              <h4 className="text-xs sm:text-sm font-semibold text-green-700 mb-2 sm:mb-3">
                 ✓ Disponibles ({selectedDay.availableMembers.length})
               </h4>
-              <div className="space-y-3">
+              <div className="space-y-2 sm:space-y-3">
                 {selectedDay.availableMembers.length === 0 ? (
-                  <p className="text-sm text-neutral-500 italic">No hay miembros disponibles este día</p>
+                  <p className="text-xs sm:text-sm text-neutral-500 italic">
+                    No hay miembros disponibles este día
+                  </p>
                 ) : (
                   selectedDay.availableMembers.map((member) => (
                     <div
                       key={member.userId}
-                      className="bg-green-50 p-3 rounded-lg"
+                      className="bg-green-50 p-2 sm:p-3 rounded-lg"
                     >
-                      <p className="font-semibold text-neutral-800">
+                      <p className="text-sm sm:text-base font-semibold text-neutral-800 truncate">
                         {member.fullName || member.username}
                       </p>
                       <p className="text-xs text-green-600 mt-1">
@@ -297,32 +299,34 @@ const GroupAvailabilityView = ({
 
             {/* Miembros no disponibles */}
             <div>
-              <h4 className="text-sm font-semibold text-red-700 mb-3">
+              <h4 className="text-xs sm:text-sm font-semibold text-red-700 mb-2 sm:mb-3">
                 ✗ No disponibles ({selectedDay.unavailableMembers.length})
               </h4>
               <div className="space-y-2">
                 {selectedDay.unavailableMembers.length === 0 ? (
-                  <p className="text-sm text-neutral-500 italic">Todos disponibles</p>
+                  <p className="text-xs sm:text-sm text-neutral-500 italic">
+                    Todos disponibles
+                  </p>
                 ) : (
                   selectedDay.unavailableMembers.map((member) => (
                     <div
                       key={member.userId}
-                      className="bg-red-50 p-3 rounded-lg"
+                      className="bg-red-50 p-2 sm:p-3 rounded-lg"
                     >
-                      <p className="font-semibold text-neutral-800">
+                      <p className="text-sm sm:text-base font-semibold text-neutral-800 truncate">
                         {member.fullName || member.username}
                       </p>
                       {member.slots && member.slots.length > 0 && (
-                        <div className="mt-2 space-y-1">
+                        <div className="mt-1 sm:mt-2 space-y-1">
                           {member.slots.map((slot, idx) => (
-                            <p key={idx} className="text-sm text-neutral-600">
+                            <p key={idx} className="text-xs sm:text-sm text-neutral-600 truncate">
                               🔒 {slot.title || `${slot.start} - ${slot.end}`}
                             </p>
                           ))}
                         </div>
                       )}
                       {member.note && (
-                        <p className="text-xs text-neutral-500 mt-2 italic">
+                        <p className="text-xs text-neutral-500 mt-1 sm:mt-2 italic line-clamp-2">
                           "{member.note}"
                         </p>
                       )}
@@ -335,15 +339,15 @@ const GroupAvailabilityView = ({
 
           {/* Franjas horarias comunes */}
           {selectedDay.timeSlots.length > 0 && (
-            <div className="mt-6 p-4 bg-primary-50 rounded-xl">
-              <h4 className="text-sm font-semibold text-primary-900 mb-3">
+            <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-primary-50 rounded-xl">
+              <h4 className="text-xs sm:text-sm font-semibold text-primary-900 mb-2 sm:mb-3">
                 🎯 Horarios en común para todos los disponibles:
               </h4>
               <div className="flex flex-wrap gap-2">
                 {selectedDay.timeSlots.map((slot, idx) => (
                   <span
                     key={idx}
-                    className="px-4 py-2 bg-primary-100 text-primary-700 font-semibold rounded-lg"
+                    className="px-3 sm:px-4 py-1.5 sm:py-2 bg-primary-100 text-primary-700 text-xs sm:text-sm font-semibold rounded-lg"
                   >
                     {slot.start} - {slot.end}
                   </span>

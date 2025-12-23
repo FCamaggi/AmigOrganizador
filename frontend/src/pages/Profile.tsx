@@ -142,27 +142,27 @@ const Profile = () => {
     <div>
       <Navbar />
       <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-accent-50">
-        <div className="container mx-auto px-4 py-8 max-w-4xl">
+        <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 lg:py-8 max-w-4xl">
           {/* Header */}
-          <div className="mb-8">
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-primary-600 to-accent-500 bg-clip-text text-transparent mb-2">
+          <div className="mb-4 sm:mb-6 lg:mb-8">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-primary-600 to-accent-500 bg-clip-text text-transparent mb-2">
               Mi Perfil
             </h1>
-            <p className="text-neutral-600">
+            <p className="text-sm sm:text-base text-neutral-600">
               Gestiona tu información personal y configuración de cuenta
             </p>
           </div>
 
           {/* Tabs */}
-          <div className="mb-6 border-b border-neutral-200">
-            <div className="flex gap-8">
+          <div className="mb-4 sm:mb-6 border-b border-neutral-200 overflow-x-auto">
+            <div className="flex gap-4 sm:gap-6 lg:gap-8 min-w-max">
               <button
                 onClick={() => {
                   setActiveTab('profile');
                   setError(null);
                   setSuccess(null);
                 }}
-                className={`pb-3 px-2 font-semibold transition-colors relative ${
+                className={`pb-2 sm:pb-3 px-1 sm:px-2 text-sm sm:text-base font-semibold transition-colors relative whitespace-nowrap ${
                   activeTab === 'profile'
                     ? 'text-primary-600'
                     : 'text-neutral-500 hover:text-neutral-700'
@@ -179,7 +179,7 @@ const Profile = () => {
                   setError(null);
                   setSuccess(null);
                 }}
-                className={`pb-3 px-2 font-semibold transition-colors relative ${
+                className={`pb-2 sm:pb-3 px-1 sm:px-2 text-sm sm:text-base font-semibold transition-colors relative whitespace-nowrap ${
                   activeTab === 'password'
                     ? 'text-primary-600'
                     : 'text-neutral-500 hover:text-neutral-700'
@@ -196,7 +196,7 @@ const Profile = () => {
                   setError(null);
                   setSuccess(null);
                 }}
-                className={`pb-3 px-2 font-semibold transition-colors relative ${
+                className={`pb-2 sm:pb-3 px-1 sm:px-2 text-sm sm:text-base font-semibold transition-colors relative whitespace-nowrap ${
                   activeTab === 'danger'
                     ? 'text-red-600'
                     : 'text-neutral-500 hover:text-neutral-700'
@@ -212,23 +212,23 @@ const Profile = () => {
 
           {/* Messages */}
           {error && (
-            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700">
+            <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-red-50 border border-red-200 rounded-xl text-sm sm:text-base text-red-700">
               {error}
             </div>
           )}
           {success && (
-            <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-xl text-green-700">
+            <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-green-50 border border-green-200 rounded-xl text-sm sm:text-base text-green-700">
               {success}
             </div>
           )}
 
           {/* Profile Tab */}
           {activeTab === 'profile' && (
-            <div className="bg-white rounded-2xl shadow-soft p-8">
-              <h2 className="text-xl font-bold text-neutral-800 mb-6">
+            <div className="bg-white rounded-xl sm:rounded-2xl shadow-soft p-4 sm:p-6 lg:p-8">
+              <h2 className="text-lg sm:text-xl font-bold text-neutral-800 mb-4 sm:mb-6">
                 Actualizar Información Personal
               </h2>
-              <form onSubmit={handleProfileSubmit} className="space-y-4">
+              <form onSubmit={handleProfileSubmit} className="space-y-3 sm:space-y-4">
                 <Input
                   label="Nombre de usuario"
                   type="text"
@@ -252,8 +252,8 @@ const Profile = () => {
                   value={profileForm.fullName || ''}
                   onChange={handleProfileChange}
                 />
-                <div className="pt-4">
-                  <Button type="submit" disabled={isLoading}>
+                <div className="pt-2 sm:pt-4">
+                  <Button type="submit" disabled={isLoading} className="w-full sm:w-auto">
                     {isLoading ? 'Guardando...' : 'Guardar Cambios'}
                   </Button>
                 </div>
@@ -263,14 +263,14 @@ const Profile = () => {
 
           {/* Password Tab */}
           {activeTab === 'password' && (
-            <div className="bg-white rounded-2xl shadow-soft p-8">
-              <h2 className="text-xl font-bold text-neutral-800 mb-2">
+            <div className="bg-white rounded-xl sm:rounded-2xl shadow-soft p-4 sm:p-6 lg:p-8">
+              <h2 className="text-lg sm:text-xl font-bold text-neutral-800 mb-2">
                 Cambiar Contraseña
               </h2>
-              <p className="text-sm text-neutral-600 mb-6">
+              <p className="text-xs sm:text-sm text-neutral-600 mb-4 sm:mb-6">
                 La contraseña debe tener al menos 6 caracteres
               </p>
-              <form onSubmit={handlePasswordSubmit} className="space-y-4">
+              <form onSubmit={handlePasswordSubmit} className="space-y-3 sm:space-y-4">
                 <Input
                   label="Contraseña actual"
                   type="password"
@@ -295,8 +295,8 @@ const Profile = () => {
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   required
                 />
-                <div className="pt-4">
-                  <Button type="submit" disabled={isLoading}>
+                <div className="pt-2 sm:pt-4">
+                  <Button type="submit" disabled={isLoading} className="w-full sm:w-auto">
                     {isLoading ? 'Cambiando...' : 'Cambiar Contraseña'}
                   </Button>
                 </div>
@@ -306,11 +306,11 @@ const Profile = () => {
 
           {/* Danger Zone Tab */}
           {activeTab === 'danger' && (
-            <div className="bg-white rounded-2xl shadow-soft p-8 border-2 border-red-200">
-              <h2 className="text-xl font-bold text-red-700 mb-2">
+            <div className="bg-white rounded-xl sm:rounded-2xl shadow-soft p-4 sm:p-6 lg:p-8 border-2 border-red-200">
+              <h2 className="text-lg sm:text-xl font-bold text-red-700 mb-2">
                 Eliminar Cuenta
               </h2>
-              <p className="text-sm text-neutral-600 mb-6">
+              <p className="text-xs sm:text-sm text-neutral-600 mb-4 sm:mb-6">
                 Una vez que elimines tu cuenta, no hay vuelta atrás. Por favor,
                 ten cuidado.
               </p>
@@ -319,17 +319,17 @@ const Profile = () => {
                 <Button
                   variant="secondary"
                   onClick={() => setShowDeleteConfirm(true)}
-                  className="bg-red-50 text-red-700 border-red-300 hover:bg-red-100"
+                  className="bg-red-50 text-red-700 border-red-300 hover:bg-red-100 w-full sm:w-auto"
                 >
                   Eliminar mi cuenta
                 </Button>
               ) : (
-                <div className="space-y-4">
-                  <div className="p-4 bg-red-50 rounded-xl">
-                    <h3 className="font-semibold text-red-900 mb-2">
+                <div className="space-y-3 sm:space-y-4">
+                  <div className="p-3 sm:p-4 bg-red-50 rounded-xl">
+                    <h3 className="text-sm sm:text-base font-semibold text-red-900 mb-2">
                       ⚠️ ¿Estás absolutamente seguro?
                     </h3>
-                    <p className="text-sm text-red-700">
+                    <p className="text-xs sm:text-sm text-red-700">
                       Esta acción no se puede deshacer. Esto eliminará
                       permanentemente tu cuenta y todos tus datos asociados.
                     </p>
@@ -343,11 +343,11 @@ const Profile = () => {
                     placeholder="Tu contraseña"
                     required
                   />
-                  <div className="flex gap-3">
+                  <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
                     <Button
                       onClick={handleDeleteAccount}
                       disabled={isLoading || !deletePassword}
-                      className="bg-red-600 hover:bg-red-700"
+                      className="bg-red-600 hover:bg-red-700 w-full sm:w-auto"
                     >
                       {isLoading ? 'Eliminando...' : 'Sí, eliminar mi cuenta'}
                     </Button>
@@ -359,6 +359,7 @@ const Profile = () => {
                         setError(null);
                       }}
                       disabled={isLoading}
+                      className="w-full sm:w-auto"
                     >
                       Cancelar
                     </Button>
@@ -369,12 +370,12 @@ const Profile = () => {
           )}
 
           {/* Account Info */}
-          <div className="mt-6 p-6 bg-white rounded-2xl shadow-soft">
-            <h3 className="font-semibold text-neutral-700 mb-3">
+          <div className="mt-4 sm:mt-6 p-4 sm:p-6 bg-white rounded-xl sm:rounded-2xl shadow-soft">
+            <h3 className="text-sm sm:text-base font-semibold text-neutral-700 mb-2 sm:mb-3">
               Información de la cuenta:
             </h3>
-            <div className="space-y-2 text-sm text-neutral-600">
-              <p>
+            <div className="space-y-1 sm:space-y-2 text-xs sm:text-sm text-neutral-600">
+              <p className="break-all">
                 <strong>ID:</strong> {user?._id}
               </p>
               <p>

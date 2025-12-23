@@ -175,33 +175,33 @@ body {
     font-size: 0.75rem;
     font-weight: 700;
   }
-  
+
   .calendar-container .rbc-date-cell {
     padding: 6px 4px;
     font-size: 0.75rem;
     font-weight: 600;
   }
-  
+
   .calendar-container .rbc-event {
     padding: 3px 4px;
     font-size: 0.65rem;
     font-weight: 600;
     margin-bottom: 1px;
   }
-  
+
   .calendar-container .rbc-month-row {
     min-height: 120px;
   }
-  
+
   .calendar-container .rbc-row-content {
     min-height: 90px;
   }
-  
+
   /* Mejorar área táctil */
   .calendar-container .rbc-day-bg {
     min-height: 80px;
   }
-  
+
   /* Hacer el badge más pequeño en móvil */
   .calendar-container .rbc-date-cell .badge {
     font-size: 0.65rem;

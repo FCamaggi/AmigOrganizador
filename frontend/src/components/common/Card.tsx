@@ -24,19 +24,17 @@ const Card = ({
   onClick,
 }: CardProps) => {
   const Component = onClick ? 'button' : 'div';
-  
+
   // Manejar variante 'soft' manualmente
-  const softCardClasses = 'bg-neutral-50 border border-neutral-200 rounded-xl shadow-sm hover:shadow transition-all duration-200';
-  const cardClasses = variant === 'soft' ? softCardClasses : getCardClasses(variant);
+  const softCardClasses =
+    'bg-neutral-50 border border-neutral-200 rounded-xl shadow-sm hover:shadow transition-all duration-200';
+  const cardClasses =
+    variant === 'soft' ? softCardClasses : getCardClasses(variant);
 
   return (
     <Component
       onClick={onClick}
-      className={cn(
-        cardClasses,
-        paddingClasses[padding],
-        className
-      )}
+      className={cn(cardClasses, paddingClasses[padding], className)}
     >
       {children}
     </Component>

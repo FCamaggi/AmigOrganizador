@@ -4,7 +4,12 @@ export const authService = {
   /**
    * Registrar nuevo usuario
    */
-  async register(userData: { username: string; email: string; password: string; fullName?: string }) {
+  async register(userData: {
+    username: string;
+    email: string;
+    password: string;
+    fullName?: string;
+  }) {
     const response = await api.post('/auth/register', userData);
     if (response.data.token) {
       localStorage.setItem('token', response.data.token);
@@ -54,5 +59,5 @@ export const authService = {
   getStoredUser() {
     const user = localStorage.getItem('user');
     return user ? JSON.parse(user) : null;
-  }
+  },
 };

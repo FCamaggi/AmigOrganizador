@@ -85,8 +85,12 @@ const CreateGroupModal = ({
             variant="primary"
             loading={loading}
             onClick={(e: any) => {
-              const form = e.target.closest('.modal-content')?.querySelector('form');
-              form?.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+              const form = e.target
+                .closest('.modal-content')
+                ?.querySelector('form');
+              form?.dispatchEvent(
+                new Event('submit', { bubbles: true, cancelable: true })
+              );
             }}
             className="w-full sm:w-auto"
           >
@@ -95,7 +99,10 @@ const CreateGroupModal = ({
         </div>
       }
     >
-      <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6 modal-content">
+      <form
+        onSubmit={handleSubmit}
+        className="space-y-4 sm:space-y-6 modal-content"
+      >
         <Input
           label="Nombre del Grupo"
           type="text"
