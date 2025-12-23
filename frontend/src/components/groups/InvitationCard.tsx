@@ -71,14 +71,14 @@ const InvitationCard = ({ invitation }: InvitationCardProps) => {
   );
 
   return (
-    <div className="bg-white rounded-2xl shadow-soft p-6">
-      <div className="flex justify-between items-start mb-4">
-        <div className="flex-1">
-          <h3 className="text-lg font-bold text-neutral-800 mb-1">
+    <div className="bg-white rounded-xl sm:rounded-2xl shadow-soft p-4 sm:p-6">
+      <div className="flex justify-between items-start mb-3 sm:mb-4 gap-2">
+        <div className="flex-1 min-w-0">
+          <h3 className="text-base sm:text-lg font-bold text-neutral-800 mb-1 truncate">
             {invitation.group.name}
           </h3>
           {invitation.group.description && (
-            <p className="text-sm text-neutral-600 line-clamp-2">
+            <p className="text-xs sm:text-sm text-neutral-600 line-clamp-2">
               {invitation.group.description}
             </p>
           )}
@@ -86,26 +86,26 @@ const InvitationCard = ({ invitation }: InvitationCardProps) => {
         {getStatusBadge()}
       </div>
 
-      <div className="space-y-2 mb-4">
-        <div className="flex items-center gap-2 text-sm text-neutral-600">
-          <span className="text-lg">👤</span>
-          <span>
+      <div className="space-y-1.5 sm:space-y-2 mb-3 sm:mb-4">
+        <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-neutral-600">
+          <span className="text-base sm:text-lg">👤</span>
+          <span className="truncate">
             Invitado por{' '}
             <strong>
               {invitation.invitedBy.fullName || invitation.invitedBy.username}
             </strong>
           </span>
         </div>
-        <div className="flex items-center gap-2 text-sm text-neutral-600">
-          <span className="text-lg">👥</span>
+        <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-neutral-600">
+          <span className="text-base sm:text-lg">👥</span>
           <span>
             {invitation.group.memberCount}{' '}
             {invitation.group.memberCount === 1 ? 'miembro' : 'miembros'}
           </span>
         </div>
         {isPending && !isExpired && (
-          <div className="flex items-center gap-2 text-sm text-neutral-600">
-            <span className="text-lg">⏰</span>
+          <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-neutral-600">
+            <span className="text-base sm:text-lg">⏰</span>
             <span>
               Expira en {daysUntilExpiration}{' '}
               {daysUntilExpiration === 1 ? 'día' : 'días'}
@@ -114,13 +114,13 @@ const InvitationCard = ({ invitation }: InvitationCardProps) => {
         )}
       </div>
 
-      <div className="pt-4 border-t border-neutral-200">
-        <div className="flex items-center justify-between">
+      <div className="pt-3 sm:pt-4 border-t border-neutral-200">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0">
           <div className="flex items-center gap-2">
             <span className="text-xs font-semibold text-neutral-500">
               CÓDIGO:
             </span>
-            <code className="px-3 py-1 bg-neutral-100 text-primary-600 font-mono font-bold rounded-lg">
+            <code className="px-2 sm:px-3 py-1 bg-neutral-100 text-primary-600 font-mono font-bold text-xs sm:text-sm rounded-lg">
               {invitation.code}
             </code>
           </div>
@@ -134,11 +134,11 @@ const InvitationCard = ({ invitation }: InvitationCardProps) => {
       </div>
 
       {isPending && !isExpired && (
-        <div className="flex gap-3 mt-4">
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 mt-4">
           <Button
             onClick={handleAccept}
             disabled={isLoading}
-            className="flex-1"
+            className="w-full sm:flex-1 min-h-[44px]"
           >
             {isLoading ? 'Aceptando...' : 'Aceptar'}
           </Button>
@@ -146,7 +146,7 @@ const InvitationCard = ({ invitation }: InvitationCardProps) => {
             onClick={handleReject}
             variant="secondary"
             disabled={isLoading}
-            className="flex-1"
+            className="w-full sm:flex-1 min-h-[44px]"
           >
             Rechazar
           </Button>

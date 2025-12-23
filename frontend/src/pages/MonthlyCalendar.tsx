@@ -136,14 +136,14 @@ const MonthlyCalendar = () => {
   };
 
   return (
-    <div className="p-4 md:p-6 space-y-6">
+    <div className="px-3 sm:px-4 md:px-6 py-4 sm:py-6 space-y-4 sm:space-y-6">
       <Card variant="default" padding="lg">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
           <div>
-            <h1 className="text-3xl font-bold text-neutral-900">
+            <h1 className="text-2xl sm:text-3xl font-bold text-neutral-900">
               Calendario de Eventos
             </h1>
-            <p className="text-neutral-600 mt-1">
+            <p className="text-xs sm:text-sm text-neutral-600 mt-1">
               Vista completa de eventos de tus grupos
             </p>
           </div>
@@ -153,6 +153,7 @@ const MonthlyCalendar = () => {
               variant={view === 'month' ? 'primary' : 'outline'}
               size="sm"
               onClick={() => setView('month')}
+              className="flex-1 sm:flex-none min-h-[44px]"
             >
               Mes
             </Button>
@@ -160,6 +161,7 @@ const MonthlyCalendar = () => {
               variant={view === 'week' ? 'primary' : 'outline'}
               size="sm"
               onClick={() => setView('week')}
+              className="flex-1 sm:flex-none min-h-[44px]"
             >
               Semana
             </Button>
@@ -167,6 +169,7 @@ const MonthlyCalendar = () => {
               variant={view === 'day' ? 'primary' : 'outline'}
               size="sm"
               onClick={() => setView('day')}
+              className="flex-1 sm:flex-none min-h-[44px]"
             >
               Día
             </Button>
@@ -174,8 +177,8 @@ const MonthlyCalendar = () => {
         </div>
 
         <div
-          className="bg-white rounded-xl shadow-sm overflow-hidden"
-          style={{ height: '600px' }}
+          className="bg-white rounded-lg sm:rounded-xl shadow-sm overflow-hidden"
+          style={{ height: view === 'month' ? '500px' : view === 'week' ? '450px' : '400px' }}
         >
           <Calendar
             localizer={localizer}
@@ -210,12 +213,12 @@ const MonthlyCalendar = () => {
           />
         </div>
 
-        <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="mt-4 sm:mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
           <Card variant="default" padding="md">
-            <div className="flex items-center gap-3">
-              <div className="w-4 h-4 rounded-full bg-blue-500"></div>
-              <div>
-                <p className="text-sm font-medium text-neutral-900">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-blue-500 flex-shrink-0"></div>
+              <div className="min-w-0">
+                <p className="text-xs sm:text-sm font-medium text-neutral-900 truncate">
                   Eventos entre semana
                 </p>
                 <p className="text-xs text-neutral-600">Lunes a Viernes</p>
@@ -224,10 +227,10 @@ const MonthlyCalendar = () => {
           </Card>
 
           <Card variant="default" padding="md">
-            <div className="flex items-center gap-3">
-              <div className="w-4 h-4 rounded-full bg-purple-600"></div>
-              <div>
-                <p className="text-sm font-medium text-neutral-900">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-purple-600 flex-shrink-0"></div>
+              <div className="min-w-0">
+                <p className="text-xs sm:text-sm font-medium text-neutral-900 truncate">
                   Eventos de fin de semana
                 </p>
                 <p className="text-xs text-neutral-600">Sábados y Domingos</p>
@@ -236,10 +239,10 @@ const MonthlyCalendar = () => {
           </Card>
 
           <Card variant="default" padding="md">
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3">
               <Badge variant="primary">{events.length}</Badge>
-              <div>
-                <p className="text-sm font-medium text-neutral-900">
+              <div className="min-w-0">
+                <p className="text-xs sm:text-sm font-medium text-neutral-900 truncate">
                   Total de eventos
                 </p>
                 <p className="text-xs text-neutral-600">Este mes</p>
