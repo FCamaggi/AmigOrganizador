@@ -18,13 +18,13 @@ interface TimeSlotPickerProps {
 
 // Plantillas predefinidas para slots comunes
 const QUICK_PRESETS = [
-  { label: 'Todo el día', start: '00:00', end: '23:59' },
-  { label: 'Turno Día (Enfermería)', start: '08:00', end: '20:00' },
-  { label: 'Turno Noche (Enfermería)', start: '20:00', end: '08:00' },
-  { label: 'Turno 24h', start: '08:00', end: '08:00' },
-  { label: 'Tarde', start: '13:00', end: '22:00' },
-  { label: 'Mañana', start: '08:00', end: '13:00' },
-  { label: 'Oficina', start: '09:00', end: '17:00' },
+  { label: 'Todo el día', start: '00:00', end: '23:59', color: '#6366f1' },
+  { label: 'Turno Día (Enfermería)', start: '08:00', end: '20:00', color: '#3b82f6' },
+  { label: 'Turno Noche (Enfermería)', start: '20:00', end: '08:00', color: '#1e40af' },
+  { label: 'Turno 24h', start: '08:00', end: '08:00', color: '#0f172a' },
+  { label: 'Tarde', start: '13:00', end: '22:00', color: '#f59e0b' },
+  { label: 'Mañana', start: '08:00', end: '13:00', color: '#10b981' },
+  { label: 'Oficina', start: '09:00', end: '17:00', color: '#6366f1' },
 ];
 
 // Generar opciones de hora cada 15 minutos
@@ -96,7 +96,11 @@ const TimeSlotPicker = ({
 
   const handleAddSlot = () => {
     setError('');
-    const newSlot: TimeSlot = { start: '09:00', end: '17:00' };
+    const newSlot: TimeSlot = { 
+      start: '09:00', 
+      end: '17:00',
+      color: '#6366f1' // Color por defecto
+    };
     onChange([...slots, newSlot]);
   };
 
@@ -123,6 +127,11 @@ const TimeSlotPicker = ({
       if (validationError) {
         setError(validationError);
       }
+    }
+
+    // Asegurar que siempre tenga color
+    if (!newSlots[index].color) {
+      newSlots[index].color = '#6366f1';
     }
 
     onChange(newSlots);

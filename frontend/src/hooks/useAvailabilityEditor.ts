@@ -14,8 +14,16 @@ interface DayAvailability {
 export const useAvailabilityEditor = (
   initialAvailability?: DayAvailability
 ) => {
+  // Asegurar que todos los slots tengan color por defecto
+  const normalizeSlots = (slots: TimeSlot[]): TimeSlot[] => {
+    return slots.map(slot => ({
+      ...slot,
+      color: slot.color || '#6366f1' // Color por defecto si no existe
+    }));
+  };
+
   const [slots, setSlots] = useState<TimeSlot[]>(
-    initialAvailability?.slots || []
+    normalizeSlots(initialAvailability?.slots || [])
   );
   const [note, setNote] = useState<string>(initialAvailability?.note || '');
   const [isDirty, setIsDirty] = useState(false);
@@ -72,7 +80,7 @@ export const useAvailabilityEditor = (
 
   // Restablecer a valores iniciales
   const reset = useCallback(() => {
-    setSlots(initialAvailability?.slots || []);
+    setSlots(normalizeSlots(initialAvailability?.slots || []));
     setNote(initialAvailability?.note || '');
     setIsDirty(false);
   }, [initialAvailability]);
