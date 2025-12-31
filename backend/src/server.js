@@ -30,15 +30,19 @@ app.use(cors({
     origin: function (origin, callback) {
         // Permitir requests sin origen (como mobile apps o curl)
         if (!origin) return callback(null, true);
-        
-        const allowedOrigins = [
-            config.frontendUrl,
-            'http://localhost:5173',
-            'https://localhost:5173',
-            'http://127.0.0.1:5173',
-            'https://127.0.0.1:5173'
-        ];
-        
+
+        const allowedOrigins = [config.frontendUrl];
+
+        // En desarrollo, permitir variantes de localhost
+        if (config.nodeEnv === 'development') {
+            allowedOrigins.push(
+                'http://localhost:5173',
+                'https://localhost:5173',
+                'http://127.0.0.1:5173',
+                'https://127.0.0.1:5173'
+            );
+        }
+
         if (allowedOrigins.indexOf(origin) !== -1) {
             callback(null, true);
         } else {
