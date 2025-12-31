@@ -27,7 +27,24 @@ app.use(helmet());
 
 // CORS configurado para el frontend
 app.use(cors({
-    origin: config.frontendUrl,
+    origin: function (origin, callback) {
+        // Permitir requests sin origen (como mobile apps o curl)
+        if (!origin) return callback(null, true);
+        
+        const allowedOrigins = [
+            config.frontendUrl,
+            'http://localhost:5173',
+            'https://localhost:5173',
+            'http://127.0.0.1:5173',
+            'https://127.0.0.1:5173'
+        ];
+        
+        if (allowedOrigins.indexOf(origin) !== -1) {
+            callback(null, true);
+        } else {
+            callback(new Error('No permitido por CORS'));
+        }
+    },
     credentials: true
 }));
 

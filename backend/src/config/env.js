@@ -7,7 +7,7 @@ export const config = {
     mongodbUri: process.env.MONGODB_URI,
     jwtSecret: process.env.JWT_SECRET,
     jwtExpiresIn: process.env.JWT_EXPIRES_IN || '2h',
-    frontendUrl: process.env.FRONTEND_URL || 'http://localhost:5174'
+    frontendUrl: process.env.FRONTEND_URL || 'http://localhost:5173'
 };
 
 // Validar variables de entorno críticas

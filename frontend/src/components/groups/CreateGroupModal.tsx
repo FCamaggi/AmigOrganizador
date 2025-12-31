@@ -69,39 +69,10 @@ const CreateGroupModal = ({
       description="Organiza eventos con tus amigos o colegas"
       size="md"
       headerGradient
-      footer={
-        <div className="flex flex-col-reverse sm:flex-row gap-2 sm:gap-3 justify-end">
-          <Button
-            type="button"
-            onClick={onClose}
-            variant="secondary"
-            disabled={loading}
-            className="w-full sm:w-auto"
-          >
-            Cancelar
-          </Button>
-          <Button
-            type="submit"
-            variant="primary"
-            loading={loading}
-            onClick={(e: any) => {
-              const form = e.target
-                .closest('.modal-content')
-                ?.querySelector('form');
-              form?.dispatchEvent(
-                new Event('submit', { bubbles: true, cancelable: true })
-              );
-            }}
-            className="w-full sm:w-auto"
-          >
-            Crear Grupo
-          </Button>
-        </div>
-      }
     >
       <form
         onSubmit={handleSubmit}
-        className="space-y-4 sm:space-y-6 modal-content"
+        className="space-y-4 sm:space-y-6"
       >
         <Input
           label="Nombre del Grupo"
@@ -149,6 +120,26 @@ const CreateGroupModal = ({
               </p>
             </div>
           </label>
+        </div>
+
+        <div className="flex flex-col-reverse sm:flex-row gap-2 sm:gap-3 justify-end pt-4">
+          <Button
+            type="button"
+            onClick={onClose}
+            variant="secondary"
+            disabled={loading}
+            className="w-full sm:w-auto"
+          >
+            Cancelar
+          </Button>
+          <Button
+            type="submit"
+            variant="primary"
+            loading={loading}
+            className="w-full sm:w-auto"
+          >
+            Crear Grupo
+          </Button>
         </div>
       </form>
     </Modal>
