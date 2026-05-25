@@ -115,14 +115,12 @@ const TimeSlotPicker = ({
     value: string
   ) => {
     setError('');
-    const newSlots = [...slots];
+    const newSlots = slots.map((slot, i) =>
+      i === index ? { ...slot, [field]: value } : slot
+    );
 
-    if (field === 'title' || field === 'color') {
-      newSlots[index][field] = value;
-    } else {
-      newSlots[index][field] = value;
-
-      // Validar el slot modificado solo si cambiaron las horas
+    // Validar el slot modificado solo si cambiaron las horas
+    if (field === 'start' || field === 'end') {
       const validationError = validateSlot(newSlots[index]);
       if (validationError) {
         setError(validationError);
@@ -131,7 +129,7 @@ const TimeSlotPicker = ({
 
     // Asegurar que siempre tenga color
     if (!newSlots[index].color) {
-      newSlots[index].color = '#6366f1';
+      newSlots[index] = { ...newSlots[index], color: '#6366f1' };
     }
 
     onChange(newSlots);

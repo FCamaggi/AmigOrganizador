@@ -79,6 +79,8 @@ const QuickScheduleView = ({ onApply }: QuickScheduleViewProps) => {
   const [showCustomModal, setShowCustomModal] = useState(false);
   const [customStartTime, setCustomStartTime] = useState('09:00');
   const [customEndTime, setCustomEndTime] = useState('17:00');
+  const [customTitle, setCustomTitle] = useState('');
+  const [customColor, setCustomColor] = useState('#6366f1');
 
   const handleTemplateSelect = (templateKey: string) => {
     setSelectedTemplate(templateKey);
@@ -111,7 +113,12 @@ const QuickScheduleView = ({ onApply }: QuickScheduleViewProps) => {
     // Actualizar todos los días seleccionados con el horario personalizado
     const newTemplate = { ...customTemplate };
     selectedDays.forEach((dayKey) => {
-      newTemplate[dayKey] = [{ start: customStartTime, end: customEndTime }];
+      newTemplate[dayKey] = [{
+        start: customStartTime,
+        end: customEndTime,
+        title: customTitle || undefined,
+        color: customColor,
+      }];
     });
     setCustomTemplate(newTemplate);
     setSelectedTemplate('custom');
@@ -131,21 +138,15 @@ const QuickScheduleView = ({ onApply }: QuickScheduleViewProps) => {
       const month = now.getMonth() + 1;
       const daysInMonth = new Date(year, month, 0).getDate();
 
-      const updates: Promise<void>[] = [];
-
       for (let day = 1; day <= daysInMonth; day++) {
         const date = new Date(year, month - 1, day);
         const dayOfWeek = date.getDay();
         const dayKey = DAYS_OF_WEEK[dayOfWeek === 0 ? 6 : dayOfWeek - 1].key;
 
         if (selectedDays.has(dayKey) && customTemplate[dayKey]) {
-          updates.push(
-            updateDayAvailability(day, customTemplate[dayKey], undefined)
-          );
+          await updateDayAvailability(day, customTemplate[dayKey], undefined);
         }
       }
-
-      await Promise.all(updates);
       alert('✅ Plantilla aplicada con éxito');
       if (onApply) onApply();
     } catch (error) {
@@ -382,31 +383,62 @@ const QuickScheduleView = ({ onApply }: QuickScheduleViewProps) => {
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-neutral-700 mb-2">
-                  Hora de Inicio
+                  Título (opcional)
                 </label>
                 <input
-                  type="time"
-                  value={customStartTime}
-                  onChange={(e) => setCustomStartTime(e.target.value)}
-                  className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-neutral-700 mb-2">
-                  Hora de Fin
-                </label>
-                <input
-                  type="time"
-                  value={customEndTime}
-                  onChange={(e) => setCustomEndTime(e.target.value)}
+                  type="text"
+                  value={customTitle}
+                  onChange={(e) => setCustomTitle(e.target.value)}
+                  placeholder="Ej: Trabajo, Clase, Reunión..."
+                  maxLength={100}
                   className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                 />
               </div>
 
+              <div className="flex gap-4">
+                <div className="flex-1">
+                  <label className="block text-sm font-medium text-neutral-700 mb-2">
+                    Hora de Inicio
+                  </label>
+                  <input
+                    type="time"
+                    value={customStartTime}
+                    onChange={(e) => setCustomStartTime(e.target.value)}
+                    className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  />
+                </div>
+
+                <div className="flex-1">
+                  <label className="block text-sm font-medium text-neutral-700 mb-2">
+                    Hora de Fin
+                  </label>
+                  <input
+                    type="time"
+                    value={customEndTime}
+                    onChange={(e) => setCustomEndTime(e.target.value)}
+                    className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-neutral-700 mb-2">
+                  Color
+                </label>
+                <div className="flex items-center gap-3">
+                  <input
+                    type="color"
+                    value={customColor}
+                    onChange={(e) => setCustomColor(e.target.value)}
+                    className="w-16 h-10 border border-neutral-300 rounded-lg cursor-pointer"
+                  />
+                  <span className="text-sm text-neutral-500">{customColor}</span>
+                </div>
+              </div>
+
               <div className="bg-primary-50 border border-primary-200 rounded-lg p-3">
                 <p className="text-sm text-primary-800">
-                  <strong>Vista previa:</strong> {customStartTime} - {customEndTime}
+                  <strong>Vista previa:</strong>{customTitle ? ` ${customTitle} —` : ''} {customStartTime} - {customEndTime}
                 </p>
                 <p className="text-xs text-primary-600 mt-1">
                   Esta plantilla se aplicará a los días que selecciones
