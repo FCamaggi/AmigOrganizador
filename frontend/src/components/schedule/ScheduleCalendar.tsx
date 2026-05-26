@@ -37,6 +37,12 @@ interface CalendarEvent {
     note?: string;
     color?: string;
     isMoreIndicator?: boolean;
+    slot?: {
+      start: string;
+      end: string;
+      title?: string;
+      color?: string;
+    };
   };
 }
 
@@ -95,8 +101,9 @@ const ScheduleCalendar = ({ onSelectDay }: ScheduleCalendarProps) => {
         const remainingCount = dayAvail.slots.length - 3;
 
         visibleSlots.forEach((slot) => {
+          const timeLabel = `${slot.start}-${slot.end}`;
           allEvents.push({
-            title: slot.title || `${slot.start}-${slot.end}`,
+            title: slot.title ? `${slot.title} ${timeLabel}` : timeLabel,
             start: date,
             end: date,
             resource: {
@@ -104,6 +111,7 @@ const ScheduleCalendar = ({ onSelectDay }: ScheduleCalendarProps) => {
               slots: dayAvail.slots,
               note: dayAvail.note,
               color: slot.color,
+              slot,
             },
           });
         });
@@ -189,6 +197,28 @@ const ScheduleCalendar = ({ onSelectDay }: ScheduleCalendarProps) => {
         marginBottom: '2px',
       },
     };
+  };
+
+  const CustomEvent = ({ event }: { event: CalendarEvent }) => {
+    if (event.resource.isMoreIndicator) {
+      return <span>{event.title}</span>;
+    }
+
+    const slot = event.resource.slot;
+    if (!slot) {
+      return <span>{event.title}</span>;
+    }
+
+    return (
+      <span className="block leading-tight">
+        {slot.title && (
+          <span className="block truncate font-semibold">{slot.title}</span>
+        )}
+        <span className="block truncate text-[0.68rem] opacity-95">
+          {slot.start}-{slot.end}
+        </span>
+      </span>
+    );
   };
 
   const CustomToolbar = (toolbar: ToolbarProps<CalendarEvent, object>) => {
@@ -348,6 +378,7 @@ const ScheduleCalendar = ({ onSelectDay }: ScheduleCalendarProps) => {
           components={{
             toolbar: CustomToolbar,
             dateCellWrapper: CustomDateCell,
+            event: CustomEvent,
           }}
           views={['month']}
           defaultView="month"
