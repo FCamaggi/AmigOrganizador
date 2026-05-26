@@ -59,6 +59,30 @@ const groupSchema = new mongoose.Schema({
             default: 2,
             min: 1,
             max: 24
+        },
+        availability: {
+            usefulStart: {
+                type: String,
+                default: '08:00',
+                match: /^([01]\d|2[0-3]):([0-5]\d)$/
+            },
+            usefulEnd: {
+                type: String,
+                default: '22:00',
+                match: /^([01]\d|2[0-3]):([0-5]\d)$/
+            },
+            minimumBlockMinutes: {
+                type: Number,
+                default: 120,
+                min: 30,
+                max: 1440
+            },
+            alternativeThreshold: {
+                type: Number,
+                default: 80,
+                min: 1,
+                max: 100
+            }
         }
     }
 }, {

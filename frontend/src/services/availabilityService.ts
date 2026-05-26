@@ -1,68 +1,50 @@
 import api from './api';
-import type { TimeSlot } from './scheduleService';
 
-export type AnalysisMode = 'daily' | 'hourly' | 'custom';
-
-export interface EnhancedTimeSlot extends TimeSlot {
-  hours?: number;
-  availableCount?: number;
-  memberCount?: number;
-  avgPercentage?: number;
+export interface AvailabilitySettings {
+  usefulStart: string;
+  usefulEnd: string;
+  minimumBlockMinutes: number;
+  alternativeThreshold: number;
 }
 
-export interface FreeBlock {
-  start: string;
-  end: string;
-  hours: number;
-}
-
-export interface MemberAvailability {
+export interface AvailabilityMember {
   userId: string;
   username: string;
   fullName?: string;
-  slots: TimeSlot[];
-  note?: string;
-  hoursFree?: number;
-  freeBlocks?: FreeBlock[];
-  percentageFree?: number;
-  maxFreeBlock?: number;
-  qualifies?: boolean;
 }
 
-export interface CalculationDetails {
-  mode: string;
-  formula: string;
-  calculation?: string;
-  totalMembers: number;
-  membersWithoutEvents?: number;
-  membersWithEvents?: number;
-  membersQualifying?: number;
-  membersPartial?: number;
-  minHoursRequired?: number;
-  hourlyPercentages?: Array<{
-    hour: number;
-    percentage: number;
-    availableCount: number;
-  }>;
-  allMembers?: MemberAvailability[];
+export interface AvailabilityWindow {
+  day: number;
+  date: string;
+  start: string;
+  end: string;
+  durationMinutes: number;
+  availabilityPercentage: number;
+  availableMembers: AvailabilityMember[];
+  unavailableMembers: AvailabilityMember[];
+  type?: 'perfect' | 'alternative';
+}
+
+export interface MemberDaySummary extends AvailabilityMember {
+  busyBlocks: Array<{ start: string; end: string }>;
+  freeBlocks: Array<{ start: string; end: string; durationMinutes: number }>;
 }
 
 export interface DayAvailability {
   day: number;
-  availableMembers: MemberAvailability[];
-  unavailableMembers: MemberAvailability[];
-  availabilityPercentage: number;
-  timeSlots: EnhancedTimeSlot[];
-  minHoursRequired?: number;
-  calculationDetails?: CalculationDetails;
+  date: string;
+  bestWindow: AvailabilityWindow | null;
+  perfectWindows: AvailabilityWindow[];
+  alternativeWindows: AvailabilityWindow[];
+  availabilityScore: number;
+  memberSummaries: MemberDaySummary[];
 }
 
 export interface GroupAvailabilityStats {
   totalDays: number;
-  daysWithFullAvailability: number;
-  daysWithPartialAvailability: number;
-  daysWithNoAvailability: number;
-  averageAvailability: number;
+  daysWithPerfectOption: number;
+  daysWithStrongAlternative: number;
+  totalRecommendations: number;
   memberCount: number;
   schedulesSubmitted: number;
 }
@@ -72,23 +54,21 @@ export interface GroupAvailability {
   groupName: string;
   month: number;
   year: number;
+  settings: AvailabilitySettings;
+  recommendations: AvailabilityWindow[];
+  days: DayAvailability[];
   availability: DayAvailability[];
   stats: GroupAvailabilityStats;
 }
 
 export const availabilityService = {
-  /**
-   * Obtener disponibilidad grupal para un mes específico
-   */
   async getGroupAvailability(
     groupId: string,
     month: number,
-    year: number,
-    mode: AnalysisMode = 'daily',
-    minHours?: number
+    year: number
   ): Promise<GroupAvailability> {
     const response = await api.get(`/availability/group/${groupId}`, {
-      params: { month, year, mode, minHours },
+      params: { month, year },
     });
     return response.data.data;
   },

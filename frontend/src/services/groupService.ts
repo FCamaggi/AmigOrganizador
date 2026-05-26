@@ -27,9 +27,18 @@ export interface Group {
   settings: {
     isPrivate: boolean;
     allowMemberInvites: boolean;
+    minimumAvailabilityHours?: number;
+    availability?: AvailabilitySettings;
   };
   createdAt: string;
   updatedAt: string;
+}
+
+export interface AvailabilitySettings {
+  usefulStart: string;
+  usefulEnd: string;
+  minimumBlockMinutes: number;
+  alternativeThreshold: number;
 }
 
 export interface CreateGroupData {
@@ -44,6 +53,8 @@ export interface UpdateGroupData {
   isPrivate?: boolean;
   allowMemberInvites?: boolean;
 }
+
+export type UpdateAvailabilitySettingsData = AvailabilitySettings;
 
 export const groupService = {
   /**
@@ -83,6 +94,17 @@ export const groupService = {
    */
   async updateGroup(groupId: string, data: UpdateGroupData): Promise<Group> {
     const response = await api.put(`/groups/${groupId}`, data);
+    return response.data.data;
+  },
+
+  async updateAvailabilitySettings(
+    groupId: string,
+    data: UpdateAvailabilitySettingsData
+  ): Promise<Group> {
+    const response = await api.patch(
+      `/groups/${groupId}/availability-settings`,
+      data
+    );
     return response.data.data;
   },
 

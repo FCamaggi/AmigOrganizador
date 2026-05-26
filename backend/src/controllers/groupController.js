@@ -237,6 +237,105 @@ export const updateGroup = async (req, res) => {
 };
 
 /**
+ * Actualizar criterios de disponibilidad del grupo
+ * PATCH /api/groups/:id/availability-settings
+ */
+export const updateAvailabilitySettings = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const {
+            usefulStart,
+            usefulEnd,
+            minimumBlockMinutes,
+            alternativeThreshold
+        } = req.body;
+        const userId = req.userId;
+
+        const group = await Group.findById(id)
+            .populate('creator', 'username email fullName')
+            .populate('members.user', 'username email fullName');
+
+        if (!group) {
+            return res.status(404).json({
+                success: false,
+                message: 'Grupo no encontrado'
+            });
+        }
+
+        const isMember = group.members.some(member => {
+            const memberId = member.user._id ? member.user._id.toString() : member.user.toString();
+            return memberId === userId.toString();
+        });
+
+        if (!isMember) {
+            return res.status(403).json({
+                success: false,
+                message: 'No tienes acceso a este grupo'
+            });
+        }
+
+        const timeRegex = /^([01]\d|2[0-3]):([0-5]\d)$/;
+        if (!timeRegex.test(usefulStart) || !timeRegex.test(usefulEnd)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Horario util invalido. Use HH:MM'
+            });
+        }
+
+        const [startHour, startMinute] = usefulStart.split(':').map(Number);
+        const [endHour, endMinute] = usefulEnd.split(':').map(Number);
+        const startMinutes = startHour * 60 + startMinute;
+        const endMinutes = endHour * 60 + endMinute;
+
+        if (endMinutes <= startMinutes) {
+            return res.status(400).json({
+                success: false,
+                message: 'La hora final util debe ser posterior a la hora inicial'
+            });
+        }
+
+        const parsedMinimum = Number(minimumBlockMinutes);
+        const parsedThreshold = Number(alternativeThreshold);
+
+        if (!Number.isFinite(parsedMinimum) || parsedMinimum < 30 || parsedMinimum > 1440) {
+            return res.status(400).json({
+                success: false,
+                message: 'La duracion minima debe estar entre 30 y 1440 minutos'
+            });
+        }
+
+        if (!Number.isFinite(parsedThreshold) || parsedThreshold < 1 || parsedThreshold > 100) {
+            return res.status(400).json({
+                success: false,
+                message: 'El umbral de alternativa debe estar entre 1 y 100'
+            });
+        }
+
+        group.settings.availability = {
+            usefulStart,
+            usefulEnd,
+            minimumBlockMinutes: parsedMinimum,
+            alternativeThreshold: parsedThreshold
+        };
+
+        group.settings.minimumAvailabilityHours = Math.max(1, Math.round(parsedMinimum / 60));
+
+        await group.save();
+
+        res.json({
+            success: true,
+            data: group
+        });
+    } catch (error) {
+        console.error('Error al actualizar criterios de disponibilidad:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error al actualizar criterios de disponibilidad'
+        });
+    }
+};
+
+/**
  * Eliminar grupo
  * DELETE /api/groups/:id
  */

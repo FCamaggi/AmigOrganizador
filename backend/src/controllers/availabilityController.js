@@ -1,24 +1,295 @@
 import Schedule from '../models/Schedule.js';
 import Group from '../models/Group.js';
 import {
+    minutesToTime,
     slotBusyBlocksForDay,
-    slotCarriesIntoNextDay
+    timeToMinutes
 } from '../utils/timeSlots.js';
 
-/**
- * Obtener disponibilidad grupal para un mes específico
- * Calcula la disponibilidad común entre todos los miembros del grupo
- * Soporta 3 modos de análisis:
- * - daily: Día completo (sin eventos = disponible)
- * - hourly: Análisis hora a hora con intersecciones
- * - custom: Requiere mínimo X horas seguidas
- */
+const DEFAULT_SETTINGS = {
+    usefulStart: '08:00',
+    usefulEnd: '22:00',
+    minimumBlockMinutes: 120,
+    alternativeThreshold: 80
+};
+
+const clampBlock = (block, start, end) => ({
+    start: Math.max(block.start, start),
+    end: Math.min(block.end, end)
+});
+
+const mergeBlocks = (blocks) => {
+    const sorted = blocks
+        .filter(block => block.end > block.start)
+        .sort((a, b) => a.start - b.start);
+
+    const merged = [];
+    sorted.forEach(block => {
+        const last = merged[merged.length - 1];
+        if (!last || last.end < block.start) {
+            merged.push({ ...block });
+        } else {
+            last.end = Math.max(last.end, block.end);
+        }
+    });
+
+    return merged;
+};
+
+const getMemberId = (member) => member.user._id.toString();
+
+const memberInfoFromSchedule = (schedule) => ({
+    userId: schedule.user._id,
+    username: schedule.user.username || schedule.user.email,
+    fullName: schedule.user.fullName
+});
+
+const getEffectiveSettings = (group) => ({
+    ...DEFAULT_SETTINGS,
+    ...(group.settings?.availability || {})
+});
+
+const getPreviousDayAvailability = (schedule, day, previousSchedules) => {
+    if (day > 1) {
+        return schedule.availability.find(availability => availability.day === day - 1) || null;
+    }
+
+    const scheduleUserId = schedule.user._id
+        ? schedule.user._id.toString()
+        : schedule.user.toString();
+    const previousSchedule = previousSchedules.find(
+        item => item.user.toString() === scheduleUserId
+    );
+
+    if (!previousSchedule) return null;
+
+    const previousMonthLastDay = new Date(
+        previousSchedule.year,
+        previousSchedule.month,
+        0
+    ).getDate();
+
+    return previousSchedule.availability.find(
+        availability => availability.day === previousMonthLastDay
+    ) || null;
+};
+
+const getBusyBlocksForDay = (schedule, day, previousSchedules, usefulStart, usefulEnd) => {
+    const dayAvailability = schedule.availability.find(availability => availability.day === day);
+    const previousAvailability = getPreviousDayAvailability(schedule, day, previousSchedules);
+    const blocks = [];
+
+    if (previousAvailability?.slots?.length) {
+        previousAvailability.slots.forEach(slot => {
+            slotBusyBlocksForDay(slot, 'previous').forEach(block => {
+                blocks.push(clampBlock(block, usefulStart, usefulEnd));
+            });
+        });
+    }
+
+    if (dayAvailability?.slots?.length) {
+        dayAvailability.slots.forEach(slot => {
+            slotBusyBlocksForDay(slot, 'same').forEach(block => {
+                blocks.push(clampBlock(block, usefulStart, usefulEnd));
+            });
+        });
+    }
+
+    return mergeBlocks(blocks);
+};
+
+const invertBusyBlocks = (busyBlocks, usefulStart, usefulEnd) => {
+    const freeBlocks = [];
+    let cursor = usefulStart;
+
+    busyBlocks.forEach(block => {
+        if (cursor < block.start) {
+            freeBlocks.push({ start: cursor, end: block.start });
+        }
+        cursor = Math.max(cursor, block.end);
+    });
+
+    if (cursor < usefulEnd) {
+        freeBlocks.push({ start: cursor, end: usefulEnd });
+    }
+
+    return freeBlocks;
+};
+
+const isSegmentInsideBlock = (segment, block) =>
+    segment.start >= block.start && segment.end <= block.end;
+
+const buildWindowsForDay = ({
+    day,
+    date,
+    memberFreeBlocks,
+    groupMembers,
+    memberCount,
+    settings
+}) => {
+    const boundaries = new Set([
+        timeToMinutes(settings.usefulStart),
+        timeToMinutes(settings.usefulEnd)
+    ]);
+
+    memberFreeBlocks.forEach(memberData => {
+        memberData.freeBlocks.forEach(block => {
+            boundaries.add(block.start);
+            boundaries.add(block.end);
+        });
+    });
+
+    const sortedBoundaries = Array.from(boundaries).sort((a, b) => a - b);
+    const rawWindows = [];
+
+    for (let i = 0; i < sortedBoundaries.length - 1; i++) {
+        const segment = {
+            start: sortedBoundaries[i],
+            end: sortedBoundaries[i + 1]
+        };
+
+        if (segment.end <= segment.start) continue;
+
+        const availableMemberIds = memberFreeBlocks
+            .filter(memberData =>
+                memberData.freeBlocks.some(block => isSegmentInsideBlock(segment, block))
+            )
+            .map(memberData => memberData.userId);
+
+        if (availableMemberIds.length === 0) continue;
+
+        const availabilityPercentage = Math.round((availableMemberIds.length / memberCount) * 100);
+        if (availabilityPercentage < settings.alternativeThreshold) continue;
+
+        rawWindows.push({
+            start: segment.start,
+            end: segment.end,
+            availableMemberIds,
+            availabilityPercentage
+        });
+    }
+
+    const mergedWindows = [];
+    rawWindows.forEach(window => {
+        const last = mergedWindows[mergedWindows.length - 1];
+        const sameMembers = last &&
+            last.availabilityPercentage === window.availabilityPercentage &&
+            last.availableMemberIds.join('|') === window.availableMemberIds.join('|') &&
+            last.end === window.start;
+
+        if (sameMembers) {
+            last.end = window.end;
+        } else {
+            mergedWindows.push({ ...window });
+        }
+    });
+
+    const allMemberIds = groupMembers.map(getMemberId);
+
+    return mergedWindows
+        .map(window => {
+            const unavailableMemberIds = allMemberIds.filter(
+                memberId => !window.availableMemberIds.includes(memberId)
+            );
+
+            return {
+                day,
+                date,
+                start: minutesToTime(window.start),
+                end: minutesToTime(window.end),
+                durationMinutes: window.end - window.start,
+                availabilityPercentage: window.availabilityPercentage,
+                availableMembers: groupMembers
+                    .filter(member => window.availableMemberIds.includes(getMemberId(member)))
+                    .map(member => ({
+                        userId: member.user._id,
+                        username: member.user.username || member.user.email,
+                        fullName: member.user.fullName
+                    })),
+                unavailableMembers: groupMembers
+                    .filter(member => unavailableMemberIds.includes(getMemberId(member)))
+                    .map(member => ({
+                        userId: member.user._id,
+                        username: member.user.username || member.user.email,
+                        fullName: member.user.fullName
+                    }))
+            };
+        })
+        .filter(window => window.durationMinutes >= settings.minimumBlockMinutes);
+};
+
+const sortWindows = (a, b) => {
+    if (b.availabilityPercentage !== a.availabilityPercentage) {
+        return b.availabilityPercentage - a.availabilityPercentage;
+    }
+    if (b.durationMinutes !== a.durationMinutes) {
+        return b.durationMinutes - a.durationMinutes;
+    }
+    return timeToMinutes(a.start) - timeToMinutes(b.start);
+};
+
+const buildDaySummary = (day, year, month, schedules, previousSchedules, groupMembers, settings) => {
+    const usefulStart = timeToMinutes(settings.usefulStart);
+    const usefulEnd = timeToMinutes(settings.usefulEnd);
+    const date = new Date(year, month - 1, day).toISOString().slice(0, 10);
+
+    const memberFreeBlocks = schedules.map(schedule => {
+        const busyBlocks = getBusyBlocksForDay(
+            schedule,
+            day,
+            previousSchedules,
+            usefulStart,
+            usefulEnd
+        );
+
+        return {
+            userId: schedule.user._id.toString(),
+            member: memberInfoFromSchedule(schedule),
+            busyBlocks,
+            freeBlocks: invertBusyBlocks(busyBlocks, usefulStart, usefulEnd)
+        };
+    });
+
+    const windows = buildWindowsForDay({
+        day,
+        date,
+        memberFreeBlocks,
+        groupMembers,
+        memberCount: groupMembers.length,
+        settings
+    }).sort(sortWindows);
+
+    const perfectWindows = windows.filter(window => window.availabilityPercentage === 100);
+    const alternativeWindows = windows.filter(window => window.availabilityPercentage < 100);
+    const bestWindow = windows[0] || null;
+
+    return {
+        day,
+        date,
+        bestWindow,
+        perfectWindows,
+        alternativeWindows,
+        availabilityScore: bestWindow?.availabilityPercentage || 0,
+        memberSummaries: memberFreeBlocks.map(memberData => ({
+            ...memberData.member,
+            busyBlocks: memberData.busyBlocks.map(block => ({
+                start: minutesToTime(block.start),
+                end: minutesToTime(block.end)
+            })),
+            freeBlocks: memberData.freeBlocks.map(block => ({
+                start: minutesToTime(block.start),
+                end: minutesToTime(block.end),
+                durationMinutes: block.end - block.start
+            }))
+        }))
+    };
+};
+
 export const getGroupAvailability = async (req, res) => {
     try {
         const { groupId } = req.params;
-        const { month, year, mode = 'daily', minHours = 6 } = req.query;
+        const { month, year } = req.query;
 
-        // Validar parámetros
         if (!month || !year) {
             return res.status(400).json({
                 success: false,
@@ -26,11 +297,10 @@ export const getGroupAvailability = async (req, res) => {
             });
         }
 
-        const analysisMode = mode || 'daily';
-        const minimumHours = parseInt(minHours) || 6;
+        const parsedMonth = parseInt(month);
+        const parsedYear = parseInt(year);
 
-        // Verificar que el grupo existe y el usuario es miembro
-        const group = await Group.findById(groupId).populate('members.user');
+        const group = await Group.findById(groupId).populate('members.user', 'username email fullName');
         if (!group) {
             return res.status(404).json({
                 success: false,
@@ -49,61 +319,60 @@ export const getGroupAvailability = async (req, res) => {
             });
         }
 
-        // Obtener todos los horarios de los miembros para el mes especificado
         const memberIds = group.members.map(member => member.user._id);
 
-        // Crear schedules vacíos para miembros que no tienen uno
         for (const memberId of memberIds) {
-            await Schedule.getOrCreate(memberId, parseInt(year), parseInt(month));
+            await Schedule.getOrCreate(memberId, parsedYear, parsedMonth);
         }
 
         const schedules = await Schedule.find({
             user: { $in: memberIds },
-            month: parseInt(month),
-            year: parseInt(year)
+            month: parsedMonth,
+            year: parsedYear
         }).populate('user', 'username email fullName');
 
-        const previousDate = new Date(parseInt(year), parseInt(month) - 2, 1);
-        const previousYear = previousDate.getFullYear();
-        const previousMonth = previousDate.getMonth() + 1;
+        const previousDate = new Date(parsedYear, parsedMonth - 2, 1);
         const previousSchedules = await Schedule.find({
             user: { $in: memberIds },
-            month: previousMonth,
-            year: previousYear
+            month: previousDate.getMonth() + 1,
+            year: previousDate.getFullYear()
         });
 
-        const daysInMonth = new Date(parseInt(year), parseInt(month), 0).getDate();
-        const memberCount = group.members.length;
+        const settings = getEffectiveSettings(group);
+        const daysInMonth = new Date(parsedYear, parsedMonth, 0).getDate();
+        const days = [];
 
-        let availabilityArray;
-
-        // Seleccionar método de análisis según modo
-        switch (analysisMode) {
-            case 'hourly':
-                availabilityArray = calculateHourlyAvailability(schedules, daysInMonth, memberCount, group.members, previousSchedules);
-                break;
-            case 'custom':
-                availabilityArray = calculateCustomAvailability(schedules, daysInMonth, memberCount, group.members, minimumHours, previousSchedules);
-                break;
-            case 'daily':
-            default:
-                availabilityArray = calculateDailyAvailability(schedules, daysInMonth, memberCount, group.members, previousSchedules);
-                break;
+        for (let day = 1; day <= daysInMonth; day++) {
+            days.push(buildDaySummary(
+                day,
+                parsedYear,
+                parsedMonth,
+                schedules,
+                previousSchedules,
+                group.members,
+                settings
+            ));
         }
 
-        // Calcular estadísticas generales
+        const recommendations = days
+            .flatMap(day => [
+                ...day.perfectWindows.map(window => ({ ...window, type: 'perfect' })),
+                ...day.alternativeWindows.map(window => ({ ...window, type: 'alternative' }))
+            ])
+            .sort((a, b) => {
+                if (a.type !== b.type) return a.type === 'perfect' ? -1 : 1;
+                const quality = sortWindows(a, b);
+                if (quality !== 0) return quality;
+                return new Date(a.date).getTime() - new Date(b.date).getTime();
+            });
+
         const stats = {
             totalDays: daysInMonth,
-            daysWithFullAvailability: availabilityArray.filter(d => d.availabilityPercentage === 100).length,
-            daysWithPartialAvailability: availabilityArray.filter(d => d.availabilityPercentage > 0 && d.availabilityPercentage < 100).length,
-            daysWithNoAvailability: availabilityArray.filter(d => d.availabilityPercentage === 0).length,
-            averageAvailability: Math.round(
-                availabilityArray.reduce((sum, d) => sum + d.availabilityPercentage, 0) / daysInMonth
-            ),
-            memberCount: memberCount,
-            schedulesSubmitted: schedules.length,
-            analysisMode: analysisMode,
-            ...(analysisMode === 'custom' && { minimumHours })
+            daysWithPerfectOption: days.filter(day => day.perfectWindows.length > 0).length,
+            daysWithStrongAlternative: days.filter(day => day.alternativeWindows.length > 0).length,
+            totalRecommendations: recommendations.length,
+            memberCount: group.members.length,
+            schedulesSubmitted: schedules.length
         };
 
         res.status(200).json({
@@ -111,9 +380,12 @@ export const getGroupAvailability = async (req, res) => {
             data: {
                 groupId,
                 groupName: group.name,
-                month: parseInt(month),
-                year: parseInt(year),
-                availability: availabilityArray,
+                month: parsedMonth,
+                year: parsedYear,
+                settings,
+                recommendations,
+                days,
+                availability: days,
                 stats
             }
         });
@@ -125,654 +397,3 @@ export const getGroupAvailability = async (req, res) => {
         });
     }
 };
-
-/**
- * Calcular franjas horarias comunes entre múltiples horarios
- * Encuentra la intersección de slots de tiempo
- */
-function calculateCommonTimeSlots(allSlots) {
-    if (!allSlots || allSlots.length === 0) return [];
-    if (allSlots.length === 1) return allSlots[0];
-
-    // Convertir todos los slots a minutos desde medianoche para facilitar comparación
-    const slotsInMinutes = allSlots.map(slots =>
-        slots.map(slot => ({
-            start: timeToMinutes(slot.start),
-            end: timeToMinutes(slot.end),
-            original: slot
-        }))
-    );
-
-    // Encontrar intersecciones
-    let commonSlots = slotsInMinutes[0];
-
-    for (let i = 1; i < slotsInMinutes.length; i++) {
-        const newCommon = [];
-
-        for (const slot1 of commonSlots) {
-            for (const slot2 of slotsInMinutes[i]) {
-                // Calcular intersección
-                const overlapStart = Math.max(slot1.start, slot2.start);
-                const overlapEnd = Math.min(slot1.end, slot2.end);
-
-                // Si hay intersección válida (al menos 30 minutos)
-                if (overlapEnd - overlapStart >= 30) {
-                    newCommon.push({
-                        start: overlapStart,
-                        end: overlapEnd
-                    });
-                }
-            }
-        }
-
-        commonSlots = newCommon;
-        if (commonSlots.length === 0) break;
-    }
-
-    // Convertir de vuelta a formato HH:MM
-    return commonSlots.map(slot => ({
-        start: minutesToTime(slot.start),
-        end: minutesToTime(slot.end)
-    }));
-}
-
-/**
- * Convertir tiempo HH:MM a minutos desde medianoche
- */
-function timeToMinutes(time) {
-    const [hours, minutes] = time.split(':').map(Number);
-    return hours * 60 + minutes;
-}
-
-/**
- * Convertir minutos desde medianoche a formato HH:MM
- */
-function minutesToTime(minutes) {
-    const hours = Math.floor(minutes / 60);
-    const mins = minutes % 60;
-    return `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`;
-}
-
-function getPreviousDayAvailability(schedule, day, previousSchedules) {
-    if (day > 1) {
-        return schedule.availability.find(a => a.day === day - 1) || null;
-    }
-
-    const scheduleUserId = schedule.user._id ? schedule.user._id.toString() : schedule.user.toString();
-    const previousSchedule = previousSchedules.find(
-        s => s.user.toString() === scheduleUserId
-    );
-
-    if (!previousSchedule) return null;
-
-    const previousMonthLastDay = new Date(
-        previousSchedule.year,
-        previousSchedule.month,
-        0
-    ).getDate();
-
-    return previousSchedule.availability.find(a => a.day === previousMonthLastDay) || null;
-}
-
-function addBusyBlocksFromSlots(target, slots, relation) {
-    slots.forEach(slot => {
-        slotBusyBlocksForDay(slot, relation).forEach(block => {
-            if (block.end > block.start) {
-                target.push(block);
-            }
-        });
-    });
-}
-
-function addBusyHoursFromSlots(target, slots, relation) {
-    slots.forEach(slot => {
-        slotBusyBlocksForDay(slot, relation).forEach(block => {
-            for (let minute = block.start; minute < block.end; minute += 60) {
-                target.add(Math.floor(minute / 60));
-            }
-        });
-    });
-}
-
-/**
- * MODO 1: ANÁLISIS DÍA A DÍA
- * Marca disponible si NO hay eventos (slots) ese día
- * Lógica: Sin eventos = completamente libre = disponible
- */
-function calculateDailyAvailability(schedules, daysInMonth, memberCount, groupMembers, previousSchedules = []) {
-    const availabilityMap = {};
-
-    // Inicializar todos los días
-    for (let day = 1; day <= daysInMonth; day++) {
-        availabilityMap[day] = {
-            day,
-            availableMembers: [],
-            unavailableMembers: [],
-            availabilityPercentage: 0,
-            timeSlots: []
-        };
-    }
-
-    // Procesar cada schedule
-    schedules.forEach(schedule => {
-        for (let day = 1; day <= daysInMonth; day++) {
-            const dayAvailability = schedule.availability.find(a => a.day === day);
-            const prevDayAvailability = getPreviousDayAvailability(schedule, day, previousSchedules);
-            
-            let hasEvents = dayAvailability && dayAvailability.slots && dayAvailability.slots.length > 0;
-            
-            // Verificar si hay turnos del día anterior que cruzan a este día
-            if (!hasEvents && prevDayAvailability && prevDayAvailability.slots && prevDayAvailability.slots.length > 0) {
-                // Revisar si algún slot del día anterior cruza medianoche
-                hasEvents = prevDayAvailability.slots.some(slotCarriesIntoNextDay);
-            }
-
-            const memberInfo = {
-                userId: schedule.user._id,
-                username: schedule.user.username || schedule.user.email,
-                fullName: schedule.user.fullName,
-                slots: dayAvailability?.slots || [],
-                note: dayAvailability?.note
-            };
-
-            if (!hasEvents) {
-                availabilityMap[day].availableMembers.push(memberInfo);
-            }
-        }
-    });
-
-    // Calcular porcentajes y miembros no disponibles
-    Object.keys(availabilityMap).forEach(day => {
-        const dayData = availabilityMap[day];
-        const availableIds = dayData.availableMembers.map(m => m.userId.toString());
-
-        dayData.unavailableMembers = groupMembers
-            .filter(member => !availableIds.includes(member.user._id.toString()))
-            .map(member => {
-                const memberSchedule = schedules.find(s => s.user._id.toString() === member.user._id.toString());
-                const dayAvailability = memberSchedule?.availability.find(a => a.day === parseInt(day));
-
-                return {
-                    userId: member.user._id,
-                    username: member.user.username || member.user.email,
-                    fullName: member.user.fullName,
-                    slots: dayAvailability?.slots || [],
-                    note: dayAvailability?.note
-                };
-            });
-
-        dayData.availabilityPercentage = Math.round(
-            (dayData.availableMembers.length / memberCount) * 100
-        );
-
-        dayData.calculationDetails = {
-            mode: 'daily',
-            formula: '(Miembros sin eventos / Total miembros) × 100',
-            calculation: `(${dayData.availableMembers.length} / ${memberCount}) × 100 = ${dayData.availabilityPercentage}%`,
-            totalMembers: memberCount,
-            membersWithoutEvents: dayData.availableMembers.length,
-            membersWithEvents: dayData.unavailableMembers.length
-        };
-    });
-
-    return Object.values(availabilityMap).sort((a, b) => a.day - b.day);
-}
-
-/**
- * MODO 2: ANÁLISIS HORA A HORA
- * Calcula disponibilidad basada en intersecciones horarias
- * Fórmula: % = (horas libres en común / 24 horas) * 100
- * Ponderado por cantidad de miembros disponibles en cada hora
- */
-function calculateHourlyAvailability(schedules, daysInMonth, memberCount, groupMembers, previousSchedules = []) {
-    const availabilityMap = {};
-
-    for (let day = 1; day <= daysInMonth; day++) {
-        // Crear mapa de horas (0-23) para cada miembro
-        const hourlyMap = new Array(24).fill(0).map(() => ({ availableMembers: [], busyMembers: [] }));
-
-        schedules.forEach(schedule => {
-            const dayAvailability = schedule.availability.find(a => a.day === day);
-            // También revisar el día anterior para slots que cruzan medianoche
-            const prevDayAvailability = getPreviousDayAvailability(schedule, day, previousSchedules);
-            
-            const memberInfo = {
-                userId: schedule.user._id,
-                username: schedule.user.username || schedule.user.email,
-                fullName: schedule.user.fullName
-            };
-
-            const busyHours = new Set();
-
-            // 1. Primero revisar si hay slots del día anterior que cruzan a este día
-            if (prevDayAvailability && prevDayAvailability.slots && prevDayAvailability.slots.length > 0) {
-                addBusyHoursFromSlots(busyHours, prevDayAvailability.slots, 'previous');
-            }
-
-            // 2. Ahora revisar los slots del día actual
-            if (!dayAvailability || !dayAvailability.slots || dayAvailability.slots.length === 0) {
-                // Sin eventos en este día
-                // Si no hay horas ocupadas del día anterior, disponible todas las horas
-                if (busyHours.size === 0) {
-                    for (let hour = 0; hour < 24; hour++) {
-                        hourlyMap[hour].availableMembers.push(memberInfo);
-                    }
-                } else {
-                    // Hay horas ocupadas del día anterior, marcar resto como disponible
-                    for (let hour = 0; hour < 24; hour++) {
-                        if (busyHours.has(hour)) {
-                            hourlyMap[hour].busyMembers.push({ ...memberInfo, slots: prevDayAvailability.slots });
-                        } else {
-                            hourlyMap[hour].availableMembers.push(memberInfo);
-                        }
-                    }
-                }
-            } else {
-                // Marcar horas ocupadas por eventos del día actual
-                addBusyHoursFromSlots(busyHours, dayAvailability.slots, 'same');
-
-                // Marcar disponibilidad por hora
-                for (let hour = 0; hour < 24; hour++) {
-                    if (busyHours.has(hour)) {
-                        const relevantSlots = dayAvailability.slots.concat(
-                            prevDayAvailability && prevDayAvailability.slots ? prevDayAvailability.slots : []
-                        );
-                        hourlyMap[hour].busyMembers.push({ ...memberInfo, slots: relevantSlots });
-                    } else {
-                        hourlyMap[hour].availableMembers.push(memberInfo);
-                    }
-                }
-            }
-        });
-
-        // Calcular porcentaje basado en horas con disponibilidad común
-        // Fórmula: Promedio de (miembros disponibles / total miembros) por hora
-        const hourlyPercentages = hourlyMap.map(hour =>
-            (hour.availableMembers.length / memberCount) * 100
-        );
-        const avgPercentage = hourlyPercentages.reduce((sum, p) => sum + p, 0) / 24;
-
-        // Encontrar bloques de tiempo comunes (al menos 2 horas seguidas con >50% disponibilidad)
-        const commonTimeSlots = [];
-        let blockStart = null;
-        let blockHours = [];
-
-        for (let hour = 0; hour < 24; hour++) {
-            const percentage = hourlyPercentages[hour];
-
-            if (percentage >= 50) {
-                if (blockStart === null) {
-                    blockStart = hour;
-                    blockHours = [];
-                }
-                blockHours.push(percentage);
-            } else {
-                if (blockStart !== null && blockHours.length >= 2) {
-                    // Calcular promedio del bloque y mínimo de personas
-                    const avgBlockPercentage = blockHours.reduce((sum, p) => sum + p, 0) / blockHours.length;
-                    const minPeopleInBlock = Math.min(...blockHours.map(p => Math.round(memberCount * (p / 100))));
-
-                    commonTimeSlots.push({
-                        start: minutesToTime(blockStart * 60),
-                        end: minutesToTime(hour * 60),
-                        availableCount: minPeopleInBlock,
-                        avgPercentage: Math.round(avgBlockPercentage)
-                    });
-                }
-                blockStart = null;
-                blockHours = [];
-            }
-        }
-
-        // Cerrar último bloque si existe
-        if (blockStart !== null && blockHours.length >= 2) {
-            const avgBlockPercentage = blockHours.reduce((sum, p) => sum + p, 0) / blockHours.length;
-            const minPeopleInBlock = Math.min(...blockHours.map(p => Math.round(memberCount * (p / 100))));
-
-            commonTimeSlots.push({
-                start: minutesToTime(blockStart * 60),
-                end: '23:59',
-                availableCount: minPeopleInBlock,
-                avgPercentage: Math.round(avgBlockPercentage)
-            });
-        }
-
-        // Obtener miembros disponibles/no disponibles con detalles de horas libres
-        const memberAvailability = schedules.map(schedule => {
-            const dayAvailability = schedule.availability.find(a => a.day === day);
-
-            // Calcular bloques de horas libres para este miembro
-            const freeHoursBlocks = [];
-            let currentBlock = null;
-
-            for (let hour = 0; hour < 24; hour++) {
-                const isFree = hourlyMap[hour].availableMembers.some(
-                    m => m.userId.toString() === schedule.user._id.toString()
-                );
-
-                if (isFree) {
-                    if (currentBlock === null) {
-                        currentBlock = { start: hour, end: hour + 1 };
-                    } else {
-                        currentBlock.end = hour + 1;
-                    }
-                } else {
-                    if (currentBlock !== null) {
-                        freeHoursBlocks.push({
-                            start: minutesToTime(currentBlock.start * 60),
-                            end: minutesToTime(currentBlock.end * 60),
-                            hours: currentBlock.end - currentBlock.start
-                        });
-                        currentBlock = null;
-                    }
-                }
-            }
-
-            // Cerrar último bloque si existe
-            if (currentBlock !== null) {
-                freeHoursBlocks.push({
-                    start: minutesToTime(currentBlock.start * 60),
-                    end: '23:59',
-                    hours: currentBlock.end - currentBlock.start
-                });
-            }
-
-            const totalHoursFree = hourlyMap.filter(h =>
-                h.availableMembers.some(m => m.userId.toString() === schedule.user._id.toString())
-            ).length;
-
-            return {
-                member: {
-                    userId: schedule.user._id,
-                    username: schedule.user.username || schedule.user.email,
-                    fullName: schedule.user.fullName,
-                    slots: dayAvailability?.slots || [],
-                    note: dayAvailability?.note,
-                    hoursFree: totalHoursFree,
-                    freeBlocks: freeHoursBlocks,
-                    percentageFree: Math.round((totalHoursFree / 24) * 100)
-                },
-                available: totalHoursFree === 24,
-                hoursFree: totalHoursFree
-            };
-        });
-
-        availabilityMap[day] = {
-            day,
-            availableMembers: memberAvailability.filter(m => m.available).map(m => m.member),
-            unavailableMembers: memberAvailability.filter(m => !m.available).map(m => m.member),
-            availabilityPercentage: Math.round(avgPercentage),
-            timeSlots: commonTimeSlots,
-            calculationDetails: {
-                mode: 'hourly',
-                formula: 'Promedio de % de disponibilidad por hora',
-                hourlyPercentages: hourlyPercentages.map((p, h) => ({
-                    hour: h,
-                    percentage: Math.round(p),
-                    availableCount: Math.round(memberCount * (p / 100))
-                })),
-                totalMembers: memberCount,
-                allMembers: memberAvailability.map(m => m.member)
-            }
-        };
-    }
-
-    return Object.values(availabilityMap).sort((a, b) => a.day - b.day);
-}
-
-/**
- * MODO 3: ANÁLISIS PERSONALIZADO (HORAS MÍNIMAS SEGUIDAS)
- * Solo marca disponibilidad si el grupo puede juntarse X horas seguidas
- * Lógica: Encuentra intersecciones de bloques libres >= minHours
- * % se ajusta si algunos miembros pueden menos horas
- */
-function calculateCustomAvailability(schedules, daysInMonth, memberCount, groupMembers, minHours, previousSchedules = []) {
-    const availabilityMap = {};
-
-    for (let day = 1; day <= daysInMonth; day++) {
-        // Calcular bloques libres para cada miembro (en minutos)
-        const memberFreeBlocks = schedules.map(schedule => {
-            const dayAvailability = schedule.availability.find(a => a.day === day);
-            const prevDayAvailability = getPreviousDayAvailability(schedule, day, previousSchedules);
-            
-            const memberInfo = {
-                userId: schedule.user._id,
-                username: schedule.user.username || schedule.user.email,
-                fullName: schedule.user.fullName,
-                slots: dayAvailability?.slots || [],
-                note: dayAvailability?.note
-            };
-
-            const busyBlocks = [];
-
-            // 1. Primero agregar bloques del día anterior que cruzan medianoche
-            if (prevDayAvailability && prevDayAvailability.slots && prevDayAvailability.slots.length > 0) {
-                addBusyBlocksFromSlots(busyBlocks, prevDayAvailability.slots, 'previous');
-            }
-
-            // 2. Ahora agregar bloques del día actual
-            if (!dayAvailability || !dayAvailability.slots || dayAvailability.slots.length === 0) {
-                // Si no hay eventos en el día actual pero sí del día anterior
-                if (busyBlocks.length === 0) {
-                    return {
-                        member: memberInfo,
-                        freeBlocks: [{ start: 0, end: 24 * 60, hours: 24 }]
-                    };
-                }
-                // Hay eventos del día anterior, continuar con cálculo de bloques libres
-            } else {
-                // Calcular bloques ocupados del día actual
-                addBusyBlocksFromSlots(busyBlocks, dayAvailability.slots, 'same');
-            }
-
-            // Ordenar y fusionar bloques ocupados superpuestos
-            busyBlocks.sort((a, b) => a.start - b.start);
-
-            // Fusionar bloques ocupados superpuestos
-            const mergedBusy = [];
-            busyBlocks.forEach(block => {
-                if (mergedBusy.length === 0 || mergedBusy[mergedBusy.length - 1].end < block.start) {
-                    mergedBusy.push(block);
-                } else {
-                    mergedBusy[mergedBusy.length - 1].end = Math.max(mergedBusy[mergedBusy.length - 1].end, block.end);
-                }
-            });
-
-            // Calcular bloques libres
-            const freeBlocks = [];
-            let currentStart = 0;
-
-            mergedBusy.forEach(busy => {
-                if (currentStart < busy.start) {
-                    const duration = (busy.start - currentStart) / 60;
-                    freeBlocks.push({
-                        start: currentStart,
-                        end: busy.start,
-                        hours: duration
-                    });
-                }
-                currentStart = busy.end;
-            });
-
-            // Agregar último bloque si existe
-            if (currentStart < 24 * 60) {
-                const duration = (24 * 60 - currentStart) / 60;
-                freeBlocks.push({
-                    start: currentStart,
-                    end: 24 * 60,
-                    hours: duration
-                });
-            }
-
-            return {
-                member: memberInfo,
-                freeBlocks
-            };
-        });
-
-        // Encontrar intersecciones de bloques libres de al menos minHours
-        const commonBlocks = findCommonFreeBlocks(memberFreeBlocks, minHours);
-
-        // NUEVA LÓGICA: % basado en intersecciones REALES
-        // - 100% si existe al menos 1 bloque donde TODOS pueden reunirse ≥ minHours
-        // - Proporcional si hay bloques con menos personas o menos horas
-        // - 0% si no hay intersecciones viables
-        
-        let percentage = 0;
-        let availableCount = 0;
-        let partialAvailableCount = 0;
-
-        if (commonBlocks.length > 0) {
-            // Hay bloques donde TODOS están libres simultáneamente
-            const totalCommonHours = commonBlocks.reduce((sum, block) => sum + block.hours, 0);
-            
-            // Si hay al menos 1 bloque que cumple minHours → 100%
-            if (totalCommonHours >= minHours) {
-                percentage = 100;
-                availableCount = memberCount; // TODOS califican
-            } else {
-                // Hay bloques comunes pero no alcanzan las horas mínimas
-                // % proporcional: (horas comunes / horas mínimas) * 100
-                percentage = Math.round((totalCommonHours / minHours) * 100);
-                partialAvailableCount = memberCount;
-            }
-        } else {
-            // NO hay bloques comunes → buscar cuántos podrían reunirse parcialmente
-            // (relajando el requisito de "todos")
-            memberFreeBlocks.forEach(memberData => {
-                const maxFreeBlock = Math.max(0, ...memberData.freeBlocks.map(b => b.hours));
-                
-                if (maxFreeBlock >= minHours) {
-                    availableCount++;
-                } else if (maxFreeBlock >= minHours * 0.5) {
-                    partialAvailableCount++;
-                }
-            });
-            
-            // Si nadie tiene las horas mínimas, el % es muy bajo
-            // Fórmula: (individuos con tiempo / total) * 50% máximo
-            percentage = Math.round(
-                ((availableCount + (partialAvailableCount * 0.5)) / memberCount) * 50
-            );
-        }
-
-        // Enriquecer member info con detalles de bloques
-        const enrichedMembers = memberFreeBlocks.map(memberData => {
-            const maxFreeBlock = Math.max(0, ...memberData.freeBlocks.map(b => b.hours));
-            
-            // Un miembro "califica" si:
-            // 1. Hay bloques comunes Y tiene las horas en esos bloques (siempre true si commonBlocks existe)
-            // 2. O si no hay bloques comunes, tiene individualmente las horas mínimas
-            const qualifies = commonBlocks.length > 0 
-                ? true  // Si hay bloques comunes, TODOS están en esos bloques
-                : maxFreeBlock >= minHours;
-
-            return {
-                ...memberData.member,
-                freeBlocks: memberData.freeBlocks.map(b => ({
-                    start: minutesToTime(b.start),
-                    end: minutesToTime(b.end),
-                    hours: b.hours
-                })),
-                maxFreeBlock,
-                qualifies,
-                inCommonBlocks: commonBlocks.length > 0
-            };
-        });
-
-        availabilityMap[day] = {
-            day,
-            availableMembers: commonBlocks.length > 0
-                ? enrichedMembers  // Si hay bloques comunes, TODOS están disponibles en ese horario
-                : enrichedMembers.filter(m => m.qualifies),
-            unavailableMembers: commonBlocks.length > 0
-                ? []  // Si hay bloques comunes, nadie está "no disponible"
-                : enrichedMembers.filter(m => !m.qualifies),
-            availabilityPercentage: percentage,
-            timeSlots: commonBlocks.map(block => ({
-                start: minutesToTime(block.start),
-                end: minutesToTime(block.end),
-                hours: block.hours,
-                memberCount: block.memberCount
-            })),
-            minHoursRequired: minHours,
-            calculationDetails: {
-                mode: 'custom',
-                formula: commonBlocks.length > 0
-                    ? 'Si hay bloques donde TODOS coinciden ≥ minHoras → 100%'
-                    : 'Sin bloques comunes → ((individuos con tiempo / total) × 50%) máx',
-                calculation: commonBlocks.length > 0
-                    ? `Bloques comunes: ${commonBlocks.length} (${commonBlocks.reduce((sum, b) => sum + b.hours, 0).toFixed(1)}h totales) → ${percentage}%`
-                    : `Sin intersección. Disponibilidad individual: (${availableCount} + ${partialAvailableCount}×0.5) / ${memberCount} × 50% = ${percentage}%`,
-                totalMembers: memberCount,
-                membersQualifying: availableCount,
-                membersPartial: partialAvailableCount,
-                hasCommonBlocks: commonBlocks.length > 0,
-                commonBlocksCount: commonBlocks.length,
-                minHoursRequired: minHours,
-                allMembers: enrichedMembers
-            }
-        };
-    }
-
-    return Object.values(availabilityMap).sort((a, b) => a.day - b.day);
-}
-
-/**
- * Encontrar bloques libres comunes entre todos los miembros
- * que cumplan con duración mínima
- */
-function findCommonFreeBlocks(memberFreeBlocks, minHours) {
-    if (memberFreeBlocks.length === 0) return [];
-
-    // Obtener todos los bloques y crear lista de eventos (inicio/fin)
-    const events = [];
-
-    memberFreeBlocks.forEach((memberData, memberIndex) => {
-        memberData.freeBlocks.forEach(block => {
-            events.push({ time: block.start, type: 'start', memberIndex });
-            events.push({ time: block.end, type: 'end', memberIndex });
-        });
-    });
-
-    // Ordenar eventos por tiempo
-    events.sort((a, b) => a.time - b.time);
-
-    // Encontrar intersecciones
-    const commonBlocks = [];
-    const activeMembersSet = new Set();
-    let blockStart = null;
-
-    events.forEach(event => {
-        const prevCount = activeMembersSet.size;
-
-        if (event.type === 'start') {
-            activeMembersSet.add(event.memberIndex);
-        } else {
-            activeMembersSet.delete(event.memberIndex);
-        }
-
-        const newCount = activeMembersSet.size;
-
-        // Si todos están disponibles y acabamos de alcanzar ese estado
-        if (newCount === memberFreeBlocks.length && prevCount < memberFreeBlocks.length) {
-            blockStart = event.time;
-        }
-
-        // Si ya no todos están disponibles y teníamos un bloque
-        if (newCount < memberFreeBlocks.length && prevCount === memberFreeBlocks.length && blockStart !== null) {
-            const duration = (event.time - blockStart) / 60;
-            if (duration >= minHours) {
-                commonBlocks.push({
-                    start: blockStart,
-                    end: event.time,
-                    hours: duration,
-                    memberCount: memberFreeBlocks.length
-                });
-            }
-            blockStart = null;
-        }
-    });
-
-    return commonBlocks;
-}

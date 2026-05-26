@@ -30,6 +30,13 @@ router.get('/', groupController.getMyGroups);
 router.get('/:id', groupController.getGroupById);
 
 /**
+ * @route   PATCH /api/groups/:id/availability-settings
+ * @desc    Actualizar criterios de disponibilidad grupal
+ * @access  Private (miembros)
+ */
+router.patch('/:id/availability-settings', groupController.updateAvailabilitySettings);
+
+/**
  * @route   POST /api/groups/join/:code
  * @desc    Unirse a grupo por código
  * @access  Private
