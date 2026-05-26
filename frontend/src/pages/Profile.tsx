@@ -62,6 +62,24 @@ const Profile = () => {
   }, [user]);
 
   useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const connectedProvider = params.get('calendarConnected') as CalendarProvider | null;
+    const errorProvider = params.get('calendarError') as CalendarProvider | null;
+
+    if (!connectedProvider && !errorProvider) return;
+
+    setActiveTab('calendars');
+    if (connectedProvider) {
+      setSuccess('Calendario conectado correctamente');
+    }
+    if (errorProvider) {
+      setError(params.get('message') || 'No se pudo conectar el calendario');
+    }
+
+    navigate('/profile', { replace: true });
+  }, [navigate]);
+
+  useEffect(() => {
     if (activeTab !== 'calendars') return;
 
     const loadCalendars = async () => {

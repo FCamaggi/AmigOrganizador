@@ -109,6 +109,10 @@ const waitForPopupMessage = (
   });
 };
 
+const isMobileViewport = () =>
+  window.matchMedia('(max-width: 768px)').matches ||
+  /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
 export const calendarSyncService = {
   async getConnectedCalendars(): Promise<CalendarStatus> {
     const response = await api.get('/calendar/status');
@@ -122,6 +126,15 @@ export const calendarSyncService = {
 
   async connect(provider: CalendarProvider): Promise<void> {
     const url = await this.getAuthUrl(provider);
+
+    if (isMobileViewport()) {
+      sessionStorage.setItem('calendarConnectProvider', provider);
+      sessionStorage.setItem('calendarConnectReturnTo', window.location.pathname);
+      window.location.href = url;
+      await new Promise<void>(() => undefined);
+      return;
+    }
+
     const popup = window.open(
       url,
       `calendar-${provider}`,

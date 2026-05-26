@@ -238,6 +238,10 @@ const getMicrosoftEvents = async (userId, year, month) => {
 };
 
 const renderCallbackPage = (res, provider, ok, message = '') => {
+    const redirectUrl = new URL('/profile', config.frontendUrl);
+    redirectUrl.searchParams.set(ok ? 'calendarConnected' : 'calendarError', provider);
+    if (message) redirectUrl.searchParams.set('message', message);
+
     res.setHeader('Content-Security-Policy', "default-src 'none'; script-src 'unsafe-inline'");
     res.setHeader('Cross-Origin-Opener-Policy', 'unsafe-none');
     res.type('html').send(`<!doctype html>
@@ -248,8 +252,10 @@ const renderCallbackPage = (res, provider, ok, message = '') => {
   const payload = ${JSON.stringify({ type: 'calendar-sync', provider, ok, message })};
   if (window.opener) {
     window.opener.postMessage(payload, ${JSON.stringify(config.frontendUrl)});
+    window.close();
+  } else {
+    window.location.replace(${JSON.stringify(redirectUrl.toString())});
   }
-  window.close();
 </script>
 </body>
 </html>`);
