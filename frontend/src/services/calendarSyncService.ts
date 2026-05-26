@@ -43,22 +43,44 @@ const waitForPopupMessage = (
   provider: CalendarProvider
 ): Promise<void> => {
   return new Promise((resolve, reject) => {
+    let settled = false;
+
     const timeout = window.setTimeout(() => {
       cleanup();
       reject(new Error('No se recibio respuesta del proveedor'));
     }, 120000);
 
-    const interval = window.setInterval(() => {
-      if (popup?.closed) {
-        cleanup();
-        reject(new Error('La ventana de conexion fue cerrada'));
+    const verifyConnection = async () => {
+      if (settled) return;
+
+      try {
+        const response = await api.get('/calendar/status');
+        const status = response.data.data as CalendarStatus;
+        if (status[provider]?.connected) {
+          cleanup();
+          resolve();
+        }
+      } catch {
+        // Si la verificacion falla, seguimos esperando el mensaje del callback.
       }
-    }, 700);
+    };
+
+    const handleFocus = () => {
+      window.setTimeout(verifyConnection, 700);
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        window.setTimeout(verifyConnection, 700);
+      }
+    };
 
     const cleanup = () => {
+      settled = true;
       window.clearTimeout(timeout);
-      window.clearInterval(interval);
       window.removeEventListener('message', handleMessage);
+      window.removeEventListener('focus', handleFocus);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
 
     const handleMessage = (event: MessageEvent<CalendarSyncMessage>) => {
@@ -78,6 +100,12 @@ const waitForPopupMessage = (
     };
 
     window.addEventListener('message', handleMessage);
+    window.addEventListener('focus', handleFocus);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    if (popup) {
+      window.setTimeout(verifyConnection, 2000);
+    }
   });
 };
 

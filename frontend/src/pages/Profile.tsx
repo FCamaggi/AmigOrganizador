@@ -400,7 +400,6 @@ const Profile = () => {
               <div className="space-y-4">
                 {[
                   { key: 'google' as const, label: 'Google Calendar' },
-                  { key: 'microsoft' as const, label: 'Outlook' },
                 ].map((provider) => {
                   const status = calendarStatus[provider.key];
                   const isProviderLoading = calendarLoading === provider.key;

@@ -21,7 +21,6 @@ interface CalendarImportModalProps {
 
 const PROVIDERS: Array<{ key: CalendarProvider; label: string }> = [
   { key: 'google', label: 'Google Calendar' },
-  { key: 'microsoft', label: 'Outlook' },
 ];
 
 const eventKey = (event: ExternalCalendarEvent) =>

@@ -238,6 +238,8 @@ const getMicrosoftEvents = async (userId, year, month) => {
 };
 
 const renderCallbackPage = (res, provider, ok, message = '') => {
+    res.setHeader('Content-Security-Policy', "default-src 'none'; script-src 'unsafe-inline'");
+    res.setHeader('Cross-Origin-Opener-Policy', 'unsafe-none');
     res.type('html').send(`<!doctype html>
 <html lang="es">
 <head><meta charset="utf-8"><title>Calendario ${ok ? 'conectado' : 'no conectado'}</title></head>
