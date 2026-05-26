@@ -5,6 +5,7 @@ import { useScheduleStore } from '../../store/scheduleStore';
 import {
   calendarSyncService,
   type CalendarProvider,
+  type CalendarStatus,
   type ExternalCalendarEvent,
 } from '../../services/calendarSyncService';
 import {
@@ -42,8 +43,13 @@ const CalendarImportModal = ({ isOpen, onClose }: CalendarImportModalProps) => {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [isFetching, setIsFetching] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
+  const [isConnecting, setIsConnecting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [scheduleSnapshot, setScheduleSnapshot] = useState<Schedule | null>(null);
+  const [calendarStatus, setCalendarStatus] = useState<CalendarStatus>({
+    google: { connected: false },
+    microsoft: { connected: false },
+  });
 
   useEffect(() => {
     if (!isOpen) return;
@@ -54,6 +60,12 @@ const CalendarImportModal = ({ isOpen, onClose }: CalendarImportModalProps) => {
     setEvents([]);
     setSelected(new Set());
     setError(null);
+    calendarSyncService
+      .getConnectedCalendars()
+      .then(setCalendarStatus)
+      .catch(() => {
+        setError('No se pudo revisar el estado de tus calendarios conectados.');
+      });
   }, [isOpen, selectedDate]);
 
   const groupedEvents = useMemo(() => {
@@ -73,8 +85,31 @@ const CalendarImportModal = ({ isOpen, onClose }: CalendarImportModalProps) => {
   }, [events]);
 
   const selectedEvents = events.filter((event) => selected.has(eventKey(event)));
+  const selectedProviderStatus = calendarStatus[provider];
+
+  const handleConnectProvider = async () => {
+    setIsConnecting(true);
+    setError(null);
+    try {
+      await calendarSyncService.connect(provider);
+      const status = await calendarSyncService.getConnectedCalendars();
+      setCalendarStatus(status);
+    } catch (err) {
+      const message =
+        (err as { response?: { data?: { message?: string } } }).response?.data
+          ?.message || (err as Error).message || 'Error al conectar calendario';
+      setError(message);
+    } finally {
+      setIsConnecting(false);
+    }
+  };
 
   const handleFetchEvents = async () => {
+    if (!selectedProviderStatus.connected) {
+      setError(`Conecta ${provider === 'google' ? 'Google Calendar' : 'Outlook'} antes de ver eventos.`);
+      return;
+    }
+
     setIsFetching(true);
     setError(null);
     try {
@@ -200,12 +235,34 @@ const CalendarImportModal = ({ isOpen, onClose }: CalendarImportModalProps) => {
             <Button
               onClick={handleFetchEvents}
               loading={isFetching}
-              disabled={!monthValue}
+              disabled={!monthValue || !selectedProviderStatus.connected}
               fullWidth
             >
               Ver eventos
             </Button>
           </div>
+        </div>
+
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 bg-neutral-50 border border-neutral-200 rounded-xl">
+          <div>
+            <p className="text-sm font-semibold text-neutral-800">
+              {provider === 'google' ? 'Google Calendar' : 'Outlook'}
+            </p>
+            <p className="text-sm text-neutral-600">
+              {selectedProviderStatus.connected
+                ? `Conectado como ${selectedProviderStatus.email || 'cuenta externa'}`
+                : 'Debes conectar este calendario antes de importar eventos.'}
+            </p>
+          </div>
+          {!selectedProviderStatus.connected && (
+            <Button
+              onClick={handleConnectProvider}
+              loading={isConnecting}
+              className="w-full sm:w-auto"
+            >
+              Conectar
+            </Button>
+          )}
         </div>
 
         {error && (
