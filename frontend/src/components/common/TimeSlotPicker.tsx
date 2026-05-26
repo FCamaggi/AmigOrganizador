@@ -11,6 +11,7 @@ export interface TimeSlot {
 interface TimeSlotPickerProps {
   slots: TimeSlot[];
   onChange: (slots: TimeSlot[]) => void;
+  onRemoveSlotRequest?: (index: number, slot: TimeSlot) => void;
   label?: string;
   quickPresets?: boolean;
   allowOverlap?: boolean;
@@ -46,6 +47,7 @@ const TIME_OPTIONS = generateTimeOptions();
 const TimeSlotPicker = ({
   slots,
   onChange,
+  onRemoveSlotRequest,
   label = 'Franjas horarias',
   quickPresets = true,
   allowOverlap = true,
@@ -108,6 +110,10 @@ const TimeSlotPicker = ({
 
   const handleRemoveSlot = (index: number) => {
     setError('');
+    if (onRemoveSlotRequest) {
+      onRemoveSlotRequest(index, slots[index]);
+      return;
+    }
     onChange(slots.filter((_, i) => i !== index));
   };
 
