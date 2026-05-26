@@ -137,7 +137,7 @@ const TimeSlotPicker = ({
 
   const handleApplyPreset = (preset: TimeSlot) => {
     setError('');
-    onChange([...slots, preset]);
+    onChange([...slots, { ...preset }]);
   };
 
   const handleClearAll = () => {

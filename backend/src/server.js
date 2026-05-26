@@ -16,6 +16,7 @@ import availabilityRoutes from './routes/availability.js';
 import userRoutes from './routes/userRoutes.js';
 import eventRoutes from './routes/eventRoutes.js';
 import userTemplateRoutes from './routes/userTemplateRoutes.js';
+import calendarSyncRoutes from './routes/calendarSyncRoutes.js';
 
 const app = express();
 
@@ -112,6 +113,7 @@ app.use('/api/availability', availabilityRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/events', eventRoutes);
 app.use('/api/user-templates', userTemplateRoutes);
+app.use('/api/calendar', calendarSyncRoutes);
 
 // 🧭 404
 app.use(notFound);

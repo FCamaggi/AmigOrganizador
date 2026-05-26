@@ -3,6 +3,11 @@ import type { FormEvent, ChangeEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import { userService } from '../services/userService';
+import {
+  calendarSyncService,
+  type CalendarProvider,
+  type CalendarStatus,
+} from '../services/calendarSyncService';
 import type {
   UpdateProfileData,
   ChangePasswordData,
@@ -15,12 +20,18 @@ const Profile = () => {
   const navigate = useNavigate();
   const { user, setUser, logout } = useAuthStore();
 
-  const [activeTab, setActiveTab] = useState<'profile' | 'password' | 'danger'>(
-    'profile'
-  );
+  const [activeTab, setActiveTab] = useState<
+    'profile' | 'password' | 'calendars' | 'danger'
+  >('profile');
   const [isLoading, setIsLoading] = useState(false);
+  const [calendarLoading, setCalendarLoading] =
+    useState<CalendarProvider | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [calendarStatus, setCalendarStatus] = useState<CalendarStatus>({
+    google: { connected: false },
+    microsoft: { connected: false },
+  });
 
   // Profile form
   const [profileForm, setProfileForm] = useState<UpdateProfileData>({
@@ -49,6 +60,25 @@ const Profile = () => {
       });
     }
   }, [user]);
+
+  useEffect(() => {
+    if (activeTab !== 'calendars') return;
+
+    const loadCalendars = async () => {
+      setError(null);
+      try {
+        const status = await calendarSyncService.getConnectedCalendars();
+        setCalendarStatus(status);
+      } catch (err) {
+        const message =
+          (err as { response?: { data?: { message?: string } } }).response?.data
+            ?.message || 'Error al cargar calendarios';
+        setError(message);
+      }
+    };
+
+    loadCalendars();
+  }, [activeTab]);
 
   const handleProfileChange = (e: ChangeEvent<HTMLInputElement>) => {
     setProfileForm({
@@ -138,6 +168,46 @@ const Profile = () => {
     }
   };
 
+  const handleConnectCalendar = async (provider: CalendarProvider) => {
+    setCalendarLoading(provider);
+    setError(null);
+    setSuccess(null);
+
+    try {
+      await calendarSyncService.connect(provider);
+      const status = await calendarSyncService.getConnectedCalendars();
+      setCalendarStatus(status);
+      setSuccess('Calendario conectado correctamente');
+    } catch (err) {
+      const message =
+        (err as { response?: { data?: { message?: string } } }).response?.data
+          ?.message || (err as Error).message || 'Error al conectar calendario';
+      setError(message);
+    } finally {
+      setCalendarLoading(null);
+    }
+  };
+
+  const handleDisconnectCalendar = async (provider: CalendarProvider) => {
+    setCalendarLoading(provider);
+    setError(null);
+    setSuccess(null);
+
+    try {
+      await calendarSyncService.disconnect(provider);
+      const status = await calendarSyncService.getConnectedCalendars();
+      setCalendarStatus(status);
+      setSuccess('Calendario desconectado');
+    } catch (err) {
+      const message =
+        (err as { response?: { data?: { message?: string } } }).response?.data
+          ?.message || 'Error al desconectar calendario';
+      setError(message);
+    } finally {
+      setCalendarLoading(null);
+    }
+  };
+
   return (
     <div>
       <Navbar />
@@ -187,6 +257,23 @@ const Profile = () => {
               >
                 Seguridad
                 {activeTab === 'password' && (
+                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-primary-600 to-accent-500" />
+                )}
+              </button>
+              <button
+                onClick={() => {
+                  setActiveTab('calendars');
+                  setError(null);
+                  setSuccess(null);
+                }}
+                className={`pb-2 sm:pb-3 px-1 sm:px-2 text-sm sm:text-base font-semibold transition-colors relative whitespace-nowrap ${
+                  activeTab === 'calendars'
+                    ? 'text-primary-600'
+                    : 'text-neutral-500 hover:text-neutral-700'
+                }`}
+              >
+                Calendarios
+                {activeTab === 'calendars' && (
                   <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-primary-600 to-accent-500" />
                 )}
               </button>
@@ -301,6 +388,61 @@ const Profile = () => {
                   </Button>
                 </div>
               </form>
+            </div>
+          )}
+
+          {/* Calendars Tab */}
+          {activeTab === 'calendars' && (
+            <div className="bg-white rounded-xl sm:rounded-2xl shadow-soft p-4 sm:p-6 lg:p-8">
+              <h2 className="text-lg sm:text-xl font-bold text-neutral-800 mb-4 sm:mb-6">
+                Calendarios conectados
+              </h2>
+              <div className="space-y-4">
+                {[
+                  { key: 'google' as const, label: 'Google Calendar' },
+                  { key: 'microsoft' as const, label: 'Outlook' },
+                ].map((provider) => {
+                  const status = calendarStatus[provider.key];
+                  const isProviderLoading = calendarLoading === provider.key;
+
+                  return (
+                    <div
+                      key={provider.key}
+                      className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 border border-neutral-200 rounded-xl"
+                    >
+                      <div>
+                        <h3 className="text-base font-semibold text-neutral-900">
+                          {provider.label}
+                        </h3>
+                        <p className="text-sm text-neutral-600 mt-1">
+                          {status.connected
+                            ? `Conectado como ${status.email || 'cuenta externa'}`
+                            : 'Desconectado'}
+                        </p>
+                      </div>
+
+                      {status.connected ? (
+                        <Button
+                          variant="secondary"
+                          onClick={() => handleDisconnectCalendar(provider.key)}
+                          loading={isProviderLoading}
+                          className="w-full sm:w-auto"
+                        >
+                          Desconectar
+                        </Button>
+                      ) : (
+                        <Button
+                          onClick={() => handleConnectCalendar(provider.key)}
+                          loading={isProviderLoading}
+                          className="w-full sm:w-auto"
+                        >
+                          Conectar
+                        </Button>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           )}
 

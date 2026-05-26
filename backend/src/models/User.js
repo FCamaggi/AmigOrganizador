@@ -35,6 +35,18 @@ const userSchema = new mongoose.Schema({
     },
     lastLogin: {
         type: Date
+    },
+    connectedCalendars: {
+        google: {
+            encryptedRefreshToken: { type: String },
+            email: { type: String, trim: true },
+            connectedAt: { type: Date }
+        },
+        microsoft: {
+            encryptedRefreshToken: { type: String },
+            email: { type: String, trim: true },
+            connectedAt: { type: Date }
+        }
     }
 }, {
     timestamps: true
@@ -68,6 +80,7 @@ userSchema.methods.comparePassword = async function (candidatePassword) {
 userSchema.methods.toJSON = function () {
     const user = this.toObject();
     delete user.password;
+    delete user.connectedCalendars;
     delete user.__v;
     return user;
 };

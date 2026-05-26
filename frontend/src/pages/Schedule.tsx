@@ -5,6 +5,7 @@ import Navbar from '../components/layout/Navbar';
 import ScheduleCalendar from '../components/schedule/ScheduleCalendar';
 import DayEditorModal from '../components/schedule/DayEditorModal';
 import QuickScheduleView from '../components/schedule/QuickScheduleView';
+import CalendarImportModal from '../components/schedule/CalendarImportModal';
 import Button from '../components/common/Button';
 import Card from '../components/common/Card';
 import Modal from '../components/common/Modal';
@@ -15,6 +16,7 @@ type ViewMode = 'calendar' | 'quick';
 const Schedule = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isQuickModalOpen, setIsQuickModalOpen] = useState(false);
+  const [isCalendarImportOpen, setIsCalendarImportOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [selectedAvailability, setSelectedAvailability] =
     useState<DayAvailability | null>(null);
@@ -137,6 +139,30 @@ const Schedule = () => {
                 }
               >
                 Config. Rápida
+              </Button>
+              <Button
+                onClick={() => setIsCalendarImportOpen(true)}
+                variant="outline"
+                size="md"
+                disabled={loading}
+                className="bg-white/10 hover:bg-white/20 text-white border-white/30"
+                icon={
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                    />
+                  </svg>
+                }
+              >
+                Importar Calendario
               </Button>
               <Button
                 onClick={handleExport}
@@ -337,6 +363,11 @@ const Schedule = () => {
           }}
         />
       </Modal>
+
+      <CalendarImportModal
+        isOpen={isCalendarImportOpen}
+        onClose={() => setIsCalendarImportOpen(false)}
+      />
     </div>
   );
 };

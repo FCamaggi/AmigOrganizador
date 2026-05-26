@@ -99,7 +99,12 @@ const QuickScheduleView = ({ onApply }: QuickScheduleViewProps) => {
       newSelectedDays.add(dayKey);
       setCustomTemplate({
         ...customTemplate,
-        [dayKey]: [{ start: customStartTime, end: customEndTime }],
+        [dayKey]: [{
+          start: customStartTime,
+          end: customEndTime,
+          title: customTitle || undefined,
+          color: customColor,
+        }],
       });
     }
     setSelectedDays(newSelectedDays);
