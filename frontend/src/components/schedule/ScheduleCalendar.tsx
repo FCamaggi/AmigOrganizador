@@ -421,6 +421,12 @@ const ScheduleCalendar = ({ onSelectDay }: ScheduleCalendarProps) => {
         event.start.getMonth() === value.getMonth() &&
         event.start.getDate() === value.getDate()
     );
+    const dayEventCount = events.filter(
+      (event) =>
+        event.start.getFullYear() === value.getFullYear() &&
+        event.start.getMonth() === value.getMonth() &&
+        event.start.getDate() === value.getDate()
+    ).length;
     const hasSchedule = (dayAvail && dayAvail.slots.length > 0) || hasContinuation;
 
     return (
@@ -431,7 +437,7 @@ const ScheduleCalendar = ({ onSelectDay }: ScheduleCalendarProps) => {
         {children}
         {hasSchedule && (
           <div className="absolute top-1 right-1 pointer-events-none">
-            <Badge variant="primary">{dayAvail.slots.length}</Badge>
+            <Badge variant="primary">{dayEventCount}</Badge>
           </div>
         )}
       </div>
