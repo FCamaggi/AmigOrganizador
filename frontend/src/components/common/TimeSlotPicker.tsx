@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+import { slotDurationMinutes } from '../../utils/timeSlots';
 
 export interface TimeSlot {
   start: string;
@@ -59,12 +60,9 @@ const TimeSlotPicker = ({
       const [endHour, endMin] = slot.end.split(':').map(Number);
       const startMinutes = startHour * 60 + startMin;
       const endMinutes = endHour * 60 + endMin;
+      const duration = slotDurationMinutes(slot);
 
-      if (startMinutes >= endMinutes) {
-        return 'La hora de inicio debe ser anterior a la hora de fin';
-      }
-
-      if (endMinutes - startMinutes < minDuration) {
+      if (duration < minDuration) {
         return `La duración mínima es ${minDuration} minutos`;
       }
 
@@ -77,6 +75,10 @@ const TimeSlotPicker = ({
           const [exEndHour, exEndMin] = existingSlot.end.split(':').map(Number);
           const exStartMinutes = exStartHour * 60 + exStartMin;
           const exEndMinutes = exEndHour * 60 + exEndMin;
+
+          if (endMinutes <= startMinutes || exEndMinutes <= exStartMinutes) {
+            continue;
+          }
 
           // Detectar solapamiento
           if (
@@ -374,7 +376,7 @@ const TimeSlotPicker = ({
 
       {/* Helper Text */}
       <p className="text-xs text-neutral-500">
-        💡 Tip: Puedes agregar múltiples franjas horarias para el mismo día
+        💡 Tip: Si la hora de fin es menor o igual al inicio, el turno termina al día siguiente
       </p>
     </div>
   );

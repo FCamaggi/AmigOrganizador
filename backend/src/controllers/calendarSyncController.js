@@ -100,13 +100,12 @@ const normalizeEvent = ({ title, startDateTime, endDateTime, color }) => {
     const end = new Date(endDateTime);
     if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return null;
 
-    const crossesMidnight = start.toDateString() !== end.toDateString();
     return {
         date: start.toISOString().slice(0, 10),
         day: start.getDate(),
         title: title || 'Evento importado',
         start: formatTime(start),
-        end: crossesMidnight ? '23:59' : formatTime(end),
+        end: formatTime(end),
         color
     };
 };

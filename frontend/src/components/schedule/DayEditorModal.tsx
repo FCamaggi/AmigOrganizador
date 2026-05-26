@@ -202,6 +202,7 @@ const DayEditorModal = ({
               • Usa las plantillas rápidas para configurar horarios comunes
             </li>
             <li>• Puedes agregar múltiples franjas horarias en el mismo día</li>
+            <li>• Si una franja termina antes o a la misma hora que inicia, termina al día siguiente</li>
             <li>• Los horarios se mostrarán a tus grupos automáticamente</li>
           </ul>
         </div>

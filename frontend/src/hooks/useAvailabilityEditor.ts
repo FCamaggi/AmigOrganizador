@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import type { TimeSlot } from '../services/scheduleService';
+import { slotDurationMinutes } from '../utils/timeSlots';
 
 interface DayAvailability {
   day: number;
@@ -103,21 +104,8 @@ export const useAvailabilityEditor = (
         };
       }
 
-      // Validar que start < end
-      const [startHour, startMin] = slot.start.split(':').map(Number);
-      const [endHour, endMin] = slot.end.split(':').map(Number);
-      const startMinutes = startHour * 60 + startMin;
-      const endMinutes = endHour * 60 + endMin;
-
-      if (startMinutes >= endMinutes) {
-        return {
-          valid: false,
-          error: 'La hora de inicio debe ser anterior a la hora de fin',
-        };
-      }
-
       // Validar duración mínima (30 minutos)
-      if (endMinutes - startMinutes < 30) {
+      if (slotDurationMinutes(slot) < 30) {
         return {
           valid: false,
           error: 'La duración mínima de una franja es 30 minutos',

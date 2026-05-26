@@ -1,5 +1,9 @@
 import Schedule from '../models/Schedule.js';
 import Group from '../models/Group.js';
+import {
+    slotBusyBlocksForDay,
+    slotCarriesIntoNextDay
+} from '../utils/timeSlots.js';
 
 /**
  * Obtener disponibilidad grupal para un mes específico
@@ -59,6 +63,15 @@ export const getGroupAvailability = async (req, res) => {
             year: parseInt(year)
         }).populate('user', 'username email fullName');
 
+        const previousDate = new Date(parseInt(year), parseInt(month) - 2, 1);
+        const previousYear = previousDate.getFullYear();
+        const previousMonth = previousDate.getMonth() + 1;
+        const previousSchedules = await Schedule.find({
+            user: { $in: memberIds },
+            month: previousMonth,
+            year: previousYear
+        });
+
         const daysInMonth = new Date(parseInt(year), parseInt(month), 0).getDate();
         const memberCount = group.members.length;
 
@@ -67,14 +80,14 @@ export const getGroupAvailability = async (req, res) => {
         // Seleccionar método de análisis según modo
         switch (analysisMode) {
             case 'hourly':
-                availabilityArray = calculateHourlyAvailability(schedules, daysInMonth, memberCount, group.members);
+                availabilityArray = calculateHourlyAvailability(schedules, daysInMonth, memberCount, group.members, previousSchedules);
                 break;
             case 'custom':
-                availabilityArray = calculateCustomAvailability(schedules, daysInMonth, memberCount, group.members, minimumHours);
+                availabilityArray = calculateCustomAvailability(schedules, daysInMonth, memberCount, group.members, minimumHours, previousSchedules);
                 break;
             case 'daily':
             default:
-                availabilityArray = calculateDailyAvailability(schedules, daysInMonth, memberCount, group.members);
+                availabilityArray = calculateDailyAvailability(schedules, daysInMonth, memberCount, group.members, previousSchedules);
                 break;
         }
 
@@ -180,12 +193,53 @@ function minutesToTime(minutes) {
     return `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`;
 }
 
+function getPreviousDayAvailability(schedule, day, previousSchedules) {
+    if (day > 1) {
+        return schedule.availability.find(a => a.day === day - 1) || null;
+    }
+
+    const scheduleUserId = schedule.user._id ? schedule.user._id.toString() : schedule.user.toString();
+    const previousSchedule = previousSchedules.find(
+        s => s.user.toString() === scheduleUserId
+    );
+
+    if (!previousSchedule) return null;
+
+    const previousMonthLastDay = new Date(
+        previousSchedule.year,
+        previousSchedule.month,
+        0
+    ).getDate();
+
+    return previousSchedule.availability.find(a => a.day === previousMonthLastDay) || null;
+}
+
+function addBusyBlocksFromSlots(target, slots, relation) {
+    slots.forEach(slot => {
+        slotBusyBlocksForDay(slot, relation).forEach(block => {
+            if (block.end > block.start) {
+                target.push(block);
+            }
+        });
+    });
+}
+
+function addBusyHoursFromSlots(target, slots, relation) {
+    slots.forEach(slot => {
+        slotBusyBlocksForDay(slot, relation).forEach(block => {
+            for (let minute = block.start; minute < block.end; minute += 60) {
+                target.add(Math.floor(minute / 60));
+            }
+        });
+    });
+}
+
 /**
  * MODO 1: ANÁLISIS DÍA A DÍA
  * Marca disponible si NO hay eventos (slots) ese día
  * Lógica: Sin eventos = completamente libre = disponible
  */
-function calculateDailyAvailability(schedules, daysInMonth, memberCount, groupMembers) {
+function calculateDailyAvailability(schedules, daysInMonth, memberCount, groupMembers, previousSchedules = []) {
     const availabilityMap = {};
 
     // Inicializar todos los días
@@ -203,19 +257,14 @@ function calculateDailyAvailability(schedules, daysInMonth, memberCount, groupMe
     schedules.forEach(schedule => {
         for (let day = 1; day <= daysInMonth; day++) {
             const dayAvailability = schedule.availability.find(a => a.day === day);
-            const prevDayAvailability = day > 1 ? schedule.availability.find(a => a.day === day - 1) : null;
+            const prevDayAvailability = getPreviousDayAvailability(schedule, day, previousSchedules);
             
             let hasEvents = dayAvailability && dayAvailability.slots && dayAvailability.slots.length > 0;
             
             // Verificar si hay turnos del día anterior que cruzan a este día
             if (!hasEvents && prevDayAvailability && prevDayAvailability.slots && prevDayAvailability.slots.length > 0) {
                 // Revisar si algún slot del día anterior cruza medianoche
-                hasEvents = prevDayAvailability.slots.some(slot => {
-                    const startMinutes = timeToMinutes(slot.start);
-                    const endMinutes = timeToMinutes(slot.end);
-                    // Si es turno 24h o cruza medianoche, afecta el día actual
-                    return (endMinutes <= startMinutes && slot.start === slot.end) || endMinutes < startMinutes;
-                });
+                hasEvents = prevDayAvailability.slots.some(slotCarriesIntoNextDay);
             }
 
             const memberInfo = {
@@ -275,7 +324,7 @@ function calculateDailyAvailability(schedules, daysInMonth, memberCount, groupMe
  * Fórmula: % = (horas libres en común / 24 horas) * 100
  * Ponderado por cantidad de miembros disponibles en cada hora
  */
-function calculateHourlyAvailability(schedules, daysInMonth, memberCount, groupMembers) {
+function calculateHourlyAvailability(schedules, daysInMonth, memberCount, groupMembers, previousSchedules = []) {
     const availabilityMap = {};
 
     for (let day = 1; day <= daysInMonth; day++) {
@@ -285,7 +334,7 @@ function calculateHourlyAvailability(schedules, daysInMonth, memberCount, groupM
         schedules.forEach(schedule => {
             const dayAvailability = schedule.availability.find(a => a.day === day);
             // También revisar el día anterior para slots que cruzan medianoche
-            const prevDayAvailability = day > 1 ? schedule.availability.find(a => a.day === day - 1) : null;
+            const prevDayAvailability = getPreviousDayAvailability(schedule, day, previousSchedules);
             
             const memberInfo = {
                 userId: schedule.user._id,
@@ -297,23 +346,7 @@ function calculateHourlyAvailability(schedules, daysInMonth, memberCount, groupM
 
             // 1. Primero revisar si hay slots del día anterior que cruzan a este día
             if (prevDayAvailability && prevDayAvailability.slots && prevDayAvailability.slots.length > 0) {
-                prevDayAvailability.slots.forEach(slot => {
-                    const startMinutes = timeToMinutes(slot.start);
-                    const endMinutes = timeToMinutes(slot.end);
-
-                    // Si el slot cruza medianoche o es 24h, marca horas del día actual
-                    if (endMinutes <= startMinutes && slot.start === slot.end) {
-                        // Turno 24h del día anterior → marca TODO el día actual
-                        for (let hour = 0; hour < 24; hour++) {
-                            busyHours.add(hour);
-                        }
-                    } else if (endMinutes < startMinutes) {
-                        // Cruza medianoche → marca horas 0 hasta endTime en día actual
-                        for (let m = 0; m < endMinutes; m += 60) {
-                            busyHours.add(Math.floor(m / 60));
-                        }
-                    }
-                });
+                addBusyHoursFromSlots(busyHours, prevDayAvailability.slots, 'previous');
             }
 
             // 2. Ahora revisar los slots del día actual
@@ -336,29 +369,7 @@ function calculateHourlyAvailability(schedules, daysInMonth, memberCount, groupM
                 }
             } else {
                 // Marcar horas ocupadas por eventos del día actual
-                dayAvailability.slots.forEach(slot => {
-                    const startMinutes = timeToMinutes(slot.start);
-                    const endMinutes = timeToMinutes(slot.end);
-
-                    // Manejar turnos que cruzan medianoche
-                    if (endMinutes <= startMinutes && slot.start === slot.end) {
-                        // Turno 24h
-                        for (let hour = 0; hour < 24; hour++) {
-                            busyHours.add(hour);
-                        }
-                    } else if (endMinutes < startMinutes) {
-                        // Cruza medianoche → solo marca hasta las 23:59 de HOY
-                        // Las horas del día siguiente se marcarán cuando procesemos ese día
-                        for (let m = startMinutes; m < 24 * 60; m += 60) {
-                            busyHours.add(Math.floor(m / 60));
-                        }
-                    } else {
-                        // Mismo día
-                        for (let m = startMinutes; m < endMinutes; m += 60) {
-                            busyHours.add(Math.floor(m / 60));
-                        }
-                    }
-                });
+                addBusyHoursFromSlots(busyHours, dayAvailability.slots, 'same');
 
                 // Marcar disponibilidad por hora
                 for (let hour = 0; hour < 24; hour++) {
@@ -429,7 +440,6 @@ function calculateHourlyAvailability(schedules, daysInMonth, memberCount, groupM
         // Obtener miembros disponibles/no disponibles con detalles de horas libres
         const memberAvailability = schedules.map(schedule => {
             const dayAvailability = schedule.availability.find(a => a.day === day);
-            const hasEvents = dayAvailability && dayAvailability.slots && dayAvailability.slots.length > 0;
 
             // Calcular bloques de horas libres para este miembro
             const freeHoursBlocks = [];
@@ -482,7 +492,7 @@ function calculateHourlyAvailability(schedules, daysInMonth, memberCount, groupM
                     freeBlocks: freeHoursBlocks,
                     percentageFree: Math.round((totalHoursFree / 24) * 100)
                 },
-                available: !hasEvents,
+                available: totalHoursFree === 24,
                 hoursFree: totalHoursFree
             };
         });
@@ -516,14 +526,14 @@ function calculateHourlyAvailability(schedules, daysInMonth, memberCount, groupM
  * Lógica: Encuentra intersecciones de bloques libres >= minHours
  * % se ajusta si algunos miembros pueden menos horas
  */
-function calculateCustomAvailability(schedules, daysInMonth, memberCount, groupMembers, minHours) {
+function calculateCustomAvailability(schedules, daysInMonth, memberCount, groupMembers, minHours, previousSchedules = []) {
     const availabilityMap = {};
 
     for (let day = 1; day <= daysInMonth; day++) {
         // Calcular bloques libres para cada miembro (en minutos)
         const memberFreeBlocks = schedules.map(schedule => {
             const dayAvailability = schedule.availability.find(a => a.day === day);
-            const prevDayAvailability = day > 1 ? schedule.availability.find(a => a.day === day - 1) : null;
+            const prevDayAvailability = getPreviousDayAvailability(schedule, day, previousSchedules);
             
             const memberInfo = {
                 userId: schedule.user._id,
@@ -537,18 +547,7 @@ function calculateCustomAvailability(schedules, daysInMonth, memberCount, groupM
 
             // 1. Primero agregar bloques del día anterior que cruzan medianoche
             if (prevDayAvailability && prevDayAvailability.slots && prevDayAvailability.slots.length > 0) {
-                prevDayAvailability.slots.forEach(slot => {
-                    const startMinutes = timeToMinutes(slot.start);
-                    const endMinutes = timeToMinutes(slot.end);
-
-                    if (startMinutes === endMinutes) {
-                        // Turno 24h del día anterior → marca todo el día actual ocupado
-                        busyBlocks.push({ start: 0, end: 24 * 60 });
-                    } else if (endMinutes < startMinutes) {
-                        // Cruza medianoche → marca 00:00 hasta endTime ocupado
-                        busyBlocks.push({ start: 0, end: endMinutes });
-                    }
-                });
+                addBusyBlocksFromSlots(busyBlocks, prevDayAvailability.slots, 'previous');
             }
 
             // 2. Ahora agregar bloques del día actual
@@ -563,21 +562,7 @@ function calculateCustomAvailability(schedules, daysInMonth, memberCount, groupM
                 // Hay eventos del día anterior, continuar con cálculo de bloques libres
             } else {
                 // Calcular bloques ocupados del día actual
-                dayAvailability.slots.forEach(slot => {
-                    const startMinutes = timeToMinutes(slot.start);
-                    const endMinutes = timeToMinutes(slot.end);
-
-                    // Manejar cruces de medianoche
-                    if (startMinutes === endMinutes) {
-                        busyBlocks.push({ start: 0, end: 24 * 60 }); // Turno 24h = todo ocupado
-                    } else if (endMinutes < startMinutes) {
-                        // Cruza medianoche: solo marca hasta 24:00 de HOY
-                        // El día siguiente se marcará cuando procesemos ese día
-                        busyBlocks.push({ start: startMinutes, end: 24 * 60 });
-                    } else {
-                        busyBlocks.push({ start: startMinutes, end: endMinutes });
-                    }
-                });
+                addBusyBlocksFromSlots(busyBlocks, dayAvailability.slots, 'same');
             }
 
             // Ordenar y fusionar bloques ocupados superpuestos

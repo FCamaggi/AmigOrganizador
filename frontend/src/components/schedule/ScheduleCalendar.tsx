@@ -4,7 +4,9 @@ import type { SlotInfo, ToolbarProps } from 'react-big-calendar';
 import { format, parse, startOfWeek, getDay } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useScheduleStore } from '../../store/scheduleStore';
-import type { DayAvailability } from '../../services/scheduleService';
+import { scheduleService } from '../../services/scheduleService';
+import type { DayAvailability, Schedule, TimeSlot } from '../../services/scheduleService';
+import { getContinuationSlot, isFullDaySlot, isOvernightSlot } from '../../utils/timeSlots';
 import Button from '../common/Button';
 import Badge from '../common/Badge';
 import Card from '../common/Card';
@@ -37,6 +39,9 @@ interface CalendarEvent {
     note?: string;
     color?: string;
     isMoreIndicator?: boolean;
+    isContinuation?: boolean;
+    ownerDay?: number;
+    ownerDate?: Date;
     slot?: {
       start: string;
       end: string;
@@ -60,6 +65,7 @@ const ScheduleCalendar = ({ onSelectDay }: ScheduleCalendarProps) => {
     setSelectedDate,
   } = useScheduleStore();
   const [currentDate, setCurrentDate] = useState(selectedDate);
+  const [previousSchedule, setPreviousSchedule] = useState<Schedule | null>(null);
 
   // Sincronizar con selectedDate del store (por ejemplo, cuando se importa un horario)
   useEffect(() => {
@@ -80,13 +86,116 @@ const ScheduleCalendar = ({ onSelectDay }: ScheduleCalendarProps) => {
     }
   }, []);
 
+  useEffect(() => {
+    const loadPreviousSchedule = async () => {
+      const previousDate = new Date(
+        currentDate.getFullYear(),
+        currentDate.getMonth() - 1,
+        1
+      );
+      const previousYear = previousDate.getFullYear();
+      const previousMonth = previousDate.getMonth() + 1;
+
+      try {
+        const schedules = await scheduleService.getScheduleRange(
+          previousYear,
+          previousMonth,
+          previousYear,
+          previousMonth
+        );
+        setPreviousSchedule(schedules[0] || null);
+      } catch (err) {
+        console.error('Error loading previous schedule:', err);
+        setPreviousSchedule(null);
+      }
+    };
+
+    loadPreviousSchedule();
+  }, [currentDate]);
+
   const events = useMemo(() => {
     if (!currentSchedule) {
       return [];
     }
 
-    // Crear un evento separado por cada slot
     const allEvents: CalendarEvent[] = [];
+    const daysInMonth = new Date(
+      currentSchedule.year,
+      currentSchedule.month,
+      0
+    ).getDate();
+
+    const addSlotEvent = ({
+      date,
+      ownerDay,
+      ownerDate,
+      ownerAvailability,
+      slot,
+      displaySlot = slot,
+      isContinuation = false,
+    }: {
+      date: Date;
+      ownerDay: number;
+      ownerDate: Date;
+      ownerAvailability: DayAvailability;
+      slot: TimeSlot;
+      displaySlot?: TimeSlot;
+      isContinuation?: boolean;
+    }) => {
+      const timeLabel = `${displaySlot.start}-${displaySlot.end}`;
+      const title = displaySlot.title
+        ? `${displaySlot.title} ${timeLabel}`
+        : timeLabel;
+
+      allEvents.push({
+        title: isContinuation ? `${title} (continuacion)` : title,
+        start: date,
+        end: date,
+        resource: {
+          day: ownerDay,
+          ownerDay,
+          ownerDate,
+          slots: ownerAvailability.slots,
+          note: ownerAvailability.note,
+          color: slot.color,
+          slot: displaySlot,
+          isContinuation,
+        },
+      });
+    };
+
+    if (previousSchedule) {
+      const previousMonthLastDay = new Date(
+        previousSchedule.year,
+        previousSchedule.month,
+        0
+      ).getDate();
+      const previousLastDay =
+        previousSchedule.availability.find(
+          (availability) => availability.day === previousMonthLastDay
+        ) || null;
+
+      if (previousLastDay) {
+        previousLastDay.slots.forEach((slot) => {
+          const continuation = getContinuationSlot(slot);
+          if (!continuation) return;
+
+          addSlotEvent({
+            date: new Date(currentSchedule.year, currentSchedule.month - 1, 1),
+            ownerDay: previousLastDay.day,
+            ownerDate: new Date(
+              previousSchedule.year,
+              previousSchedule.month - 1,
+              previousLastDay.day
+            ),
+            ownerAvailability: previousLastDay,
+            slot,
+            displaySlot: continuation,
+            isContinuation: true,
+          });
+        });
+      }
+    }
 
     currentSchedule.availability.forEach((dayAvail) => {
       const date = new Date(
@@ -101,19 +210,37 @@ const ScheduleCalendar = ({ onSelectDay }: ScheduleCalendarProps) => {
         const remainingCount = dayAvail.slots.length - 3;
 
         visibleSlots.forEach((slot) => {
-          const timeLabel = `${slot.start}-${slot.end}`;
-          allEvents.push({
-            title: slot.title ? `${slot.title} ${timeLabel}` : timeLabel,
-            start: date,
-            end: date,
-            resource: {
-              day: dayAvail.day,
-              slots: dayAvail.slots,
-              note: dayAvail.note,
-              color: slot.color,
-              slot,
-            },
+          addSlotEvent({
+            date,
+            ownerDay: dayAvail.day,
+            ownerDate: date,
+            ownerAvailability: dayAvail,
+            slot,
           });
+        });
+
+        dayAvail.slots.forEach((slot) => {
+          if (
+            dayAvail.day < daysInMonth &&
+            (isOvernightSlot(slot) || isFullDaySlot(slot))
+          ) {
+            const continuation = getContinuationSlot(slot);
+            if (continuation) {
+              addSlotEvent({
+                date: new Date(
+                  currentSchedule.year,
+                  currentSchedule.month - 1,
+                  dayAvail.day + 1
+                ),
+                ownerDay: dayAvail.day,
+                ownerDate: date,
+                ownerAvailability: dayAvail,
+                slot,
+                displaySlot: continuation,
+                isContinuation: true,
+              });
+            }
+          }
         });
 
         // Agregar evento "+X más" si hay más de 3 slots
@@ -134,7 +261,7 @@ const ScheduleCalendar = ({ onSelectDay }: ScheduleCalendarProps) => {
     });
 
     return allEvents;
-  }, [currentSchedule]);
+  }, [currentSchedule, previousSchedule]);
 
   const handleSelectSlot = (slotInfo: SlotInfo) => {
     const selectedDate = slotInfo.start;
@@ -148,8 +275,12 @@ const ScheduleCalendar = ({ onSelectDay }: ScheduleCalendarProps) => {
   };
 
   const handleSelectEvent = (event: CalendarEvent) => {
-    const date = event.start;
-    const dayAvailability = event.resource;
+    const date = event.resource.ownerDate || event.start;
+    const dayAvailability = {
+      day: event.resource.ownerDay || event.resource.day,
+      slots: event.resource.slots,
+      note: event.resource.note,
+    };
     onSelectDay(date, dayAvailability);
   };
 
@@ -283,7 +414,14 @@ const ScheduleCalendar = ({ onSelectDay }: ScheduleCalendarProps) => {
   }) => {
     const day = value.getDate();
     const dayAvail = currentSchedule?.availability.find((a) => a.day === day);
-    const hasSchedule = dayAvail && dayAvail.slots.length > 0;
+    const hasContinuation = events.some(
+      (event) =>
+        event.resource.isContinuation &&
+        event.start.getFullYear() === value.getFullYear() &&
+        event.start.getMonth() === value.getMonth() &&
+        event.start.getDate() === value.getDate()
+    );
+    const hasSchedule = (dayAvail && dayAvail.slots.length > 0) || hasContinuation;
 
     return (
       <div
