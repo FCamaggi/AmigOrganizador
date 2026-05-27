@@ -1,6 +1,14 @@
 import Group from '../models/Group.js';
 import Event from '../models/Event.js';
 
+const getMemberUserId = (member) => {
+    if (!member || !member.user) {
+        return null;
+    }
+
+    return member.user._id ? member.user._id.toString() : member.user.toString();
+};
+
 /**
  * Vista simple: Obtener días con ventanas libres para todos los miembros
  * GET /api/groups/:id/availability/simple?startDate=YYYY-MM-DD&endDate=YYYY-MM-DD
@@ -27,10 +35,7 @@ export const getSimpleAvailability = async (req, res) => {
         }
 
         // Verificar que el usuario es miembro
-        const isMember = group.members.some(member => {
-            const memberId = member.user._id ? member.user._id.toString() : member.user.toString();
-            return memberId === userId.toString();
-        });
+        const isMember = group.members.some(member => getMemberUserId(member) === userId.toString());
 
         if (!isMember) {
             return res.status(403).json({
@@ -40,7 +45,10 @@ export const getSimpleAvailability = async (req, res) => {
         }
 
         const minimumHours = group.settings.minimumAvailabilityHours || 2;
-        const memberIds = group.members.map(m => m.user._id || m.user);
+        const activeMembers = group.members.filter(member => getMemberUserId(member));
+        const memberIds = activeMembers
+            .map(getMemberUserId)
+            .filter(Boolean);
 
         // Obtener todos los eventos de todos los miembros en el rango
         const allEvents = await Event.find({
@@ -122,10 +130,7 @@ export const getDetailedAvailability = async (req, res) => {
         }
 
         // Verificar que el usuario es miembro
-        const isMember = group.members.some(member => {
-            const memberId = member.user._id ? member.user._id.toString() : member.user.toString();
-            return memberId === userId.toString();
-        });
+        const isMember = group.members.some(member => getMemberUserId(member) === userId.toString());
 
         if (!isMember) {
             return res.status(403).json({
@@ -134,7 +139,10 @@ export const getDetailedAvailability = async (req, res) => {
             });
         }
 
-        const memberIds = group.members.map(m => m.user._id || m.user);
+        const activeMembers = group.members.filter(member => getMemberUserId(member));
+        const memberIds = activeMembers
+            .map(getMemberUserId)
+            .filter(Boolean);
 
         // Obtener todos los eventos de todos los miembros en el rango
         const allEvents = await Event.find({
@@ -161,7 +169,7 @@ export const getDetailedAvailability = async (req, res) => {
                 date,
                 eventsByUser,
                 memberIds,
-                group.members
+                activeMembers
             );
 
             detailedAvailability.push({
@@ -173,8 +181,8 @@ export const getDetailedAvailability = async (req, res) => {
         res.json({
             success: true,
             data: {
-                members: group.members.map(m => ({
-                    userId: m.user._id,
+                members: activeMembers.map(m => ({
+                    userId: getMemberUserId(m),
                     username: m.user.username,
                     fullName: m.user.fullName
                 })),

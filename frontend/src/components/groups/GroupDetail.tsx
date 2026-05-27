@@ -75,8 +75,9 @@ const GroupDetail = () => {
     );
   }
 
-  const isCreator = user?._id === currentGroup.creator._id;
-  const userMember = currentGroup.members.find((m) => m.user._id === user?._id);
+  const activeMembers = currentGroup.members.filter((member) => member.user);
+  const isCreator = user?._id === currentGroup.creator?._id;
+  const userMember = activeMembers.find((m) => m.user._id === user?._id);
   const isAdmin = userMember?.role === 'admin';
 
   const handleInvite = async () => {
@@ -339,10 +340,10 @@ const GroupDetail = () => {
               {/* Members Section */}
               <div className="bg-white rounded-xl sm:rounded-2xl shadow-soft p-4 sm:p-6 lg:p-8 mb-4 sm:mb-6">
                 <h2 className="text-lg sm:text-xl font-bold text-neutral-800 mb-3 sm:mb-4">
-                  Miembros ({currentGroup.memberCount})
+                  Miembros ({activeMembers.length})
                 </h2>
                 <div className="space-y-2 sm:space-y-3">
-                  {currentGroup.members.map((member) => (
+                  {activeMembers.map((member) => (
                     <div
                       key={member.user._id}
                       className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-3 sm:p-4 bg-neutral-50 rounded-xl"

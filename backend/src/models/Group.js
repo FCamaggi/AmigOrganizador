@@ -89,6 +89,14 @@ const groupSchema = new mongoose.Schema({
     timestamps: true
 });
 
+const getMemberUserId = (member) => {
+    if (!member || !member.user) {
+        return null;
+    }
+
+    return member.user._id ? member.user._id.toString() : member.user.toString();
+};
+
 // Índice para búsquedas rápidas
 groupSchema.index({ creator: 1 });
 groupSchema.index({ 'members.user': 1 });
@@ -113,9 +121,7 @@ groupSchema.statics.generateUniqueCode = async function () {
  * Método para verificar si un usuario es miembro del grupo
  */
 groupSchema.methods.isMember = function (userId) {
-    return this.members.some(member =>
-        member.user.toString() === userId.toString()
-    );
+    return this.members.some(member => getMemberUserId(member) === userId.toString());
 };
 
 /**
@@ -123,7 +129,7 @@ groupSchema.methods.isMember = function (userId) {
  */
 groupSchema.methods.isAdmin = function (userId) {
     return this.members.some(member =>
-        member.user.toString() === userId.toString() && member.role === 'admin'
+        getMemberUserId(member) === userId.toString() && member.role === 'admin'
     );
 };
 
@@ -146,7 +152,7 @@ groupSchema.methods.addMember = function (userId, role = 'member') {
  */
 groupSchema.methods.removeMember = function (userId) {
     this.members = this.members.filter(member =>
-        member.user.toString() !== userId.toString()
+        getMemberUserId(member) !== userId.toString()
     );
     return this.save();
 };
@@ -155,7 +161,7 @@ groupSchema.methods.removeMember = function (userId) {
  * Método para obtener número de miembros
  */
 groupSchema.methods.getMemberCount = function () {
-    return this.members.length;
+    return this.members.filter(member => getMemberUserId(member)).length;
 };
 
 /**
@@ -174,8 +180,10 @@ groupSchema.pre('save', async function (next) {
 groupSchema.methods.toJSON = function () {
     const group = this.toObject();
 
+    group.members = group.members.filter(member => member.user);
+
     // Agregar información calculada
-    group.memberCount = this.getMemberCount();
+    group.memberCount = group.members.length;
 
     return group;
 };

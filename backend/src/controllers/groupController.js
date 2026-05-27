@@ -2,6 +2,17 @@ import Group from '../models/Group.js';
 import Invitation from '../models/Invitation.js';
 import User from '../models/User.js';
 
+const getMemberUserId = (member) => {
+    if (!member || !member.user) {
+        return null;
+    }
+
+    return member.user._id ? member.user._id.toString() : member.user.toString();
+};
+
+const hasGroupMember = (group, userId) =>
+    group.members.some(member => getMemberUserId(member) === userId.toString());
+
 /**
  * Crear un nuevo grupo
  * POST /api/groups
@@ -107,10 +118,7 @@ export const getGroupById = async (req, res) => {
         }
 
         // Verificar que el usuario sea miembro del grupo
-        const isMember = group.members.some(member => {
-            const memberId = member.user._id ? member.user._id.toString() : member.user.toString();
-            return memberId === userId.toString();
-        });
+        const isMember = hasGroupMember(group, userId);
 
         if (!isMember) {
             return res.status(403).json({
@@ -142,9 +150,7 @@ export const joinGroupByCode = async (req, res) => {
         const { code } = req.params;
         const userId = req.userId;
 
-        const group = await Group.findOne({ code: code.toUpperCase() })
-            .populate('creator', 'username email fullName')
-            .populate('members.user', 'username email fullName');
+        const group = await Group.findOne({ code: code.toUpperCase() });
 
         if (!group) {
             return res.status(404).json({
@@ -154,10 +160,7 @@ export const joinGroupByCode = async (req, res) => {
         }
 
         // Verificar si ya es miembro
-        const isMember = group.members.some(member => {
-            const memberId = member.user._id ? member.user._id.toString() : member.user.toString();
-            return memberId === userId.toString();
-        });
+        const isMember = hasGroupMember(group, userId);
 
         if (isMember) {
             return res.status(400).json({
@@ -168,6 +171,7 @@ export const joinGroupByCode = async (req, res) => {
 
         // Agregar como miembro
         await group.addMember(userId, 'member');
+        await group.populate('creator', 'username email fullName');
         await group.populate('members.user', 'username email fullName');
 
         res.json({
@@ -262,10 +266,7 @@ export const updateAvailabilitySettings = async (req, res) => {
             });
         }
 
-        const isMember = group.members.some(member => {
-            const memberId = member.user._id ? member.user._id.toString() : member.user.toString();
-            return memberId === userId.toString();
-        });
+        const isMember = hasGroupMember(group, userId);
 
         if (!isMember) {
             return res.status(403).json({
@@ -464,10 +465,7 @@ export const leaveGroup = async (req, res) => {
         }
 
         // Verificar si el usuario es miembro
-        const isMember = group.members.some(member => {
-            const memberId = member.user._id ? member.user._id.toString() : member.user.toString();
-            return memberId === userId.toString();
-        });
+        const isMember = hasGroupMember(group, userId);
 
         if (!isMember) {
             return res.status(400).json({

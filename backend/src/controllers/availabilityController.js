@@ -36,7 +36,13 @@ const mergeBlocks = (blocks) => {
     return merged;
 };
 
-const getMemberId = (member) => member.user._id.toString();
+const getMemberId = (member) => {
+    if (!member || !member.user) {
+        return null;
+    }
+
+    return member.user._id ? member.user._id.toString() : member.user.toString();
+};
 
 const memberInfoFromSchedule = (schedule) => ({
     userId: schedule.user._id,
@@ -184,7 +190,7 @@ const buildWindowsForDay = ({
         }
     });
 
-    const allMemberIds = groupMembers.map(getMemberId);
+    const allMemberIds = groupMembers.map(getMemberId).filter(Boolean);
 
     return mergedWindows
         .map(window => {
@@ -202,14 +208,14 @@ const buildWindowsForDay = ({
                 availableMembers: groupMembers
                     .filter(member => window.availableMemberIds.includes(getMemberId(member)))
                     .map(member => ({
-                        userId: member.user._id,
+                        userId: getMemberId(member),
                         username: member.user.username || member.user.email,
                         fullName: member.user.fullName
                     })),
                 unavailableMembers: groupMembers
                     .filter(member => unavailableMemberIds.includes(getMemberId(member)))
                     .map(member => ({
-                        userId: member.user._id,
+                        userId: getMemberId(member),
                         username: member.user.username || member.user.email,
                         fullName: member.user.fullName
                     }))
@@ -308,8 +314,9 @@ export const getGroupAvailability = async (req, res) => {
             });
         }
 
-        const isMember = group.members.some(
-            member => member.user._id.toString() === req.userId
+        const groupMembers = group.members.filter(member => getMemberId(member));
+        const isMember = groupMembers.some(
+            member => getMemberId(member) === req.userId
         );
 
         if (!isMember) {
@@ -319,7 +326,7 @@ export const getGroupAvailability = async (req, res) => {
             });
         }
 
-        const memberIds = group.members.map(member => member.user._id);
+        const memberIds = groupMembers.map(member => getMemberId(member));
 
         for (const memberId of memberIds) {
             await Schedule.getOrCreate(memberId, parsedYear, parsedMonth);
@@ -349,7 +356,7 @@ export const getGroupAvailability = async (req, res) => {
                 parsedMonth,
                 schedules,
                 previousSchedules,
-                group.members,
+                groupMembers,
                 settings
             ));
         }
@@ -371,7 +378,7 @@ export const getGroupAvailability = async (req, res) => {
             daysWithPerfectOption: days.filter(day => day.perfectWindows.length > 0).length,
             daysWithStrongAlternative: days.filter(day => day.alternativeWindows.length > 0).length,
             totalRecommendations: recommendations.length,
-            memberCount: group.members.length,
+            memberCount: groupMembers.length,
             schedulesSubmitted: schedules.length
         };
 

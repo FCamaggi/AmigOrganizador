@@ -56,13 +56,30 @@ export interface UpdateGroupData {
 
 export type UpdateAvailabilitySettingsData = AvailabilitySettings;
 
+const sanitizeGroup = (group: Group): Group => {
+  const rawMembers = group.members as Array<
+    Omit<GroupMember, 'user'> & { user: GroupMember['user'] | null }
+  >;
+  const members = rawMembers.filter(
+    (member): member is GroupMember => Boolean(member.user?._id)
+  );
+
+  return {
+    ...group,
+    members,
+    memberCount: members.length,
+  };
+};
+
+const sanitizeGroups = (groups: Group[]): Group[] => groups.map(sanitizeGroup);
+
 export const groupService = {
   /**
    * Crear nuevo grupo
    */
   async createGroup(data: CreateGroupData): Promise<Group> {
     const response = await api.post('/groups', data);
-    return response.data.data;
+    return sanitizeGroup(response.data.data);
   },
 
   /**
@@ -70,7 +87,7 @@ export const groupService = {
    */
   async getMyGroups(): Promise<Group[]> {
     const response = await api.get('/groups');
-    return response.data.data;
+    return sanitizeGroups(response.data.data);
   },
 
   /**
@@ -78,7 +95,7 @@ export const groupService = {
    */
   async getGroupById(groupId: string): Promise<Group> {
     const response = await api.get(`/groups/${groupId}`);
-    return response.data.data;
+    return sanitizeGroup(response.data.data);
   },
 
   /**
@@ -86,7 +103,7 @@ export const groupService = {
    */
   async joinGroupByCode(code: string): Promise<Group> {
     const response = await api.post(`/groups/join/${code}`);
-    return response.data.data;
+    return sanitizeGroup(response.data.data);
   },
 
   /**
@@ -94,7 +111,7 @@ export const groupService = {
    */
   async updateGroup(groupId: string, data: UpdateGroupData): Promise<Group> {
     const response = await api.put(`/groups/${groupId}`, data);
-    return response.data.data;
+    return sanitizeGroup(response.data.data);
   },
 
   async updateAvailabilitySettings(
@@ -105,7 +122,7 @@ export const groupService = {
       `/groups/${groupId}/availability-settings`,
       data
     );
-    return response.data.data;
+    return sanitizeGroup(response.data.data);
   },
 
   /**
@@ -127,6 +144,6 @@ export const groupService = {
    */
   async removeMember(groupId: string, memberId: string): Promise<Group> {
     const response = await api.delete(`/groups/${groupId}/members/${memberId}`);
-    return response.data.data;
+    return sanitizeGroup(response.data.data);
   },
 };
