@@ -24,11 +24,11 @@ router.post('/', groupController.createGroup);
 router.get('/', groupController.getMyGroups);
 
 /**
- * @route   GET /api/groups/:id
- * @desc    Obtener grupo por ID
- * @access  Private (solo miembros)
+ * @route   GET /api/groups/:id/event-suggestions
+ * @desc    Obtener eventos sugeridos para los dias utiles del grupo
+ * @access  Private (miembros)
  */
-router.get('/:id', groupController.getGroupById);
+router.get('/:id/event-suggestions', getGroupEventSuggestions);
 
 /**
  * @route   PATCH /api/groups/:id/availability-settings
@@ -38,11 +38,11 @@ router.get('/:id', groupController.getGroupById);
 router.patch('/:id/availability-settings', groupController.updateAvailabilitySettings);
 
 /**
- * @route   GET /api/groups/:id/event-suggestions
- * @desc    Obtener eventos sugeridos para los dias utiles del grupo
- * @access  Private (miembros)
+ * @route   GET /api/groups/:id
+ * @desc    Obtener grupo por ID
+ * @access  Private (solo miembros)
  */
-router.get('/:id/event-suggestions', getGroupEventSuggestions);
+router.get('/:id', groupController.getGroupById);
 
 /**
  * @route   POST /api/groups/join/:code

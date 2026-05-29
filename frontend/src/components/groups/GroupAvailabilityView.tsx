@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { format, getDaysInMonth, startOfMonth } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { availabilityService } from '../../services/availabilityService';
+import { getApiErrorMessage } from '../../services/api';
 import { eventSuggestionService } from '../../services/eventSuggestionService';
 import { groupService } from '../../services/groupService';
 import type {
@@ -161,7 +162,9 @@ const GroupAvailabilityView = ({
     } catch (err) {
       console.error(err);
       setEventSuggestions(null);
-      setEventsError('No pudimos cargar eventos sugeridos por ahora');
+      setEventsError(
+        getApiErrorMessage(err, 'No pudimos cargar eventos sugeridos por ahora')
+      );
     } finally {
       setIsLoadingEvents(false);
     }
@@ -878,7 +881,7 @@ const GroupAvailabilityView = ({
         </div>
       )}
 
-      {isLoadingEvents && !eventSuggestions ? (
+      {eventsError && eventDays.length === 0 ? null : isLoadingEvents && !eventSuggestions ? (
         <div className="flex items-center gap-3 rounded-lg bg-neutral-50 p-4 text-sm text-neutral-600">
           <span className="h-4 w-4 animate-spin rounded-full border-2 border-primary-300 border-t-primary-700" />
           Buscando eventos compatibles...
