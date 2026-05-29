@@ -23,6 +23,7 @@ export interface SuggestedEvent {
   matchingWindows?: AvailabilityWindow[];
   matchType?: 'perfect' | 'alternative';
   availabilityPercentage?: number;
+  timeMatchStatus?: 'matched' | 'unknown-time';
 }
 
 export interface SuggestedEventDay {
@@ -30,6 +31,9 @@ export interface SuggestedEventDay {
   availabilityWindow: AvailabilityWindow;
   windows?: AvailabilityWindow[];
   events: SuggestedEvent[];
+  rawEventsCount?: number;
+  timedEventsCount?: number;
+  unknownTimeEventsCount?: number;
 }
 
 export interface GroupEventSuggestions {
@@ -39,6 +43,8 @@ export interface GroupEventSuggestions {
   available: boolean;
   message?: string;
   totalEvents: number;
+  rawEventsCount?: number;
+  unknownTimeEventsCount?: number;
   days: SuggestedEventDay[];
 }
 

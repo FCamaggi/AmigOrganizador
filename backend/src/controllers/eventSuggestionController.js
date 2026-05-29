@@ -58,6 +58,29 @@ const getEventMatchingWindows = (event, windows, includeUnknownTime) => {
     });
 };
 
+const getBestMatchingWindow = (windows) =>
+    windows
+        .slice()
+        .sort((a, b) => {
+            if (a.type !== b.type) return a.type === 'perfect' ? -1 : 1;
+            if ((b.qualityScore || 0) !== (a.qualityScore || 0)) {
+                return (b.qualityScore || 0) - (a.qualityScore || 0);
+            }
+            return b.availabilityPercentage - a.availabilityPercentage;
+        })[0];
+
+const decorateEventMatch = (event, matchingWindows, timeMatchStatus = 'matched') => {
+    const bestMatch = getBestMatchingWindow(matchingWindows);
+
+    return {
+        ...event,
+        matchingWindows,
+        matchType: bestMatch.type || (bestMatch.availabilityPercentage === 100 ? 'perfect' : 'alternative'),
+        availabilityPercentage: bestMatch.availabilityPercentage,
+        timeMatchStatus
+    };
+};
+
 export const getGroupEventSuggestions = async (req, res) => {
     try {
         const { id } = req.params;
@@ -132,42 +155,54 @@ export const getGroupEventSuggestions = async (req, res) => {
 
         const days = usefulDays.map(day => {
             const events = eventDaysByDate.get(day.date) || [];
-            const filteredEvents = events
-                .filter(event => !sources || sources.includes(event.source))
-                .map(event => {
-                    const matchingWindows = getEventMatchingWindows(
-                        event,
-                        day.windows,
-                        includeUnknownTime
-                    );
-                    if (matchingWindows.length === 0) return null;
+            const sourceFilteredEvents = events.filter(event => !sources || sources.includes(event.source));
+            const timedMatches = [];
+            const unknownTimeEvents = [];
 
-                    const bestMatch = matchingWindows
-                        .slice()
-                        .sort((a, b) => {
-                            if (a.type !== b.type) return a.type === 'perfect' ? -1 : 1;
-                            if ((b.qualityScore || 0) !== (a.qualityScore || 0)) {
-                                return (b.qualityScore || 0) - (a.qualityScore || 0);
-                            }
-                            return b.availabilityPercentage - a.availabilityPercentage;
-                        })[0];
+            sourceFilteredEvents.forEach(event => {
+                if (!event.timeLocal) {
+                    unknownTimeEvents.push(event);
+                    return;
+                }
 
-                    return {
-                        ...event,
-                        matchingWindows,
-                        matchType: bestMatch.type || (bestMatch.availabilityPercentage === 100 ? 'perfect' : 'alternative'),
-                        availabilityPercentage: bestMatch.availabilityPercentage
-                    };
-                })
-                .filter(Boolean);
+                const matchingWindows = getEventMatchingWindows(event, day.windows, false);
+                if (matchingWindows.length > 0) {
+                    timedMatches.push(decorateEventMatch(event, matchingWindows));
+                }
+            });
+
+            const unknownMatches = (includeUnknownTime || timedMatches.length === 0)
+                ? unknownTimeEvents.map(event =>
+                    decorateEventMatch(event, day.windows, 'unknown-time')
+                )
+                : [];
+
+            const filteredEvents = [...timedMatches, ...unknownMatches];
 
             return {
                 date: day.date,
                 availabilityWindow: day.availabilityWindow,
                 windows: day.windows,
-                events: filteredEvents
+                events: filteredEvents,
+                rawEventsCount: sourceFilteredEvents.length,
+                timedEventsCount: sourceFilteredEvents.filter(event => event.timeLocal).length,
+                unknownTimeEventsCount: unknownTimeEvents.length
             };
         });
+
+        const totalEvents = days.reduce((total, day) => total + day.events.length, 0);
+        const rawEventsCount = days.reduce((total, day) => total + day.rawEventsCount, 0);
+        const unknownTimeEventsCount = days.reduce(
+            (total, day) => total + day.unknownTimeEventsCount,
+            0
+        );
+        const message = suggestions.message ||
+            (totalEvents === 0 && rawEventsCount > 0
+                ? 'Encontramos eventos para estos dias, pero ninguno calza con las ventanas horarias actuales'
+                : undefined) ||
+            (unknownTimeEventsCount > 0
+                ? 'Algunos eventos no tienen hora confirmada y se muestran como referencia'
+                : undefined);
 
         res.json({
             success: true,
@@ -176,8 +211,10 @@ export const getGroupEventSuggestions = async (req, res) => {
                 month: parsedMonth.month,
                 year: parsedMonth.year,
                 available: suggestions.available,
-                message: suggestions.message,
-                totalEvents: days.reduce((total, day) => total + day.events.length, 0),
+                message,
+                totalEvents,
+                rawEventsCount,
+                unknownTimeEventsCount,
                 days
             }
         });

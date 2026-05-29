@@ -445,7 +445,9 @@ const GroupAvailabilityView = ({
           </span>
           {matchingWindow && (
             <span className="mt-2 inline-flex rounded-full bg-green-50 px-2 py-1 text-xs font-semibold text-green-800">
-              Calza {matchingWindow.start}-{matchingWindow.end}
+              {event.timeMatchStatus === 'unknown-time'
+                ? `Hora por confirmar - ventana ${matchingWindow.start}-${matchingWindow.end}`
+                : `Calza ${matchingWindow.start}-${matchingWindow.end}`}
             </span>
           )}
         </span>
@@ -878,6 +880,12 @@ const GroupAvailabilityView = ({
       {eventsError && (
         <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
           {eventsError}
+        </div>
+      )}
+
+      {!eventsError && eventSuggestions?.message && (
+        <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+          {eventSuggestions.message}
         </div>
       )}
 
