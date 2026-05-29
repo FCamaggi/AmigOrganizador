@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { authService } from '../services/authService';
+import { getApiErrorMessage } from '../services/api';
 
 interface User {
   _id: string;
@@ -48,9 +49,8 @@ export const useAuthStore = create<AuthState>((set) => ({
         error: null,
       });
       return data;
-    } catch (error: any) {
-      const message =
-        error.response?.data?.message || 'Error al iniciar sesión';
+    } catch (error) {
+      const message = getApiErrorMessage(error, 'Error al iniciar sesión');
       set({
         error: message,
         loading: false,
@@ -72,9 +72,8 @@ export const useAuthStore = create<AuthState>((set) => ({
         error: null,
       });
       return data;
-    } catch (error: any) {
-      const message =
-        error.response?.data?.message || 'Error al registrar usuario';
+    } catch (error) {
+      const message = getApiErrorMessage(error, 'Error al registrar usuario');
       set({
         error: message,
         loading: false,

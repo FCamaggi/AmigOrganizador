@@ -52,10 +52,6 @@ const userSchema = new mongoose.Schema({
     timestamps: true
 });
 
-// Índices para mejorar performance
-userSchema.index({ email: 1 });
-userSchema.index({ username: 1 });
-
 // Hook pre-save para hashear contraseña
 userSchema.pre('save', async function (next) {
     // Solo hashear si la contraseña fue modificada

@@ -1,9 +1,11 @@
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useScheduleStore } from '../../store/scheduleStore';
+import { useEventStore } from '../../store/eventStore';
 import { cn } from '../../styles/design-system';
 import Button from '../common/Button';
 import Card from '../common/Card';
 import type { TimeSlot } from '../../services/scheduleService';
+import type { UserTemplate } from '../../services/userTemplateService';
 
 interface WeekTemplate {
   [day: string]: TimeSlot[];
@@ -84,6 +86,14 @@ interface QuickScheduleViewProps {
 
 const cloneSlots = (slots: TimeSlot[]) => slots.map((slot) => ({ ...slot }));
 
+const templateToSlots = (template: UserTemplate): TimeSlot[] =>
+  template.defaultSlots.map((slot) => ({
+    start: slot.start,
+    end: slot.end,
+    title: template.name,
+    color: template.color,
+  }));
+
 const normalizeSlots = (slots: TimeSlot[]) =>
   slots.map((slot) => ({
     ...slot,
@@ -113,14 +123,35 @@ const mergeSlots = (existingSlots: TimeSlot[], incomingSlots: TimeSlot[]) => {
 const QuickScheduleView = ({ onApply }: QuickScheduleViewProps) => {
   const { currentSchedule, selectedDate, updateDayAvailability, loading } =
     useScheduleStore();
+  const {
+    userTemplates,
+    fetchUserTemplates,
+    createUserTemplate,
+    loading: templatesLoading,
+  } = useEventStore();
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
   const [customTemplate, setCustomTemplate] = useState<WeekTemplate>({});
   const [selectedDays, setSelectedDays] = useState<Set<string>>(new Set());
   const [showCustomModal, setShowCustomModal] = useState(false);
   const [applyMode, setApplyMode] = useState<ApplyMode>('append');
+  const [customTemplateName, setCustomTemplateName] = useState('');
   const [customSlots, setCustomSlots] = useState<TimeSlot[]>([
     { start: '09:00', end: '17:00', title: '', color: '#6366f1' },
   ]);
+
+  useEffect(() => {
+    fetchUserTemplates().catch((error) => {
+      console.error('Error loading user templates:', error);
+    });
+  }, [fetchUserTemplates]);
+
+  const reusableTemplates = useMemo(
+    () =>
+      userTemplates.filter(
+        (template) => !template.isDefault && template.defaultSlots.length > 0
+      ),
+    [userTemplates]
+  );
 
   const handleTemplateSelect = (templateKey: string) => {
     const template = QUICK_TEMPLATES[templateKey];
@@ -134,6 +165,14 @@ const QuickScheduleView = ({ onApply }: QuickScheduleViewProps) => {
       )
     );
     setSelectedDays(new Set(Object.keys(template)));
+  };
+
+  const handleUserTemplateSelect = (template: UserTemplate) => {
+    const slots = templateToSlots(template);
+    setSelectedTemplate(`user-${template._id}`);
+    setCustomSlots(slots);
+    setCustomTemplate({});
+    setSelectedDays(new Set());
   };
 
   const handleDayToggle = (dayKey: string) => {
@@ -182,18 +221,46 @@ const QuickScheduleView = ({ onApply }: QuickScheduleViewProps) => {
     setCustomSlots((slots) => slots.filter((_, slotIndex) => slotIndex !== index));
   };
 
-  const handleApplyCustomTime = () => {
+  const handleApplyCustomTime = async () => {
     if (customSlots.length === 0) {
       alert('Agrega al menos una franja horaria');
       return;
     }
 
+    const normalizedSlots = normalizeSlots(customSlots);
+    const templateName =
+      customTemplateName.trim() ||
+      normalizedSlots.find((slot) => slot.title)?.title ||
+      'Plantilla personalizada';
+
+    try {
+      const savedTemplate = await createUserTemplate({
+        name: templateName,
+        category: 'custom',
+        color: normalizedSlots[0]?.color || '#6366f1',
+        defaultSlots: normalizedSlots.map((slot) => ({
+          start: slot.start,
+          end: slot.end,
+        })),
+      });
+
+      setSelectedTemplate(`user-${savedTemplate._id}`);
+      setCustomSlots(templateToSlots(savedTemplate));
+    } catch (error) {
+      console.error('Error saving custom template:', error);
+      alert('No se pudo guardar la plantilla personalizada');
+      return;
+    }
+
     const newTemplate = { ...customTemplate };
     selectedDays.forEach((dayKey) => {
-      newTemplate[dayKey] = normalizeSlots(customSlots);
+      newTemplate[dayKey] = normalizedSlots.map((slot) => ({
+        ...slot,
+        title: templateName,
+      }));
     });
     setCustomTemplate(newTemplate);
-    setSelectedTemplate('custom');
+    setCustomTemplateName('');
     setShowCustomModal(false);
   };
 
@@ -277,6 +344,64 @@ const QuickScheduleView = ({ onApply }: QuickScheduleViewProps) => {
             </Card>
           ))}
         </div>
+
+        {reusableTemplates.length > 0 && (
+          <div className="mt-4">
+            <h4 className="text-sm font-semibold text-neutral-700 mb-2">
+              Mis plantillas
+            </h4>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3">
+              {reusableTemplates.map((template) => {
+                const templateKey = `user-${template._id}`;
+                const slotsLabel = template.defaultSlots
+                  .map((slot) => `${slot.start}-${slot.end}`)
+                  .join(', ');
+
+                return (
+                  <Card
+                    key={template._id}
+                    variant={
+                      selectedTemplate === templateKey
+                        ? 'interactive'
+                        : 'elevated'
+                    }
+                    className={cn(
+                      'cursor-pointer transition-all',
+                      selectedTemplate === templateKey &&
+                        'ring-2 ring-primary-500'
+                    )}
+                    onClick={() => handleUserTemplateSelect(template)}
+                  >
+                    <div className="flex items-start gap-3">
+                      <span
+                        className="mt-1 h-4 w-4 rounded-full border border-white shadow-sm flex-shrink-0"
+                        style={{ backgroundColor: template.color }}
+                      />
+                      <span className="min-w-0">
+                        <h4 className="text-sm sm:text-base font-semibold text-neutral-800 truncate">
+                          {template.name}
+                        </h4>
+                        <p className="text-xs sm:text-sm text-neutral-600 mt-1">
+                          {slotsLabel}
+                        </p>
+                      </span>
+                    </div>
+                  </Card>
+                );
+              })}
+            </div>
+            <p className="mt-2 text-xs text-neutral-500">
+              Selecciona una plantilla y luego marca los dias donde quieres
+              aplicarla.
+            </p>
+          </div>
+        )}
+
+        {templatesLoading && reusableTemplates.length === 0 && (
+          <p className="mt-3 text-xs text-neutral-500">
+            Cargando plantillas guardadas...
+          </p>
+        )}
       </div>
 
       <div>
@@ -415,6 +540,20 @@ const QuickScheduleView = ({ onApply }: QuickScheduleViewProps) => {
             </div>
 
             <div className="space-y-3">
+              <div>
+                <label className="block text-xs font-medium text-neutral-700 mb-1">
+                  Nombre de la plantilla
+                </label>
+                <input
+                  type="text"
+                  value={customTemplateName}
+                  onChange={(event) => setCustomTemplateName(event.target.value)}
+                  placeholder="Ej: Turno Urgencia, Libre PM..."
+                  maxLength={100}
+                  className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                />
+              </div>
+
               {customSlots.map((slot, index) => (
                 <div
                   key={index}
@@ -514,8 +653,12 @@ const QuickScheduleView = ({ onApply }: QuickScheduleViewProps) => {
                 >
                   Cancelar
                 </Button>
-                <Button onClick={handleApplyCustomTime} variant="primary">
-                  Usar esta plantilla
+                <Button
+                  onClick={handleApplyCustomTime}
+                  variant="primary"
+                  loading={templatesLoading}
+                >
+                  Guardar y usar plantilla
                 </Button>
               </div>
             </div>

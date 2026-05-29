@@ -1,6 +1,19 @@
 import User from '../models/User.js';
 import { generateToken } from '../utils/jwt.js';
 
+const duplicateUserError = (field) => ({
+    success: false,
+    message: field === 'email'
+        ? 'El email ya está registrado'
+        : 'El username ya está en uso',
+    errors: [{
+        field,
+        message: field === 'email'
+            ? 'Este email ya está registrado'
+            : 'Este username ya está en uso'
+    }]
+});
+
 /**
  * @route   POST /api/auth/register
  * @desc    Registrar nuevo usuario
@@ -9,33 +22,29 @@ import { generateToken } from '../utils/jwt.js';
 export const register = async (req, res) => {
     try {
         const { email, password, username, fullName } = req.body;
+        const normalizedEmail = email.toLowerCase().trim();
+        const normalizedUsername = username.trim();
 
         // Verificar si el usuario ya existe (email o username)
         const existingUser = await User.findOne({
-            $or: [{ email }, { username }]
+            $or: [{ email: normalizedEmail }, { username: normalizedUsername }]
         });
 
         if (existingUser) {
-            if (existingUser.email === email) {
-                return res.status(400).json({
-                    success: false,
-                    message: 'El email ya está registrado'
-                });
+            if (existingUser.email === normalizedEmail) {
+                return res.status(409).json(duplicateUserError('email'));
             }
-            if (existingUser.username === username) {
-                return res.status(400).json({
-                    success: false,
-                    message: 'El username ya está en uso'
-                });
+            if (existingUser.username === normalizedUsername) {
+                return res.status(409).json(duplicateUserError('username'));
             }
         }
 
         // Crear nuevo usuario
         const user = new User({
-            email,
+            email: normalizedEmail,
             password,
-            username,
-            fullName
+            username: normalizedUsername,
+            fullName: fullName?.trim()
         });
 
         await user.save();
@@ -56,6 +65,13 @@ export const register = async (req, res) => {
 
     } catch (error) {
         console.error('Error en register:', error);
+        if (error.code === 11000) {
+            const field = Object.keys(error.keyPattern || error.keyValue || {})[0];
+            if (field === 'email' || field === 'username') {
+                return res.status(409).json(duplicateUserError(field));
+            }
+        }
+
         res.status(500).json({
             success: false,
             message: 'Error al registrar usuario',

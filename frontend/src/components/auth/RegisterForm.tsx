@@ -27,6 +27,20 @@ interface FormErrors {
   [key: string]: string | undefined;
 }
 
+interface ApiFieldError {
+  field: string;
+  message: string;
+}
+
+interface ApiErrorResponse {
+  response?: {
+    data?: {
+      message?: string;
+      errors?: ApiFieldError[];
+    };
+  };
+}
+
 const RegisterForm = () => {
   const navigate = useNavigate();
   const { register, loading, error, clearError } = useAuthStore();
@@ -109,7 +123,15 @@ const RegisterForm = () => {
     } catch (error) {
       // El error ya está manejado en el store y se mostrará en la UI
       console.error('Error en registro:', error);
-      // No hacer nada más - el error ya está en el estado
+      const apiErrors = (error as ApiErrorResponse).response?.data?.errors;
+      if (apiErrors?.length) {
+        setFormErrors((currentErrors) => ({
+          ...currentErrors,
+          ...Object.fromEntries(
+            apiErrors.map((apiError) => [apiError.field, apiError.message])
+          ),
+        }));
+      }
     }
   };
 
@@ -125,6 +147,15 @@ const RegisterForm = () => {
         {error && (
           <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-danger-50 border border-danger-200 text-danger-700 rounded-xl text-sm">
             {error}
+          </div>
+        )}
+
+        {loading && (
+          <div className="mb-4 sm:mb-6 flex items-center gap-3 rounded-xl border border-primary-200 bg-primary-50 p-3 text-sm text-primary-800">
+            <span className="h-4 w-4 rounded-full border-2 border-primary-300 border-t-primary-700 animate-spin" />
+            <span>
+              Conectando con la API. Si Render estaba dormido, puede tardar unos segundos.
+            </span>
           </div>
         )}
 
