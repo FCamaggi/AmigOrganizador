@@ -1,6 +1,6 @@
 import { config } from '../config/env.js';
 
-export const fetchEventSuggestions = async ({ dates, categories, city = 'Santiago', limit = 20 }) => {
+export const fetchEventSuggestions = async ({ dates, categories, city, limit = 20 }) => {
     if (!config.eventScraperApiUrl || !config.eventScraperApiKey) {
         return {
             available: false,
@@ -20,7 +20,7 @@ export const fetchEventSuggestions = async ({ dates, categories, city = 'Santiag
                 'Content-Type': 'application/json',
                 'x-api-key': config.eventScraperApiKey
             },
-            body: JSON.stringify({ dates, categories, city, limit }),
+            body: JSON.stringify({ dates, categories, ...(city ? { city } : {}), limit }),
             signal: controller.signal
         });
 

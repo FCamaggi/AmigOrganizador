@@ -8,6 +8,7 @@ export interface SuggestedEvent {
   name: string;
   date?: string | null;
   dateLocal?: string | null;
+  timeLocal?: string | null;
   venue?: {
     name?: string | null;
     city?: string | null;
@@ -19,11 +20,15 @@ export interface SuggestedEvent {
   ticketUrl?: string | null;
   priceFrom?: number | null;
   description?: string | null;
+  matchingWindows?: AvailabilityWindow[];
+  matchType?: 'perfect' | 'alternative';
+  availabilityPercentage?: number;
 }
 
 export interface SuggestedEventDay {
   date: string;
   availabilityWindow: AvailabilityWindow;
+  windows?: AvailabilityWindow[];
   events: SuggestedEvent[];
 }
 
@@ -41,11 +46,31 @@ export const eventSuggestionService = {
   async getGroupEventSuggestions(
     groupId: string,
     month: number,
-    year: number
+    year: number,
+    filters?: {
+      categories?: string[];
+      city?: string;
+      source?: string;
+      includeAlternatives?: boolean;
+      includeUnknownTime?: boolean;
+      limit?: number;
+    }
   ): Promise<GroupEventSuggestions> {
     const response = await api.get(`/groups/${groupId}/event-suggestions`, {
       params: {
         month: `${year}-${month.toString().padStart(2, '0')}`,
+        ...(filters?.categories?.length
+          ? { categories: filters.categories.join(',') }
+          : {}),
+        ...(filters?.city ? { city: filters.city } : {}),
+        ...(filters?.source ? { source: filters.source } : {}),
+        ...(filters?.includeAlternatives !== undefined
+          ? { includeAlternatives: filters.includeAlternatives }
+          : {}),
+        ...(filters?.includeUnknownTime !== undefined
+          ? { includeUnknownTime: filters.includeUnknownTime }
+          : {}),
+        ...(filters?.limit ? { limit: filters.limit } : {}),
       },
     });
     return response.data.data;

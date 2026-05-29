@@ -20,6 +20,9 @@ export interface AvailabilityWindow {
   end: string;
   durationMinutes: number;
   availabilityPercentage: number;
+  qualityScore: number;
+  scoreReasons: string[];
+  timeQuality: 'morning' | 'afternoon' | 'evening' | 'late';
   availableMembers: AvailabilityMember[];
   unavailableMembers: AvailabilityMember[];
   type?: 'perfect' | 'alternative';

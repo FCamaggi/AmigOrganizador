@@ -125,12 +125,77 @@ const invertBusyBlocks = (busyBlocks, usefulStart, usefulEnd) => {
 const isSegmentInsideBlock = (segment, block) =>
     segment.start >= block.start && segment.end <= block.end;
 
+const getTimeQuality = (startMinutes, endMinutes) => {
+    const midpoint = (startMinutes + endMinutes) / 2;
+    if (midpoint < 12 * 60) return 'morning';
+    if (midpoint < 17 * 60) return 'afternoon';
+    if (midpoint < 22 * 60) return 'evening';
+    return 'late';
+};
+
+const getTimeQualityScore = (timeQuality) => ({
+    morning: 0.65,
+    afternoon: 0.85,
+    evening: 1,
+    late: 0.45
+}[timeQuality] || 0.65);
+
+const scoreWindow = ({ window, date, memberCount, submittedMemberCount }) => {
+    const startMinutes = window.start;
+    const endMinutes = window.end;
+    const durationMinutes = endMinutes - startMinutes;
+    const availabilityRatio = window.availabilityPercentage / 100;
+    const durationRatio = Math.min(durationMinutes / 180, 1);
+    const timeQuality = getTimeQuality(startMinutes, endMinutes);
+    const timeRatio = getTimeQualityScore(timeQuality);
+    const weekday = new Date(`${date}T12:00:00`).getDay();
+    const dayRatio = weekday === 5 || weekday === 6 ? 1 : weekday === 0 ? 0.9 : 0.65;
+    const certaintyRatio = memberCount > 0 ? submittedMemberCount / memberCount : 0;
+    const qualityScore = Math.round(
+        (availabilityRatio * 45) +
+        (durationRatio * 20) +
+        (timeRatio * 20) +
+        (dayRatio * 10) +
+        (certaintyRatio * 5)
+    );
+
+    const scoreReasons = [];
+    if (window.availabilityPercentage === 100) {
+        scoreReasons.push('Todos pueden');
+    } else {
+        scoreReasons.push(`${window.availabilityPercentage}% del grupo puede`);
+    }
+    if (durationMinutes >= 180) {
+        scoreReasons.push('Bloque largo');
+    } else if (durationMinutes >= 120) {
+        scoreReasons.push('Duracion suficiente');
+    }
+    if (timeQuality === 'evening') {
+        scoreReasons.push('Horario tarde/noche');
+    } else if (timeQuality === 'late') {
+        scoreReasons.push('Horario tardio');
+    }
+    if (dayRatio >= 0.9) {
+        scoreReasons.push('Buen dia de semana');
+    }
+    if (certaintyRatio < 1) {
+        scoreReasons.push('Faltan horarios de algunos miembros');
+    }
+
+    return {
+        qualityScore,
+        scoreReasons,
+        timeQuality
+    };
+};
+
 const buildWindowsForDay = ({
     day,
     date,
     memberFreeBlocks,
     groupMembers,
     memberCount,
+    submittedMemberCount,
     settings
 }) => {
     const boundaries = new Set([
@@ -198,6 +263,13 @@ const buildWindowsForDay = ({
                 memberId => !window.availableMemberIds.includes(memberId)
             );
 
+            const scored = scoreWindow({
+                window,
+                date,
+                memberCount,
+                submittedMemberCount
+            });
+
             return {
                 day,
                 date,
@@ -205,6 +277,9 @@ const buildWindowsForDay = ({
                 end: minutesToTime(window.end),
                 durationMinutes: window.end - window.start,
                 availabilityPercentage: window.availabilityPercentage,
+                qualityScore: scored.qualityScore,
+                scoreReasons: scored.scoreReasons,
+                timeQuality: scored.timeQuality,
                 availableMembers: groupMembers
                     .filter(member => window.availableMemberIds.includes(getMemberId(member)))
                     .map(member => ({
@@ -225,6 +300,12 @@ const buildWindowsForDay = ({
 };
 
 const sortWindows = (a, b) => {
+    const aPerfect = a.availabilityPercentage === 100;
+    const bPerfect = b.availabilityPercentage === 100;
+    if (aPerfect !== bPerfect) return aPerfect ? -1 : 1;
+    if ((b.qualityScore || 0) !== (a.qualityScore || 0)) {
+        return (b.qualityScore || 0) - (a.qualityScore || 0);
+    }
     if (b.availabilityPercentage !== a.availabilityPercentage) {
         return b.availabilityPercentage - a.availabilityPercentage;
     }
@@ -234,7 +315,7 @@ const sortWindows = (a, b) => {
     return timeToMinutes(a.start) - timeToMinutes(b.start);
 };
 
-const buildDaySummary = (day, year, month, schedules, previousSchedules, groupMembers, settings) => {
+const buildDaySummary = (day, year, month, schedules, previousSchedules, groupMembers, settings, submittedMemberIds) => {
     const usefulStart = timeToMinutes(settings.usefulStart);
     const usefulEnd = timeToMinutes(settings.usefulEnd);
     const date = new Date(year, month - 1, day).toISOString().slice(0, 10);
@@ -262,6 +343,7 @@ const buildDaySummary = (day, year, month, schedules, previousSchedules, groupMe
         memberFreeBlocks,
         groupMembers,
         memberCount: groupMembers.length,
+        submittedMemberCount: submittedMemberIds.size,
         settings
     }).sort(sortWindows);
 
@@ -333,6 +415,13 @@ export const calculateGroupAvailabilityData = async ({ groupId, userId, month, y
     });
 
     const settings = getEffectiveSettings(group);
+    const submittedMemberIds = new Set(
+        schedules
+            .filter(schedule =>
+                schedule.availability?.some(dayAvailability => dayAvailability.slots?.length > 0)
+            )
+            .map(schedule => schedule.user._id.toString())
+    );
     const daysInMonth = new Date(parsedYear, parsedMonth, 0).getDate();
     const days = [];
 
@@ -344,7 +433,8 @@ export const calculateGroupAvailabilityData = async ({ groupId, userId, month, y
             schedules,
             previousSchedules,
             groupMembers,
-            settings
+            settings,
+            submittedMemberIds
         ));
     }
 
@@ -355,8 +445,15 @@ export const calculateGroupAvailabilityData = async ({ groupId, userId, month, y
         ])
         .sort((a, b) => {
             if (a.type !== b.type) return a.type === 'perfect' ? -1 : 1;
-            const quality = sortWindows(a, b);
-            if (quality !== 0) return quality;
+            if ((b.qualityScore || 0) !== (a.qualityScore || 0)) {
+                return (b.qualityScore || 0) - (a.qualityScore || 0);
+            }
+            if (b.availabilityPercentage !== a.availabilityPercentage) {
+                return b.availabilityPercentage - a.availabilityPercentage;
+            }
+            if (b.durationMinutes !== a.durationMinutes) {
+                return b.durationMinutes - a.durationMinutes;
+            }
             return new Date(a.date).getTime() - new Date(b.date).getTime();
         });
 
@@ -366,7 +463,7 @@ export const calculateGroupAvailabilityData = async ({ groupId, userId, month, y
         daysWithStrongAlternative: days.filter(day => day.alternativeWindows.length > 0).length,
         totalRecommendations: recommendations.length,
         memberCount: groupMembers.length,
-        schedulesSubmitted: schedules.length
+        schedulesSubmitted: submittedMemberIds.size
     };
 
     return {
