@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { format, getDaysInMonth, startOfMonth } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { availabilityService } from '../../services/availabilityService';
+import { eventSuggestionService } from '../../services/eventSuggestionService';
 import { groupService } from '../../services/groupService';
 import type {
   AvailabilitySettings,
@@ -9,6 +10,10 @@ import type {
   DayAvailability,
   GroupAvailability,
 } from '../../services/availabilityService';
+import type {
+  GroupEventSuggestions,
+  SuggestedEvent,
+} from '../../services/eventSuggestionService';
 import Button from '../common/Button';
 import Card from '../common/Card';
 
@@ -47,6 +52,10 @@ const GroupAvailabilityView = ({
   const [selectedDay, setSelectedDay] = useState<DayAvailability | null>(null);
   const [settingsForm, setSettingsForm] =
     useState<AvailabilitySettings>(DEFAULT_SETTINGS);
+  const [eventSuggestions, setEventSuggestions] =
+    useState<GroupEventSuggestions | null>(null);
+  const [isLoadingEvents, setIsLoadingEvents] = useState(false);
+  const [eventsError, setEventsError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isSavingSettings, setIsSavingSettings] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -76,8 +85,35 @@ const GroupAvailabilityView = ({
     }
   };
 
+  const fetchEventSuggestions = async () => {
+    setIsLoadingEvents(true);
+    setEventsError(null);
+    try {
+      const data = await eventSuggestionService.getGroupEventSuggestions(
+        groupId,
+        month,
+        year
+      );
+      setEventSuggestions(data);
+      if (!data.available && data.message) {
+        setEventsError(data.message);
+      }
+    } catch (err) {
+      console.error(err);
+      setEventSuggestions(null);
+      setEventsError('No pudimos cargar eventos sugeridos por ahora');
+    } finally {
+      setIsLoadingEvents(false);
+    }
+  };
+
   useEffect(() => {
     fetchAvailability();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [groupId, month, year]);
+
+  useEffect(() => {
+    fetchEventSuggestions();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [groupId, month, year]);
 
@@ -199,6 +235,38 @@ const GroupAvailabilityView = ({
         </div>
       </div>
     </div>
+  );
+
+  const renderSuggestedEvent = (event: SuggestedEvent) => (
+    <a
+      key={`${event.source}-${event.externalId}`}
+      href={event.ticketUrl || '#'}
+      target="_blank"
+      rel="noreferrer"
+      className="flex gap-3 rounded-xl border border-neutral-200 bg-white p-3 hover:border-primary-300 hover:bg-primary-50/40 transition-colors"
+    >
+      {event.imageUrl ? (
+        <img
+          src={event.imageUrl}
+          alt={event.name}
+          className="h-16 w-16 rounded-lg object-cover flex-shrink-0"
+        />
+      ) : (
+        <div className="h-16 w-16 rounded-lg bg-neutral-100 flex items-center justify-center text-xs font-semibold text-neutral-500 flex-shrink-0">
+          Evento
+        </div>
+      )}
+      <span className="min-w-0">
+        <span className="block font-semibold text-neutral-900 line-clamp-2">
+          {event.name}
+        </span>
+        <span className="mt-1 block text-xs text-neutral-600">
+          {[event.venue?.name, event.venue?.city, event.category]
+            .filter(Boolean)
+            .join(' - ')}
+        </span>
+      </span>
+    </a>
   );
 
   if (isLoading && !availability) {
@@ -389,6 +457,78 @@ const GroupAvailabilityView = ({
             ) : (
               <div className="space-y-3">
                 {availability.recommendations.slice(0, 10).map(renderWindow)}
+              </div>
+            )}
+          </Card>
+
+          <Card padding="lg">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4">
+              <div>
+                <h3 className="text-lg font-bold text-neutral-900">
+                  Eventos sugeridos
+                </h3>
+                <p className="text-sm text-neutral-600">
+                  Eventos encontrados para los dias con mejores bloques utiles.
+                </p>
+              </div>
+              <Button
+                variant="secondary"
+                onClick={fetchEventSuggestions}
+                loading={isLoadingEvents}
+              >
+                Actualizar eventos
+              </Button>
+            </div>
+
+            {eventsError && (
+              <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+                {eventsError}
+              </div>
+            )}
+
+            {isLoadingEvents && !eventSuggestions ? (
+              <div className="flex items-center gap-3 rounded-xl bg-neutral-50 p-4 text-sm text-neutral-600">
+                <span className="h-4 w-4 rounded-full border-2 border-primary-300 border-t-primary-700 animate-spin" />
+                Buscando eventos para estos dias...
+              </div>
+            ) : !eventSuggestions || eventSuggestions.totalEvents === 0 ? (
+              <div className="p-6 text-center bg-neutral-50 rounded-xl text-neutral-600">
+                No encontramos eventos para estos dias todavia.
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {eventSuggestions.days
+                  .filter((day) => day.events.length > 0)
+                  .slice(0, 8)
+                  .map((day) => (
+                    <div
+                      key={day.date}
+                      className="rounded-xl border border-neutral-200 bg-neutral-50 p-3"
+                    >
+                      <div className="mb-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
+                        <div>
+                          <h4 className="font-semibold text-neutral-900">
+                            {format(
+                              new Date(`${day.date}T12:00:00`),
+                              "EEEE d 'de' MMMM",
+                              { locale: es }
+                            )}
+                          </h4>
+                          <p className="text-xs text-neutral-600">
+                            Mejor bloque: {day.availabilityWindow.start} -{' '}
+                            {day.availabilityWindow.end}
+                          </p>
+                        </div>
+                        <span className="text-xs font-semibold text-primary-700">
+                          {day.events.length} evento
+                          {day.events.length === 1 ? '' : 's'}
+                        </span>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                        {day.events.slice(0, 4).map(renderSuggestedEvent)}
+                      </div>
+                    </div>
+                  ))}
               </div>
             )}
           </Card>

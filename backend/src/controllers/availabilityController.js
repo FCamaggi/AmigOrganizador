@@ -291,6 +291,97 @@ const buildDaySummary = (day, year, month, schedules, previousSchedules, groupMe
     };
 };
 
+export const calculateGroupAvailabilityData = async ({ groupId, userId, month, year }) => {
+    const parsedMonth = parseInt(month);
+    const parsedYear = parseInt(year);
+
+    const group = await Group.findById(groupId).populate('members.user', 'username email fullName');
+    if (!group) {
+        const error = new Error('Grupo no encontrado');
+        error.statusCode = 404;
+        throw error;
+    }
+
+    const groupMembers = group.members.filter(member => getMemberId(member));
+    const isMember = groupMembers.some(
+        member => getMemberId(member) === userId
+    );
+
+    if (!isMember) {
+        const error = new Error('No eres miembro de este grupo');
+        error.statusCode = 403;
+        throw error;
+    }
+
+    const memberIds = groupMembers.map(member => getMemberId(member));
+
+    for (const memberId of memberIds) {
+        await Schedule.getOrCreate(memberId, parsedYear, parsedMonth);
+    }
+
+    const schedules = await Schedule.find({
+        user: { $in: memberIds },
+        month: parsedMonth,
+        year: parsedYear
+    }).populate('user', 'username email fullName');
+
+    const previousDate = new Date(parsedYear, parsedMonth - 2, 1);
+    const previousSchedules = await Schedule.find({
+        user: { $in: memberIds },
+        month: previousDate.getMonth() + 1,
+        year: previousDate.getFullYear()
+    });
+
+    const settings = getEffectiveSettings(group);
+    const daysInMonth = new Date(parsedYear, parsedMonth, 0).getDate();
+    const days = [];
+
+    for (let day = 1; day <= daysInMonth; day++) {
+        days.push(buildDaySummary(
+            day,
+            parsedYear,
+            parsedMonth,
+            schedules,
+            previousSchedules,
+            groupMembers,
+            settings
+        ));
+    }
+
+    const recommendations = days
+        .flatMap(day => [
+            ...day.perfectWindows.map(window => ({ ...window, type: 'perfect' })),
+            ...day.alternativeWindows.map(window => ({ ...window, type: 'alternative' }))
+        ])
+        .sort((a, b) => {
+            if (a.type !== b.type) return a.type === 'perfect' ? -1 : 1;
+            const quality = sortWindows(a, b);
+            if (quality !== 0) return quality;
+            return new Date(a.date).getTime() - new Date(b.date).getTime();
+        });
+
+    const stats = {
+        totalDays: daysInMonth,
+        daysWithPerfectOption: days.filter(day => day.perfectWindows.length > 0).length,
+        daysWithStrongAlternative: days.filter(day => day.alternativeWindows.length > 0).length,
+        totalRecommendations: recommendations.length,
+        memberCount: groupMembers.length,
+        schedulesSubmitted: schedules.length
+    };
+
+    return {
+        groupId,
+        groupName: group.name,
+        month: parsedMonth,
+        year: parsedYear,
+        settings,
+        recommendations,
+        days,
+        availability: days,
+        stats
+    };
+};
+
 export const getGroupAvailability = async (req, res) => {
     try {
         const { groupId } = req.params;
@@ -303,104 +394,22 @@ export const getGroupAvailability = async (req, res) => {
             });
         }
 
-        const parsedMonth = parseInt(month);
-        const parsedYear = parseInt(year);
-
-        const group = await Group.findById(groupId).populate('members.user', 'username email fullName');
-        if (!group) {
-            return res.status(404).json({
-                success: false,
-                message: 'Grupo no encontrado'
-            });
-        }
-
-        const groupMembers = group.members.filter(member => getMemberId(member));
-        const isMember = groupMembers.some(
-            member => getMemberId(member) === req.userId
-        );
-
-        if (!isMember) {
-            return res.status(403).json({
-                success: false,
-                message: 'No eres miembro de este grupo'
-            });
-        }
-
-        const memberIds = groupMembers.map(member => getMemberId(member));
-
-        for (const memberId of memberIds) {
-            await Schedule.getOrCreate(memberId, parsedYear, parsedMonth);
-        }
-
-        const schedules = await Schedule.find({
-            user: { $in: memberIds },
-            month: parsedMonth,
-            year: parsedYear
-        }).populate('user', 'username email fullName');
-
-        const previousDate = new Date(parsedYear, parsedMonth - 2, 1);
-        const previousSchedules = await Schedule.find({
-            user: { $in: memberIds },
-            month: previousDate.getMonth() + 1,
-            year: previousDate.getFullYear()
+        const data = await calculateGroupAvailabilityData({
+            groupId,
+            userId: req.userId,
+            month,
+            year
         });
-
-        const settings = getEffectiveSettings(group);
-        const daysInMonth = new Date(parsedYear, parsedMonth, 0).getDate();
-        const days = [];
-
-        for (let day = 1; day <= daysInMonth; day++) {
-            days.push(buildDaySummary(
-                day,
-                parsedYear,
-                parsedMonth,
-                schedules,
-                previousSchedules,
-                groupMembers,
-                settings
-            ));
-        }
-
-        const recommendations = days
-            .flatMap(day => [
-                ...day.perfectWindows.map(window => ({ ...window, type: 'perfect' })),
-                ...day.alternativeWindows.map(window => ({ ...window, type: 'alternative' }))
-            ])
-            .sort((a, b) => {
-                if (a.type !== b.type) return a.type === 'perfect' ? -1 : 1;
-                const quality = sortWindows(a, b);
-                if (quality !== 0) return quality;
-                return new Date(a.date).getTime() - new Date(b.date).getTime();
-            });
-
-        const stats = {
-            totalDays: daysInMonth,
-            daysWithPerfectOption: days.filter(day => day.perfectWindows.length > 0).length,
-            daysWithStrongAlternative: days.filter(day => day.alternativeWindows.length > 0).length,
-            totalRecommendations: recommendations.length,
-            memberCount: groupMembers.length,
-            schedulesSubmitted: schedules.length
-        };
 
         res.status(200).json({
             success: true,
-            data: {
-                groupId,
-                groupName: group.name,
-                month: parsedMonth,
-                year: parsedYear,
-                settings,
-                recommendations,
-                days,
-                availability: days,
-                stats
-            }
+            data
         });
     } catch (error) {
         console.error('Error al obtener disponibilidad grupal:', error);
-        res.status(500).json({
+        res.status(error.statusCode || 500).json({
             success: false,
-            message: 'Error al obtener disponibilidad grupal'
+            message: error.message || 'Error al obtener disponibilidad grupal'
         });
     }
 };

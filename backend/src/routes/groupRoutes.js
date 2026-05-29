@@ -1,6 +1,7 @@
 import express from 'express';
 import * as groupController from '../controllers/groupController.js';
 import * as groupAvailabilityController from '../controllers/groupAvailabilityController.js';
+import { getGroupEventSuggestions } from '../controllers/eventSuggestionController.js';
 import { auth } from '../middleware/auth.js';
 
 const router = express.Router();
@@ -35,6 +36,13 @@ router.get('/:id', groupController.getGroupById);
  * @access  Private (miembros)
  */
 router.patch('/:id/availability-settings', groupController.updateAvailabilitySettings);
+
+/**
+ * @route   GET /api/groups/:id/event-suggestions
+ * @desc    Obtener eventos sugeridos para los dias utiles del grupo
+ * @access  Private (miembros)
+ */
+router.get('/:id/event-suggestions', getGroupEventSuggestions);
 
 /**
  * @route   POST /api/groups/join/:code

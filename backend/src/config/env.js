@@ -12,7 +12,9 @@ export const config = {
     googleClientSecret: process.env.GOOGLE_CLIENT_SECRET,
     microsoftClientId: process.env.MICROSOFT_CLIENT_ID,
     microsoftClientSecret: process.env.MICROSOFT_CLIENT_SECRET,
-    tokenEncryptionKey: process.env.TOKEN_ENCRYPTION_KEY
+    tokenEncryptionKey: process.env.TOKEN_ENCRYPTION_KEY,
+    eventScraperApiUrl: process.env.EVENT_SCRAPER_API_URL,
+    eventScraperApiKey: process.env.EVENT_SCRAPER_API_KEY
 };
 
 // Validar variables de entorno críticas
