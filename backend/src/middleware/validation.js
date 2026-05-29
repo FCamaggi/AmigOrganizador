@@ -44,6 +44,11 @@ export const validateRegister = [
         .trim()
         .isLength({ max: 100 })
         .withMessage('El nombre completo debe tener máximo 100 caracteres'),
+    body('registrationRequestId')
+        .optional()
+        .trim()
+        .isLength({ min: 16, max: 120 })
+        .withMessage('Identificador de registro inválido'),
     handleValidationErrors
 ];
 

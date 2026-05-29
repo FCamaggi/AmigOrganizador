@@ -25,6 +25,7 @@ export interface AuthState {
     password: string;
     username: string;
     fullName?: string;
+    registrationRequestId?: string;
   }) => Promise<{ user: User; token: string }>;
   logout: () => void;
   clearError: () => void;

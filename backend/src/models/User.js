@@ -47,6 +47,12 @@ const userSchema = new mongoose.Schema({
             email: { type: String, trim: true },
             connectedAt: { type: Date }
         }
+    },
+    registrationRequestId: {
+        type: String,
+        unique: true,
+        sparse: true,
+        select: false
     }
 }, {
     timestamps: true
@@ -77,6 +83,7 @@ userSchema.methods.toJSON = function () {
     const user = this.toObject();
     delete user.password;
     delete user.connectedCalendars;
+    delete user.registrationRequestId;
     delete user.__v;
     return user;
 };

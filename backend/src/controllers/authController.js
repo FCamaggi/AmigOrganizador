@@ -21,9 +21,36 @@ const duplicateUserError = (field) => ({
  */
 export const register = async (req, res) => {
     try {
-        const { email, password, username, fullName } = req.body;
+        const { email, password, username, fullName, registrationRequestId } = req.body;
         const normalizedEmail = email.toLowerCase().trim();
         const normalizedUsername = username.trim();
+        const normalizedRequestId = registrationRequestId?.trim();
+
+        if (normalizedRequestId) {
+            const previousRegistration = await User.findOne({
+                registrationRequestId: normalizedRequestId
+            }).select('+registrationRequestId');
+
+            if (previousRegistration) {
+                if (
+                    previousRegistration.email !== normalizedEmail ||
+                    previousRegistration.username !== normalizedUsername
+                ) {
+                    return res.status(409).json({
+                        success: false,
+                        message: 'Este intento de registro ya fue usado con otros datos'
+                    });
+                }
+
+                const token = generateToken(previousRegistration._id);
+                return res.status(200).json({
+                    success: true,
+                    message: 'Usuario registrado exitosamente',
+                    token,
+                    user: previousRegistration.toJSON()
+                });
+            }
+        }
 
         // Verificar si el usuario ya existe (email o username)
         const existingUser = await User.findOne({
@@ -44,17 +71,15 @@ export const register = async (req, res) => {
             email: normalizedEmail,
             password,
             username: normalizedUsername,
-            fullName: fullName?.trim()
+            fullName: fullName?.trim(),
+            registrationRequestId: normalizedRequestId,
+            lastLogin: new Date()
         });
 
         await user.save();
 
         // Generar token JWT
         const token = generateToken(user._id);
-
-        // Actualizar último login
-        user.lastLogin = new Date();
-        await user.save();
 
         res.status(201).json({
             success: true,
@@ -69,6 +94,21 @@ export const register = async (req, res) => {
             const field = Object.keys(error.keyPattern || error.keyValue || {})[0];
             if (field === 'email' || field === 'username') {
                 return res.status(409).json(duplicateUserError(field));
+            }
+            if (field === 'registrationRequestId' && req.body.registrationRequestId) {
+                const previousRegistration = await User.findOne({
+                    registrationRequestId: req.body.registrationRequestId.trim()
+                }).select('+registrationRequestId');
+
+                if (previousRegistration) {
+                    const token = generateToken(previousRegistration._id);
+                    return res.status(200).json({
+                        success: true,
+                        message: 'Usuario registrado exitosamente',
+                        token,
+                        user: previousRegistration.toJSON()
+                    });
+                }
             }
         }
 

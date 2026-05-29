@@ -9,6 +9,7 @@ export const authService = {
     email: string;
     password: string;
     fullName?: string;
+    registrationRequestId?: string;
   }) {
     const response = await api.post('/auth/register', userData);
     if (response.data.token) {

@@ -1,4 +1,4 @@
-import { useState, type FormEvent, type ChangeEvent } from 'react';
+import { useRef, useState, type FormEvent, type ChangeEvent } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuthStore } from '../../store/authStore';
 import { textColors } from '../../styles/design-system';
@@ -44,6 +44,7 @@ interface ApiErrorResponse {
 const RegisterForm = () => {
   const navigate = useNavigate();
   const { register, loading, error, clearError } = useAuthStore();
+  const registrationRequestIdRef = useRef(crypto.randomUUID());
 
   const [formData, setFormData] = useState<RegisterFormData>({
     email: '',
@@ -69,6 +70,7 @@ const RegisterForm = () => {
       }));
     }
     clearError();
+    registrationRequestIdRef.current = crypto.randomUUID();
   };
 
   const validateForm = (): boolean => {
@@ -115,9 +117,13 @@ const RegisterForm = () => {
     try {
       // No enviamos confirmPassword al backend
       const { confirmPassword, ...userData } = formData;
-      const result = await register(userData);
+      const result = await register({
+        ...userData,
+        registrationRequestId: registrationRequestIdRef.current,
+      });
       // Solo navegar si el registro fue exitoso
       if (result && result.user) {
+        registrationRequestIdRef.current = crypto.randomUUID();
         navigate('/dashboard');
       }
     } catch (error) {
