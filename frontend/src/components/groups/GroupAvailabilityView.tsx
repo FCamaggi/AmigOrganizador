@@ -444,10 +444,18 @@ const GroupAvailabilityView = ({
               .join(' - ')}
           </span>
           {matchingWindow && (
-            <span className="mt-2 inline-flex rounded-full bg-green-50 px-2 py-1 text-xs font-semibold text-green-800">
+            <span
+              className={`mt-2 inline-flex rounded-full px-2 py-1 text-xs font-semibold ${
+                event.timeMatchStatus === 'outside-window'
+                  ? 'bg-amber-50 text-amber-800'
+                  : 'bg-green-50 text-green-800'
+              }`}
+            >
               {event.timeMatchStatus === 'unknown-time'
                 ? `Hora por confirmar - ventana ${matchingWindow.start}-${matchingWindow.end}`
-                : `Calza ${matchingWindow.start}-${matchingWindow.end}`}
+                : event.timeMatchStatus === 'outside-window'
+                  ? `Fuera de ventana - mejor bloque ${matchingWindow.start}-${matchingWindow.end}`
+                  : `Calza ${matchingWindow.start}-${matchingWindow.end}`}
             </span>
           )}
         </span>

@@ -177,7 +177,13 @@ export const getGroupEventSuggestions = async (req, res) => {
                 )
                 : [];
 
-            const filteredEvents = [...timedMatches, ...unknownMatches];
+            const fallbackEvents = timedMatches.length === 0 && unknownMatches.length === 0
+                ? sourceFilteredEvents
+                    .slice(0, 6)
+                    .map(event => decorateEventMatch(event, day.windows, 'outside-window'))
+                : [];
+
+            const filteredEvents = [...timedMatches, ...unknownMatches, ...fallbackEvents];
 
             return {
                 date: day.date,
@@ -199,6 +205,9 @@ export const getGroupEventSuggestions = async (req, res) => {
         const message = suggestions.message ||
             (totalEvents === 0 && rawEventsCount > 0
                 ? 'Encontramos eventos para estos dias, pero ninguno calza con las ventanas horarias actuales'
+                : undefined) ||
+            (days.some(day => day.events.some(event => event.timeMatchStatus === 'outside-window'))
+                ? 'Algunos eventos son del dia recomendado, pero quedan fuera de la ventana disponible'
                 : undefined) ||
             (unknownTimeEventsCount > 0
                 ? 'Algunos eventos no tienen hora confirmada y se muestran como referencia'

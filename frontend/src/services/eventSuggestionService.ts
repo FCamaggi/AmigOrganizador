@@ -23,7 +23,7 @@ export interface SuggestedEvent {
   matchingWindows?: AvailabilityWindow[];
   matchType?: 'perfect' | 'alternative';
   availabilityPercentage?: number;
-  timeMatchStatus?: 'matched' | 'unknown-time';
+  timeMatchStatus?: 'matched' | 'unknown-time' | 'outside-window';
 }
 
 export interface SuggestedEventDay {
