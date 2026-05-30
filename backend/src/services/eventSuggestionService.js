@@ -23,7 +23,15 @@ const getResponseDetail = async (response) => {
 const normalizeDates = (dates = []) =>
     Array.from(new Set(dates.filter(Boolean))).sort();
 
-const fetchEventSuggestionsBatch = async ({ dates, categories, city, limit }) => {
+const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+const shouldRetryScraperResponse = (result) =>
+    !result.available && (
+        result.timeout ||
+        [502, 503, 504].includes(result.statusCode)
+    );
+
+const fetchEventSuggestionsBatchOnce = async ({ dates, categories, city, limit }) => {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), config.eventScraperTimeoutMs);
 
@@ -67,11 +75,33 @@ const fetchEventSuggestionsBatch = async ({ dates, categories, city, limit }) =>
             available: false,
             days: [],
             totalEvents: 0,
+            timeout: isTimeout,
             message
         };
     } finally {
         clearTimeout(timeout);
     }
+};
+
+const fetchEventSuggestionsBatch = async (params) => {
+    const maxAttempts = 2;
+    let lastResult;
+
+    for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+        lastResult = await fetchEventSuggestionsBatchOnce(params);
+
+        if (!shouldRetryScraperResponse(lastResult) || attempt === maxAttempts) {
+            return lastResult;
+        }
+
+        console.warn(
+            `Retrying event scraper batch after ${lastResult.statusCode || 'timeout'} ` +
+            `(attempt ${attempt + 1}/${maxAttempts})`
+        );
+        await sleep(2500);
+    }
+
+    return lastResult;
 };
 
 export const fetchEventSuggestions = async ({ dates, categories, city, limit = 20 }) => {
