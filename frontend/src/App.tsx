@@ -11,7 +11,6 @@ import Schedule from './pages/Schedule';
 import MonthlyCalendar from './pages/MonthlyCalendar';
 import Profile from './pages/Profile';
 import Onboarding from './pages/Onboarding';
-import Explore from './pages/Explore';
 import Notifications from './pages/Notifications';
 import GroupsPage from './components/groups/GroupsPage';
 import GroupDetail from './components/groups/GroupDetail';
@@ -93,15 +92,6 @@ function App() {
           element={
             <PrivateRoute>
               <GroupDetail />
-            </PrivateRoute>
-          }
-        />
-
-        <Route
-          path="/explore"
-          element={
-            <PrivateRoute>
-              <Explore />
             </PrivateRoute>
           }
         />

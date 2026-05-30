@@ -7,7 +7,7 @@ interface AuthShellProps {
   tone?: 'deep' | 'soft';
 }
 
-const AuthShell = ({ children, subtitle, tone = 'deep' }: AuthShellProps) => (
+const AuthShell = ({ children, subtitle, tone = 'soft' }: AuthShellProps) => (
   <main
     className={cn(
       'flex min-h-screen items-center justify-center px-4 py-8 sm:px-6',
