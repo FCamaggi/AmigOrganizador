@@ -433,6 +433,9 @@ const ScheduleCalendar = ({ onSelectDay }: ScheduleCalendarProps) => {
       <div
         className={`relative h-full ${hasSchedule ? 'bg-primary-50/30' : ''}`}
         style={{ pointerEvents: 'none' }}
+        aria-label={`${format(value, "d 'de' MMMM yyyy", { locale: es })}: ${
+          hasSchedule ? `${dayEventCount} horarios registrados` : 'sin horarios'
+        }`}
       >
         {children}
         {hasSchedule && (
@@ -475,7 +478,8 @@ const ScheduleCalendar = ({ onSelectDay }: ScheduleCalendarProps) => {
           </div>
           <button
             onClick={clearError}
-            className="text-danger-700 hover:text-danger-900 font-bold text-xl ml-4"
+            className="ml-4 flex min-h-11 min-w-11 items-center justify-center rounded-xl text-xl font-bold text-danger-700 hover:bg-danger-100 hover:text-danger-900"
+            aria-label="Cerrar mensaje de error"
           >
             ✕
           </button>

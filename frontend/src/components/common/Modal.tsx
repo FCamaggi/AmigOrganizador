@@ -113,7 +113,7 @@ const Modal = ({
               <button
                 onClick={onClose}
                 className={cn(
-                  'ml-2 sm:ml-4 p-1 sm:p-1.5 rounded-lg transition-colors flex-shrink-0',
+                  'ml-2 flex min-h-11 min-w-11 flex-shrink-0 items-center justify-center rounded-lg transition-colors sm:ml-4',
                   headerGradient
                     ? 'text-white/80 hover:text-white hover:bg-white/10'
                     : 'text-neutral-400 hover:text-neutral-600 hover:bg-neutral-100'

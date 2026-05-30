@@ -380,7 +380,14 @@ const GroupAvailabilityView = ({
             </div>
           )}
         </div>
-        <div className="rounded-2xl bg-primary-50 px-4 py-3 text-center">
+        <div
+          className="rounded-2xl bg-primary-50 px-4 py-3 text-center"
+          role="progressbar"
+          aria-label={`Alineacion del grupo ${window.availabilityPercentage}%`}
+          aria-valuenow={window.availabilityPercentage}
+          aria-valuemin={0}
+          aria-valuemax={100}
+        >
           <div className="text-2xl font-extrabold text-primary-700">
             {window.availabilityPercentage}%
           </div>
@@ -819,6 +826,10 @@ const GroupAvailabilityView = ({
                 key={dayInfo.day}
                 onClick={() => setSelectedDay(dayInfo.data || null)}
                 disabled={!dayInfo.data || score === 0}
+                aria-label={`Dia ${dayInfo.day}, disponibilidad ${score}%, ${
+                  eventsCount > 0 ? `${eventsCount} eventos compatibles` : 'sin eventos compatibles'
+                }`}
+                aria-pressed={isSelected}
                 className={`aspect-square min-h-[54px] rounded-lg text-xs font-semibold transition-all sm:rounded-xl sm:text-sm ${getColorClass(
                   score
                 )} ${

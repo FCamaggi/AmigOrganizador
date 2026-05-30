@@ -154,7 +154,7 @@ const RegisterForm = () => {
       });
       if (result?.user) {
         registrationRequestIdRef.current = crypto.randomUUID();
-        navigate('/dashboard');
+        navigate('/onboarding');
       }
     } catch (error) {
       console.error('Error en registro:', error);

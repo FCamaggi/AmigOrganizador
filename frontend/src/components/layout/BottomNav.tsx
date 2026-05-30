@@ -15,11 +15,17 @@ const BottomNav = ({ items, className }: BottomNavProps) => (
     )}
     aria-label="Navegacion inferior"
   >
-    <div className="grid grid-cols-3 gap-1">
-      {items.slice(0, 3).map(item => (
+    <div
+      className={cn(
+        'grid gap-1',
+        items.length >= 4 ? 'grid-cols-4' : 'grid-cols-3'
+      )}
+    >
+      {items.slice(0, 4).map(item => (
         <Link
           key={item.to}
           to={item.to}
+          aria-label={item.label}
           className={cn(
             'flex min-h-12 flex-col items-center justify-center gap-0.5 rounded-xl px-2 text-[0.7rem] font-bold transition-all duration-200',
             item.active

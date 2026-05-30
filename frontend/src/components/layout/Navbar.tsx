@@ -30,6 +30,18 @@ const icons = {
       <path strokeLinecap="round" strokeLinejoin="round" d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
     </svg>
   ),
+  explore: (
+    <svg className={iconClassName} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path strokeLinecap="round" strokeLinejoin="round" d="m12 3 1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8L12 3Z" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="m19 16 .8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8L19 16Z" />
+    </svg>
+  ),
+  bell: (
+    <svg className={iconClassName} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M18 8a6 6 0 1 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M13.73 21a2 2 0 0 1-3.46 0" />
+    </svg>
+  ),
   menu: (
     <svg className={iconClassName} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
       <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
@@ -62,6 +74,7 @@ const Navbar = () => {
 
   const isActive = (path: string) => location.pathname === path;
   const isGroupsActive = location.pathname.startsWith('/groups');
+  const isExploreActive = location.pathname.startsWith('/explore');
   const closeMobileMenu = () => setIsMobileMenuOpen(false);
   const userName = user?.fullName || user?.username || 'Usuario';
 
@@ -69,6 +82,7 @@ const Navbar = () => {
     { label: 'Inicio', to: '/dashboard', icon: icons.home, active: isActive('/dashboard') },
     { label: 'Mi Horario', to: '/schedule', icon: icons.schedule, active: isActive('/schedule') },
     { label: 'Grupos', to: '/groups', icon: icons.groups, active: isGroupsActive },
+    { label: 'Explorar', to: '/explore', icon: icons.explore, active: isExploreActive },
   ];
 
   const mobileMenu = (
@@ -109,6 +123,17 @@ const Navbar = () => {
         navItems={navItems}
         actions={
           <>
+            <Link
+              to="/notifications"
+              className={cn(
+                'inline-flex min-h-11 items-center justify-center rounded-xl px-3 text-neutral-700 transition-all hover:bg-white hover:text-primary-700',
+                isActive('/notifications') && 'bg-primary-50 text-primary-700'
+              )}
+              aria-label="Notificaciones"
+              aria-current={isActive('/notifications') ? 'page' : undefined}
+            >
+              {icons.bell}
+            </Link>
             <Link
               to="/profile"
               className={cn(

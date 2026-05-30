@@ -10,6 +10,9 @@ import Dashboard from './pages/Dashboard';
 import Schedule from './pages/Schedule';
 import MonthlyCalendar from './pages/MonthlyCalendar';
 import Profile from './pages/Profile';
+import Onboarding from './pages/Onboarding';
+import Explore from './pages/Explore';
+import Notifications from './pages/Notifications';
 import GroupsPage from './components/groups/GroupsPage';
 import GroupDetail from './components/groups/GroupDetail';
 import PrivateRoute from './components/auth/PrivateRoute';
@@ -50,6 +53,15 @@ function App() {
         />
 
         <Route
+          path="/onboarding"
+          element={
+            <PrivateRoute>
+              <Onboarding />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
           path="/schedule"
           element={
             <PrivateRoute>
@@ -81,6 +93,24 @@ function App() {
           element={
             <PrivateRoute>
               <GroupDetail />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/explore"
+          element={
+            <PrivateRoute>
+              <Explore />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/notifications"
+          element={
+            <PrivateRoute>
+              <Notifications />
             </PrivateRoute>
           }
         />
