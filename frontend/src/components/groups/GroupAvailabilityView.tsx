@@ -339,12 +339,12 @@ const GroupAvailabilityView = ({
   const renderWindow = (window: AvailabilityWindow) => (
     <div
       key={windowKey(window)}
-      className="rounded-lg border border-neutral-200 bg-white p-3 sm:p-4"
+      className="rounded-2xl border border-white/70 bg-white/85 p-4 shadow-soft backdrop-blur sm:p-5"
     >
       <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
         <div>
           <div className="flex flex-wrap items-center gap-2">
-            <span className="text-lg font-bold text-neutral-900">
+            <span className="amig-time-code text-xl font-bold text-neutral-950">
               {window.start} - {window.end}
             </span>
             <span
@@ -380,15 +380,18 @@ const GroupAvailabilityView = ({
             </div>
           )}
         </div>
-        <div className="text-sm font-semibold text-neutral-700">
-          {window.availableMembers.length}/
-          {window.availableMembers.length + window.unavailableMembers.length}{' '}
-          miembros
+        <div className="rounded-2xl bg-primary-50 px-4 py-3 text-center">
+          <div className="text-2xl font-extrabold text-primary-700">
+            {window.availabilityPercentage}%
+          </div>
+          <div className="text-xs font-bold uppercase text-neutral-600">
+            alineacion
+          </div>
         </div>
       </div>
 
       <div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-2">
-        <div className="rounded-lg bg-green-50 p-3">
+        <div className="rounded-xl bg-green-50 p-3">
           <p className="mb-2 text-xs font-semibold text-green-800">
             Disponibles
           </p>
@@ -398,7 +401,7 @@ const GroupAvailabilityView = ({
               .join(', ')}
           </p>
         </div>
-        <div className="rounded-lg bg-red-50 p-3">
+        <div className="rounded-xl bg-red-50 p-3">
           <p className="mb-2 text-xs font-semibold text-red-800">No pueden</p>
           <p className="text-sm text-neutral-700">
             {window.unavailableMembers.length > 0
@@ -468,25 +471,25 @@ const GroupAvailabilityView = ({
 
     return (
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <div className="rounded-lg bg-white p-4 shadow-soft">
+        <div className="rounded-2xl bg-white/85 p-4 shadow-soft backdrop-blur">
           <div className="text-2xl font-bold text-green-700">
             {availability.stats.daysWithPerfectOption}
           </div>
           <div className="text-xs text-neutral-600">Dias perfectos</div>
         </div>
-        <div className="rounded-lg bg-white p-4 shadow-soft">
+        <div className="rounded-2xl bg-white/85 p-4 shadow-soft backdrop-blur">
           <div className="text-2xl font-bold text-amber-700">
             {availability.stats.daysWithStrongAlternative}
           </div>
           <div className="text-xs text-neutral-600">Dias con alternativa</div>
         </div>
-        <div className="rounded-lg bg-white p-4 shadow-soft">
+        <div className="rounded-2xl bg-white/85 p-4 shadow-soft backdrop-blur">
           <div className="text-2xl font-bold text-primary-700">
             {availability.stats.totalRecommendations}
           </div>
           <div className="text-xs text-neutral-600">Opciones utiles</div>
         </div>
-        <div className="rounded-lg bg-white p-4 shadow-soft">
+        <div className="rounded-2xl bg-white/85 p-4 shadow-soft backdrop-blur">
           <div className="text-2xl font-bold text-neutral-800">
             {availability.stats.schedulesSubmitted}/
             {availability.stats.memberCount}
@@ -498,7 +501,7 @@ const GroupAvailabilityView = ({
   };
 
   const renderSettingsPanel = () => (
-    <Card padding="md">
+    <Card variant="glass" padding="md">
       <div className="grid grid-cols-1 gap-3 lg:grid-cols-6">
         <div className="lg:col-span-2">
           <h3 className="text-base font-semibold text-neutral-900">
@@ -600,7 +603,7 @@ const GroupAvailabilityView = ({
   );
 
   const renderEventFilters = () => (
-    <Card padding="md">
+    <Card variant="glass" padding="md">
       <div className="grid grid-cols-1 gap-3 lg:grid-cols-6">
         <div className="lg:col-span-2">
           <label className="mb-1 block text-xs font-semibold text-neutral-700">
@@ -714,14 +717,14 @@ const GroupAvailabilityView = ({
     ];
 
     return (
-      <div className="grid grid-cols-2 gap-2 rounded-lg bg-neutral-100 p-1 md:grid-cols-4">
+      <div className="grid grid-cols-2 gap-2 rounded-2xl bg-white/55 p-1 backdrop-blur md:grid-cols-4">
         {tabs.map((tab) => (
           <button
             key={tab.id}
             onClick={() => setActiveView(tab.id)}
             className={`rounded-md px-3 py-2 text-sm font-semibold transition-colors ${
               activeView === tab.id
-                ? 'bg-white text-primary-700 shadow-sm'
+                ? 'bg-white text-primary-700 shadow-soft'
                 : 'text-neutral-600 hover:bg-white/70'
             }`}
           >
@@ -735,10 +738,13 @@ const GroupAvailabilityView = ({
   const renderRankingView = () => {
     if (!availability) return null;
     return (
-      <Card padding="lg">
+      <Card variant="glass" padding="lg">
         <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h3 className="text-lg font-bold text-neutral-900">
+            <p className="text-sm font-bold uppercase text-primary-700">
+              Algorithm Results
+            </p>
+            <h3 className="mt-1 text-2xl font-extrabold text-neutral-950">
               Mejores horarios
             </h3>
             <p className="text-sm text-neutral-600">
@@ -751,7 +757,7 @@ const GroupAvailabilityView = ({
         </div>
 
         {availability.recommendations.length === 0 ? (
-          <div className="rounded-lg bg-neutral-50 p-6 text-center text-neutral-600">
+          <div className="rounded-2xl bg-white/70 p-6 text-center text-neutral-600">
             No hay bloques utiles con los criterios actuales.
           </div>
         ) : (
@@ -765,7 +771,7 @@ const GroupAvailabilityView = ({
 
   const renderCalendarView = () => (
     <div className="space-y-4">
-      <Card padding="lg">
+      <Card variant="glass" padding="lg">
         <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h3 className="text-lg font-bold text-neutral-900">
@@ -835,7 +841,7 @@ const GroupAvailabilityView = ({
       </Card>
 
       {selectedDay && (
-        <Card padding="lg">
+        <Card variant="glass" padding="lg">
           <h3 className="mb-4 text-lg font-bold text-neutral-900">
             {format(
               new Date(`${selectedDay.date}T12:00:00`),
@@ -951,7 +957,7 @@ const GroupAvailabilityView = ({
 
     return (
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
-        <Card padding="lg">
+        <Card variant="glass" padding="lg">
           <h3 className="mb-4 text-lg font-bold text-neutral-900">
             Lectura rapida
           </h3>
@@ -1039,9 +1045,12 @@ const GroupAvailabilityView = ({
 
   return (
     <div className="space-y-4 sm:space-y-6">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-3 rounded-pebble bg-white/70 p-5 shadow-soft backdrop-blur sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="text-lg font-bold text-neutral-800 sm:text-xl lg:text-2xl">
+          <p className="text-sm font-bold uppercase text-primary-700">
+            Calculo de grupo
+          </p>
+          <h2 className="mt-1 text-2xl font-extrabold text-neutral-950 sm:text-3xl">
             Disponibilidad de {groupName}
           </h2>
           <p className="text-sm text-neutral-600">

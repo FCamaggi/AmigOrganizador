@@ -1,53 +1,39 @@
-import { useState, useEffect } from 'react';
-import type { FormEvent, ChangeEvent } from 'react';
+import { useEffect, useState } from 'react';
+import type { ChangeEvent, FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuthStore } from '../store/authStore';
+import type { CalendarProvider, CalendarStatus } from '../services/calendarSyncService';
+import { calendarSyncService } from '../services/calendarSyncService';
+import type { ChangePasswordData, UpdateProfileData } from '../services/userService';
 import { userService } from '../services/userService';
-import {
-  calendarSyncService,
-  type CalendarProvider,
-  type CalendarStatus,
-} from '../services/calendarSyncService';
-import type {
-  UpdateProfileData,
-  ChangePasswordData,
-} from '../services/userService';
+import { useAuthStore } from '../store/authStore';
+import Avatar from '../components/common/Avatar';
+import Badge from '../components/common/Badge';
 import Button from '../components/common/Button';
+import Card from '../components/common/Card';
 import Input from '../components/common/Input';
 import Navbar from '../components/layout/Navbar';
 
 const Profile = () => {
   const navigate = useNavigate();
   const { user, setUser, logout } = useAuthStore();
-
-  const [activeTab, setActiveTab] = useState<
-    'profile' | 'password' | 'calendars' | 'danger'
-  >('profile');
   const [isLoading, setIsLoading] = useState(false);
-  const [calendarLoading, setCalendarLoading] =
-    useState<CalendarProvider | null>(null);
+  const [calendarLoading, setCalendarLoading] = useState<CalendarProvider | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [calendarStatus, setCalendarStatus] = useState<CalendarStatus>({
     google: { connected: false },
     microsoft: { connected: false },
   });
-
-  // Profile form
   const [profileForm, setProfileForm] = useState<UpdateProfileData>({
     username: user?.username || '',
     email: user?.email || '',
     fullName: user?.fullName || '',
   });
-
-  // Password form
   const [passwordForm, setPasswordForm] = useState<ChangePasswordData>({
     currentPassword: '',
     newPassword: '',
   });
   const [confirmPassword, setConfirmPassword] = useState('');
-
-  // Delete account
   const [deletePassword, setDeletePassword] = useState('');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
@@ -68,7 +54,6 @@ const Profile = () => {
 
     if (!connectedProvider && !errorProvider) return;
 
-    setActiveTab('calendars');
     if (connectedProvider) {
       setSuccess('Calendario conectado correctamente');
     }
@@ -80,8 +65,6 @@ const Profile = () => {
   }, [navigate]);
 
   useEffect(() => {
-    if (activeTab !== 'calendars') return;
-
     const loadCalendars = async () => {
       setError(null);
       try {
@@ -96,24 +79,24 @@ const Profile = () => {
     };
 
     loadCalendars();
-  }, [activeTab]);
+  }, []);
 
-  const handleProfileChange = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleProfileChange = (event: ChangeEvent<HTMLInputElement>) => {
     setProfileForm({
       ...profileForm,
-      [e.target.name]: e.target.value,
+      [event.target.name]: event.target.value,
     });
   };
 
-  const handlePasswordChange = (e: ChangeEvent<HTMLInputElement>) => {
+  const handlePasswordChange = (event: ChangeEvent<HTMLInputElement>) => {
     setPasswordForm({
       ...passwordForm,
-      [e.target.name]: e.target.value,
+      [event.target.name]: event.target.value,
     });
   };
 
-  const handleProfileSubmit = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const handleProfileSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
     setError(null);
     setSuccess(null);
     setIsLoading(true);
@@ -132,18 +115,18 @@ const Profile = () => {
     }
   };
 
-  const handlePasswordSubmit = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const handlePasswordSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
     setError(null);
     setSuccess(null);
 
     if (passwordForm.newPassword !== confirmPassword) {
-      setError('Las contraseñas no coinciden');
+      setError('Las contrasenas no coinciden');
       return;
     }
 
     if (passwordForm.newPassword.length < 6) {
-      setError('La contraseña debe tener al menos 6 caracteres');
+      setError('La contrasena debe tener al menos 6 caracteres');
       return;
     }
 
@@ -151,13 +134,13 @@ const Profile = () => {
 
     try {
       await userService.changePassword(passwordForm);
-      setSuccess('Contraseña cambiada correctamente');
+      setSuccess('Contrasena cambiada correctamente');
       setPasswordForm({ currentPassword: '', newPassword: '' });
       setConfirmPassword('');
     } catch (err) {
       const message =
         (err as { response?: { data?: { message?: string } } }).response?.data
-          ?.message || 'Error al cambiar contraseña';
+          ?.message || 'Error al cambiar contrasena';
       setError(message);
     } finally {
       setIsLoading(false);
@@ -166,7 +149,7 @@ const Profile = () => {
 
   const handleDeleteAccount = async () => {
     if (!deletePassword) {
-      setError('Debes ingresar tu contraseña');
+      setError('Debes ingresar tu contrasena');
       return;
     }
 
@@ -199,7 +182,9 @@ const Profile = () => {
     } catch (err) {
       const message =
         (err as { response?: { data?: { message?: string } } }).response?.data
-          ?.message || (err as Error).message || 'Error al conectar calendario';
+          ?.message ||
+        (err as Error).message ||
+        'Error al conectar calendario';
       setError(message);
     } finally {
       setCalendarLoading(null);
@@ -226,330 +211,307 @@ const Profile = () => {
     }
   };
 
+  const googleStatus = calendarStatus.google;
+
   return (
-    <div>
+    <>
       <Navbar />
-      <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-accent-50">
-        <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 lg:py-8 max-w-4xl">
-          {/* Header */}
-          <div className="mb-4 sm:mb-6 lg:mb-8">
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-primary-600 to-accent-500 bg-clip-text text-transparent mb-2">
-              Mi Perfil
-            </h1>
-            <p className="text-sm sm:text-base text-neutral-600">
-              Gestiona tu información personal y configuración de cuenta
-            </p>
-          </div>
-
-          {/* Tabs */}
-          <div className="mb-4 sm:mb-6 border-b border-neutral-200 overflow-x-auto">
-            <div className="flex gap-4 sm:gap-6 lg:gap-8 min-w-max">
-              <button
-                onClick={() => {
-                  setActiveTab('profile');
-                  setError(null);
-                  setSuccess(null);
-                }}
-                className={`pb-2 sm:pb-3 px-1 sm:px-2 text-sm sm:text-base font-semibold transition-colors relative whitespace-nowrap ${
-                  activeTab === 'profile'
-                    ? 'text-primary-600'
-                    : 'text-neutral-500 hover:text-neutral-700'
-                }`}
-              >
-                Información Personal
-                {activeTab === 'profile' && (
-                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-primary-600 to-accent-500" />
-                )}
-              </button>
-              <button
-                onClick={() => {
-                  setActiveTab('password');
-                  setError(null);
-                  setSuccess(null);
-                }}
-                className={`pb-2 sm:pb-3 px-1 sm:px-2 text-sm sm:text-base font-semibold transition-colors relative whitespace-nowrap ${
-                  activeTab === 'password'
-                    ? 'text-primary-600'
-                    : 'text-neutral-500 hover:text-neutral-700'
-                }`}
-              >
-                Seguridad
-                {activeTab === 'password' && (
-                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-primary-600 to-accent-500" />
-                )}
-              </button>
-              <button
-                onClick={() => {
-                  setActiveTab('calendars');
-                  setError(null);
-                  setSuccess(null);
-                }}
-                className={`pb-2 sm:pb-3 px-1 sm:px-2 text-sm sm:text-base font-semibold transition-colors relative whitespace-nowrap ${
-                  activeTab === 'calendars'
-                    ? 'text-primary-600'
-                    : 'text-neutral-500 hover:text-neutral-700'
-                }`}
-              >
-                Calendarios
-                {activeTab === 'calendars' && (
-                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-primary-600 to-accent-500" />
-                )}
-              </button>
-              <button
-                onClick={() => {
-                  setActiveTab('danger');
-                  setError(null);
-                  setSuccess(null);
-                }}
-                className={`pb-2 sm:pb-3 px-1 sm:px-2 text-sm sm:text-base font-semibold transition-colors relative whitespace-nowrap ${
-                  activeTab === 'danger'
-                    ? 'text-red-600'
-                    : 'text-neutral-500 hover:text-neutral-700'
-                }`}
-              >
-                Zona Peligrosa
-                {activeTab === 'danger' && (
-                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-red-500" />
-                )}
-              </button>
+      <main className="amig-cosmic-canvas min-h-screen pb-28 pt-6">
+        <div className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 sm:px-6 lg:px-8">
+          <header className="grid gap-5 lg:grid-cols-[1fr_auto] lg:items-center">
+            <div>
+              <p className="text-sm font-bold uppercase text-primary-700">
+                Cuenta y seguridad
+              </p>
+              <h1 className="mt-2 text-4xl font-extrabold text-neutral-950 sm:text-5xl">
+                User Profile
+              </h1>
+              <p className="mt-3 max-w-xl text-base text-neutral-700">
+                Manage your identity, security, and connected apps.
+              </p>
             </div>
-          </div>
+            <div className="flex items-center gap-4 rounded-pebble bg-white/75 p-4 shadow-soft backdrop-blur">
+              <Avatar
+                name={user?.fullName || user?.username || user?.email}
+                size="xl"
+                status="online"
+              />
+              <div>
+                <p className="text-xl font-bold text-neutral-950">
+                  {user?.fullName || user?.username || 'Usuario'}
+                </p>
+                <p className="text-sm text-neutral-600">{user?.email}</p>
+              </div>
+            </div>
+          </header>
 
-          {/* Messages */}
           {error && (
-            <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-red-50 border border-red-200 rounded-xl text-sm sm:text-base text-red-700">
+            <div className="rounded-2xl border border-danger-200 bg-danger-50 p-4 text-sm font-medium text-danger-700">
               {error}
             </div>
           )}
           {success && (
-            <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-green-50 border border-green-200 rounded-xl text-sm sm:text-base text-green-700">
+            <div className="rounded-2xl border border-success-200 bg-success-50 p-4 text-sm font-medium text-success-700">
               {success}
             </div>
           )}
 
-          {/* Profile Tab */}
-          {activeTab === 'profile' && (
-            <div className="bg-white rounded-xl sm:rounded-2xl shadow-soft p-4 sm:p-6 lg:p-8">
-              <h2 className="text-lg sm:text-xl font-bold text-neutral-800 mb-4 sm:mb-6">
-                Actualizar Información Personal
-              </h2>
-              <form onSubmit={handleProfileSubmit} className="space-y-3 sm:space-y-4">
-                <Input
-                  label="Nombre de usuario"
-                  type="text"
-                  name="username"
-                  value={profileForm.username}
-                  onChange={handleProfileChange}
-                  required
-                />
-                <Input
-                  label="Email"
-                  type="email"
-                  name="email"
-                  value={profileForm.email}
-                  onChange={handleProfileChange}
-                  required
-                />
-                <Input
-                  label="Nombre completo (opcional)"
-                  type="text"
-                  name="fullName"
-                  value={profileForm.fullName || ''}
-                  onChange={handleProfileChange}
-                />
-                <div className="pt-2 sm:pt-4">
-                  <Button type="submit" disabled={isLoading} className="w-full sm:w-auto">
-                    {isLoading ? 'Guardando...' : 'Guardar Cambios'}
-                  </Button>
+          <section className="grid gap-6 xl:grid-cols-[1fr_360px]">
+            <div className="space-y-6">
+              <Card variant="glass" padding="xl">
+                <div className="mb-6 flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-sm font-bold uppercase text-accent-700">
+                      Personal Information
+                    </p>
+                    <h2 className="mt-1 text-2xl font-extrabold text-neutral-950">
+                      Identidad publica
+                    </h2>
+                  </div>
+                  <Badge variant="glass">Perfil</Badge>
                 </div>
-              </form>
-            </div>
-          )}
 
-          {/* Password Tab */}
-          {activeTab === 'password' && (
-            <div className="bg-white rounded-xl sm:rounded-2xl shadow-soft p-4 sm:p-6 lg:p-8">
-              <h2 className="text-lg sm:text-xl font-bold text-neutral-800 mb-2">
-                Cambiar Contraseña
-              </h2>
-              <p className="text-xs sm:text-sm text-neutral-600 mb-4 sm:mb-6">
-                La contraseña debe tener al menos 6 caracteres
-              </p>
-              <form onSubmit={handlePasswordSubmit} className="space-y-3 sm:space-y-4">
-                <Input
-                  label="Contraseña actual"
-                  type="password"
-                  name="currentPassword"
-                  value={passwordForm.currentPassword}
-                  onChange={handlePasswordChange}
-                  required
-                />
-                <Input
-                  label="Nueva contraseña"
-                  type="password"
-                  name="newPassword"
-                  value={passwordForm.newPassword}
-                  onChange={handlePasswordChange}
-                  required
-                />
-                <Input
-                  label="Confirmar nueva contraseña"
-                  type="password"
-                  name="confirmPassword"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  required
-                />
-                <div className="pt-2 sm:pt-4">
-                  <Button type="submit" disabled={isLoading} className="w-full sm:w-auto">
-                    {isLoading ? 'Cambiando...' : 'Cambiar Contraseña'}
-                  </Button>
+                <form onSubmit={handleProfileSubmit} className="space-y-4">
+                  <Input
+                    label="Username"
+                    type="text"
+                    name="username"
+                    value={profileForm.username}
+                    onChange={handleProfileChange}
+                    variant="glass"
+                    required
+                  />
+                  <Input
+                    label="Email Address"
+                    type="email"
+                    name="email"
+                    value={profileForm.email}
+                    onChange={handleProfileChange}
+                    variant="glass"
+                    required
+                  />
+                  <Input
+                    label="Nombre completo"
+                    type="text"
+                    name="fullName"
+                    value={profileForm.fullName || ''}
+                    onChange={handleProfileChange}
+                    variant="glass"
+                    placeholder="Tu nombre visible"
+                  />
+                  <div className="flex justify-end pt-2">
+                    <Button type="submit" loading={isLoading}>
+                      Save Changes
+                    </Button>
+                  </div>
+                </form>
+              </Card>
+
+              <Card variant="glass" padding="xl">
+                <div className="mb-6">
+                  <p className="text-sm font-bold uppercase text-warning-700">
+                    Security
+                  </p>
+                  <h2 className="mt-1 text-2xl font-extrabold text-neutral-950">
+                    Cambiar contrasena
+                  </h2>
+                  <p className="mt-1 text-sm text-neutral-600">
+                    Usa al menos 6 caracteres.
+                  </p>
                 </div>
-              </form>
+
+                <form onSubmit={handlePasswordSubmit} className="space-y-4">
+                  <Input
+                    label="Current Password"
+                    type="password"
+                    name="currentPassword"
+                    value={passwordForm.currentPassword}
+                    onChange={handlePasswordChange}
+                    variant="glass"
+                    required
+                  />
+                  <Input
+                    label="New Password"
+                    type="password"
+                    name="newPassword"
+                    value={passwordForm.newPassword}
+                    onChange={handlePasswordChange}
+                    variant="glass"
+                    required
+                  />
+                  <Input
+                    label="Confirmar nueva contrasena"
+                    type="password"
+                    name="confirmPassword"
+                    value={confirmPassword}
+                    onChange={(event) => setConfirmPassword(event.target.value)}
+                    variant="glass"
+                    required
+                  />
+                  <Button type="submit" variant="secondary" loading={isLoading}>
+                    Update Password
+                  </Button>
+                </form>
+              </Card>
             </div>
-          )}
 
-          {/* Calendars Tab */}
-          {activeTab === 'calendars' && (
-            <div className="bg-white rounded-xl sm:rounded-2xl shadow-soft p-4 sm:p-6 lg:p-8">
-              <h2 className="text-lg sm:text-xl font-bold text-neutral-800 mb-4 sm:mb-6">
-                Calendarios conectados
-              </h2>
-              <div className="space-y-4">
-                {[
-                  { key: 'google' as const, label: 'Google Calendar' },
-                ].map((provider) => {
-                  const status = calendarStatus[provider.key];
-                  const isProviderLoading = calendarLoading === provider.key;
+            <aside className="space-y-6">
+              <Card variant="glass" padding="lg">
+                <div className="mb-5">
+                  <p className="text-sm font-bold uppercase text-success-700">
+                    Connected Calendars
+                  </p>
+                  <h2 className="mt-1 text-2xl font-extrabold text-neutral-950">
+                    Calendarios
+                  </h2>
+                </div>
 
-                  return (
-                    <div
-                      key={provider.key}
-                      className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 border border-neutral-200 rounded-xl"
-                    >
-                      <div>
-                        <h3 className="text-base font-semibold text-neutral-900">
-                          {provider.label}
-                        </h3>
-                        <p className="text-sm text-neutral-600 mt-1">
-                          {status.connected
-                            ? `Conectado como ${status.email || 'cuenta externa'}`
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between gap-3 rounded-2xl bg-white/80 p-3 shadow-sm">
+                    <div className="flex min-w-0 items-center gap-3">
+                      <span className="flex h-10 w-10 items-center justify-center rounded-full bg-primary-50 font-bold text-primary-700">
+                        G
+                      </span>
+                      <div className="min-w-0">
+                        <p className="font-bold text-neutral-950">
+                          Google Calendar
+                        </p>
+                        <p className="truncate text-xs text-neutral-500">
+                          {googleStatus.connected
+                            ? googleStatus.email || 'Cuenta conectada'
                             : 'Desconectado'}
                         </p>
                       </div>
-
-                      {status.connected ? (
-                        <Button
-                          variant="secondary"
-                          onClick={() => handleDisconnectCalendar(provider.key)}
-                          loading={isProviderLoading}
-                          className="w-full sm:w-auto"
-                        >
-                          Desconectar
-                        </Button>
-                      ) : (
-                        <Button
-                          onClick={() => handleConnectCalendar(provider.key)}
-                          loading={isProviderLoading}
-                          className="w-full sm:w-auto"
-                        >
-                          Conectar
-                        </Button>
-                      )}
                     </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
-          {/* Danger Zone Tab */}
-          {activeTab === 'danger' && (
-            <div className="bg-white rounded-xl sm:rounded-2xl shadow-soft p-4 sm:p-6 lg:p-8 border-2 border-red-200">
-              <h2 className="text-lg sm:text-xl font-bold text-red-700 mb-2">
-                Eliminar Cuenta
-              </h2>
-              <p className="text-xs sm:text-sm text-neutral-600 mb-4 sm:mb-6">
-                Una vez que elimines tu cuenta, no hay vuelta atrás. Por favor,
-                ten cuidado.
-              </p>
-
-              {!showDeleteConfirm ? (
-                <Button
-                  variant="secondary"
-                  onClick={() => setShowDeleteConfirm(true)}
-                  className="bg-red-50 text-red-700 border-red-300 hover:bg-red-100 w-full sm:w-auto"
-                >
-                  Eliminar mi cuenta
-                </Button>
-              ) : (
-                <div className="space-y-3 sm:space-y-4">
-                  <div className="p-3 sm:p-4 bg-red-50 rounded-xl">
-                    <h3 className="text-sm sm:text-base font-semibold text-red-900 mb-2">
-                      ⚠️ ¿Estás absolutamente seguro?
-                    </h3>
-                    <p className="text-xs sm:text-sm text-red-700">
-                      Esta acción no se puede deshacer. Esto eliminará
-                      permanentemente tu cuenta y todos tus datos asociados.
-                    </p>
+                    {googleStatus.connected ? (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDisconnectCalendar('google')}
+                        loading={calendarLoading === 'google'}
+                        className="text-danger-600 hover:bg-danger-50"
+                      >
+                        Disconnect
+                      </Button>
+                    ) : (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleConnectCalendar('google')}
+                        loading={calendarLoading === 'google'}
+                        className="text-primary-700"
+                      >
+                        Connect
+                      </Button>
+                    )}
                   </div>
-                  <Input
-                    label="Ingresa tu contraseña para confirmar"
-                    type="password"
-                    name="deletePassword"
-                    value={deletePassword}
-                    onChange={(e) => setDeletePassword(e.target.value)}
-                    placeholder="Tu contraseña"
-                    required
-                  />
-                  <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
-                    <Button
-                      onClick={handleDeleteAccount}
-                      disabled={isLoading || !deletePassword}
-                      className="bg-red-600 hover:bg-red-700 w-full sm:w-auto"
-                    >
-                      {isLoading ? 'Eliminando...' : 'Sí, eliminar mi cuenta'}
-                    </Button>
-                    <Button
-                      variant="secondary"
-                      onClick={() => {
-                        setShowDeleteConfirm(false);
-                        setDeletePassword('');
-                        setError(null);
-                      }}
-                      disabled={isLoading}
-                      className="w-full sm:w-auto"
-                    >
-                      Cancelar
-                    </Button>
+
+                  <div className="flex items-center justify-between gap-3 rounded-2xl bg-white/60 p-3 shadow-sm opacity-75">
+                    <div className="flex items-center gap-3">
+                      <span className="flex h-10 w-10 items-center justify-center rounded-full bg-accent-50 font-bold text-accent-700">
+                        O
+                      </span>
+                      <div>
+                        <p className="font-bold text-neutral-950">Outlook</p>
+                        <p className="text-xs text-neutral-500">Pausado</p>
+                      </div>
+                    </div>
+                    <Badge variant="neutral">No disponible</Badge>
                   </div>
                 </div>
-              )}
-            </div>
-          )}
 
-          {/* Account Info */}
-          <div className="mt-4 sm:mt-6 p-4 sm:p-6 bg-white rounded-xl sm:rounded-2xl shadow-soft">
-            <h3 className="text-sm sm:text-base font-semibold text-neutral-700 mb-2 sm:mb-3">
-              Información de la cuenta:
-            </h3>
-            <div className="space-y-1 sm:space-y-2 text-xs sm:text-sm text-neutral-600">
-              <p className="break-all">
-                <strong>ID:</strong> {user?._id}
-              </p>
-              <p>
-                <strong>Miembro desde:</strong>{' '}
-                {new Date(user?.createdAt || '').toLocaleDateString('es-ES', {
-                  day: 'numeric',
-                  month: 'long',
-                  year: 'numeric',
-                })}
-              </p>
-            </div>
-          </div>
+                <p className="mt-4 text-sm text-neutral-600">
+                  Syncing allows AmigOrganizador to automatically build your
+                  availability from connected calendars.
+                </p>
+              </Card>
+
+              <Card
+                variant="glass"
+                padding="lg"
+                className="border border-danger-200 bg-danger-50/80"
+              >
+                <div className="mb-4">
+                  <p className="text-sm font-bold uppercase text-danger-700">
+                    Danger Zone
+                  </p>
+                  <h2 className="mt-1 text-2xl font-extrabold text-danger-700">
+                    Delete Account
+                  </h2>
+                  <p className="mt-2 text-sm leading-6 text-neutral-700">
+                    Permanently delete your account and remove all associated
+                    data, including linked calendars and group memberships.
+                  </p>
+                </div>
+
+                {!showDeleteConfirm ? (
+                  <Button
+                    variant="danger"
+                    onClick={() => setShowDeleteConfirm(true)}
+                  >
+                    Delete Account
+                  </Button>
+                ) : (
+                  <div className="space-y-3">
+                    <Input
+                      label="Confirma con tu contrasena"
+                      type="password"
+                      name="deletePassword"
+                      value={deletePassword}
+                      onChange={(event) => setDeletePassword(event.target.value)}
+                      variant="glass"
+                      required
+                    />
+                    <div className="grid gap-2">
+                      <Button
+                        variant="danger"
+                        onClick={handleDeleteAccount}
+                        disabled={isLoading || !deletePassword}
+                        loading={isLoading}
+                        fullWidth
+                      >
+                        Si, eliminar mi cuenta
+                      </Button>
+                      <Button
+                        variant="secondary"
+                        onClick={() => {
+                          setShowDeleteConfirm(false);
+                          setDeletePassword('');
+                          setError(null);
+                        }}
+                        disabled={isLoading}
+                        fullWidth
+                      >
+                        Cancelar
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </Card>
+
+              <Card variant="glass" padding="lg">
+                <p className="text-xs font-bold uppercase text-neutral-500">
+                  Informacion de la cuenta
+                </p>
+                <div className="mt-3 space-y-2 text-sm text-neutral-600">
+                  <p className="break-all">
+                    <strong>ID:</strong> {user?._id}
+                  </p>
+                  <p>
+                    <strong>Miembro desde:</strong>{' '}
+                    {new Date(user?.createdAt || '').toLocaleDateString('es-ES', {
+                      day: 'numeric',
+                      month: 'long',
+                      year: 'numeric',
+                    })}
+                  </p>
+                </div>
+              </Card>
+            </aside>
+          </section>
         </div>
-      </div>
-    </div>
+      </main>
+    </>
   );
 };
 

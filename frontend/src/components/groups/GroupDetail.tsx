@@ -1,12 +1,18 @@
 import { useEffect, useState } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
-import { useGroupStore } from '../../store/groupStore';
-import { useAuthStore } from '../../store/authStore';
-import Navbar from '../layout/Navbar';
-import Button from '../common/Button';
-import Input from '../common/Input';
-import GroupAvailabilityView from './GroupAvailabilityView';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import type { CreateInvitationData } from '../../services/invitationService';
+import { useAuthStore } from '../../store/authStore';
+import { useGroupStore } from '../../store/groupStore';
+import Avatar from '../common/Avatar';
+import Badge from '../common/Badge';
+import Button from '../common/Button';
+import Card from '../common/Card';
+import EmptyState from '../common/EmptyState';
+import Input from '../common/Input';
+import Skeleton from '../common/Skeleton';
+import Textarea from '../common/Textarea';
+import Navbar from '../layout/Navbar';
+import GroupAvailabilityView from './GroupAvailabilityView';
 
 const GroupDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -30,9 +36,7 @@ const GroupDetail = () => {
   const [inviteEmail, setInviteEmail] = useState('');
   const [isInviting, setIsInviting] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const [activeTab, setActiveTab] = useState<'details' | 'availability'>(
-    'details'
-  );
+  const [activeTab, setActiveTab] = useState<'details' | 'availability'>('details');
   const [editForm, setEditForm] = useState({
     name: '',
     description: '',
@@ -58,27 +62,45 @@ const GroupDetail = () => {
 
   if (isLoading && !currentGroup) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-accent-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
-      </div>
+      <>
+        <Navbar />
+        <main className="amig-cosmic-canvas min-h-screen p-4 sm:p-8">
+          <div className="mx-auto max-w-5xl space-y-5">
+            <Skeleton className="h-64 w-full" rounded="lg" />
+            <Skeleton className="h-16 w-full" rounded="lg" />
+            <Skeleton className="h-28 w-full" rounded="lg" />
+          </div>
+        </main>
+      </>
     );
   }
 
   if (!currentGroup) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-accent-50 flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-neutral-600 mb-4">Grupo no encontrado</p>
-          <Button onClick={() => navigate('/groups')}>Volver a grupos</Button>
-        </div>
-      </div>
+      <>
+        <Navbar />
+        <main className="amig-cosmic-canvas flex min-h-screen items-center justify-center p-4">
+          <EmptyState
+            title="Grupo no encontrado"
+            description="Puede que el grupo haya sido eliminado o que ya no tengas acceso."
+            actionLabel="Volver a grupos"
+            onAction={() => navigate('/groups')}
+          />
+        </main>
+      </>
     );
   }
 
   const activeMembers = currentGroup.members.filter((member) => member.user);
   const isCreator = user?._id === currentGroup.creator?._id;
-  const userMember = activeMembers.find((m) => m.user._id === user?._id);
+  const userMember = activeMembers.find((member) => member.user._id === user?._id);
   const isAdmin = userMember?.role === 'admin';
+  const groupInvitations = invitations.filter(
+    (invitation) => invitation.group._id === id
+  );
+  const pendingInvitations = groupInvitations.filter(
+    (invitation) => invitation.status === 'pending'
+  );
 
   const handleInvite = async () => {
     if (!inviteEmail.trim() || !id) return;
@@ -91,9 +113,7 @@ const GroupDetail = () => {
       };
       await createInvitation(invitationData);
       setInviteEmail('');
-      if (id) {
-        await fetchGroupInvitations(id);
-      }
+      await fetchGroupInvitations(id);
     } finally {
       setIsInviting(false);
     }
@@ -109,7 +129,7 @@ const GroupDetail = () => {
     if (!id) return;
     if (
       !window.confirm(
-        '¿Estás seguro de que quieres eliminar este grupo? Esta acción no se puede deshacer.'
+        'Estas seguro de que quieres eliminar este grupo? Esta accion no se puede deshacer.'
       )
     ) {
       return;
@@ -120,7 +140,7 @@ const GroupDetail = () => {
 
   const handleLeave = async () => {
     if (!id) return;
-    if (!window.confirm('¿Estás seguro de que quieres salir de este grupo?')) {
+    if (!window.confirm('Estas seguro de que quieres salir de este grupo?')) {
       return;
     }
     await leaveGroup(id);
@@ -129,9 +149,7 @@ const GroupDetail = () => {
 
   const handleRemoveMember = async (userId: string) => {
     if (!id) return;
-    if (
-      !window.confirm('¿Estás seguro de que quieres eliminar a este miembro?')
-    ) {
+    if (!window.confirm('Estas seguro de que quieres eliminar a este miembro?')) {
       return;
     }
     await removeMember(id, userId);
@@ -141,326 +159,288 @@ const GroupDetail = () => {
     await cancelInvitation(invitationId);
   };
 
-  const groupInvitations = invitations.filter(
-    (inv: (typeof invitations)[0]) => inv.group._id === id
-  );
-  const pendingInvitations = groupInvitations.filter(
-    (inv: (typeof groupInvitations)[0]) => inv.status === 'pending'
-  );
+  const tabClass = (tab: 'details' | 'availability') =>
+    `relative min-h-11 px-2 text-base font-bold transition-colors ${
+      activeTab === tab
+        ? 'text-neutral-950'
+        : 'text-neutral-500 hover:text-neutral-800'
+    }`;
 
   return (
     <>
       <Navbar />
-      <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-accent-50">
-        <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 lg:py-8 max-w-5xl">
-          {/* Back Button */}
-          <Link
-            to="/groups"
-            className="inline-flex items-center gap-2 text-primary-600 hover:text-primary-700 mb-4 sm:mb-6 text-sm sm:text-base font-semibold"
-          >
-            <span>←</span> Volver a grupos
-          </Link>
+      <main className="amig-cosmic-canvas min-h-screen pb-28 pt-5">
+        <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between gap-3">
+            <Link
+              to="/groups"
+              className="inline-flex min-h-11 items-center gap-2 rounded-full bg-white/80 px-4 text-sm font-bold text-primary-700 shadow-soft transition hover:bg-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+            >
+              <span aria-hidden="true">←</span>
+              Grupos
+            </Link>
+            {isAdmin && (
+              <Button variant="secondary" onClick={() => setIsEditing(true)}>
+                Configurar
+              </Button>
+            )}
+          </div>
 
           {error && (
-            <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-red-50 border border-red-200 rounded-xl text-sm sm:text-base text-red-700">
+            <div className="rounded-2xl border border-danger-200 bg-danger-50 p-4 text-sm font-medium text-danger-700">
               {error}
             </div>
           )}
 
-          {/* Group Header */}
-          <div className="bg-white rounded-xl sm:rounded-2xl shadow-soft p-4 sm:p-6 lg:p-8 mb-4 sm:mb-6">
+          <Card variant="glass" padding="xl" className="overflow-hidden">
             {isEditing ? (
-              <div className="space-y-3 sm:space-y-4">
+              <div className="space-y-4">
                 <Input
                   type="text"
                   name="name"
                   value={editForm.name}
-                  onChange={(e) =>
-                    setEditForm({ ...editForm, name: e.target.value })
+                  onChange={(event) =>
+                    setEditForm({ ...editForm, name: event.target.value })
                   }
                   placeholder="Nombre del grupo"
                   label="Nombre"
+                  variant="glass"
                   required
                 />
-                <div>
-                  <label className="block text-sm font-semibold text-neutral-700 mb-2">
-                    Descripción
-                  </label>
-                  <textarea
-                    value={editForm.description}
-                    onChange={(e) =>
-                      setEditForm({ ...editForm, description: e.target.value })
-                    }
-                    placeholder="Descripción del grupo"
-                    className="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-xl border border-neutral-300 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 transition-all text-sm sm:text-base"
-                    rows={3}
-                  />
-                </div>
-                <div className="flex items-center gap-3">
+                <Textarea
+                  value={editForm.description}
+                  onChange={(event) =>
+                    setEditForm({ ...editForm, description: event.target.value })
+                  }
+                  placeholder="Descripcion del grupo"
+                  label="Descripcion"
+                  variant="glass"
+                  rows={3}
+                />
+                <label className="flex items-center gap-3 rounded-2xl bg-white/70 p-4 text-sm font-semibold text-neutral-700">
                   <input
                     type="checkbox"
-                    id="isPrivate"
                     checked={editForm.isPrivate}
-                    onChange={(e) =>
-                      setEditForm({ ...editForm, isPrivate: e.target.checked })
+                    onChange={(event) =>
+                      setEditForm({ ...editForm, isPrivate: event.target.checked })
                     }
-                    className="w-4 h-4 sm:w-5 sm:h-5 text-primary-600 rounded focus:ring-primary-500"
+                    className="h-5 w-5 rounded border-neutral-300 text-primary-600 focus:ring-primary-500"
                   />
-                  <label
-                    htmlFor="isPrivate"
-                    className="text-xs sm:text-sm text-neutral-700"
-                  >
-                    Grupo privado
-                  </label>
-                </div>
-                <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
-                  <Button onClick={handleSaveEdit} disabled={isLoading} className="w-full sm:w-auto justify-center">
-                    {isLoading ? 'Guardando...' : 'Guardar cambios'}
+                  Grupo privado
+                </label>
+                <div className="flex flex-col gap-2 sm:flex-row">
+                  <Button onClick={handleSaveEdit} loading={isLoading}>
+                    Guardar cambios
                   </Button>
-                  <Button
-                    variant="secondary"
-                    onClick={() => setIsEditing(false)}
-                    className="w-full sm:w-auto justify-center"
-                  >
+                  <Button variant="secondary" onClick={() => setIsEditing(false)}>
                     Cancelar
                   </Button>
                 </div>
               </div>
             ) : (
-              <>
-                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3 sm:gap-0 mb-4">
-                  <div className="flex-1 min-w-0">
-                    <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-neutral-800 mb-1 sm:mb-2 break-words">
-                      {currentGroup.name}
-                    </h1>
-                    {currentGroup.description && (
-                      <p className="text-sm sm:text-base text-neutral-600 break-words">
-                        {currentGroup.description}
-                      </p>
-                    )}
+              <div className="grid gap-8 lg:grid-cols-[1fr_300px] lg:items-end">
+                <div>
+                  <div className="mb-5 flex flex-wrap gap-2">
+                    {isCreator && <Badge variant="primary">Creador</Badge>}
+                    {!isCreator && isAdmin && <Badge variant="primary">Admin</Badge>}
+                    {currentGroup.settings.isPrivate && <Badge variant="neutral">Privado</Badge>}
                   </div>
-                  <div className="flex flex-wrap gap-2">
-                    {isCreator && (
-                      <span className="px-3 sm:px-4 py-1.5 sm:py-2 bg-primary-100 text-primary-700 text-xs sm:text-sm font-semibold rounded-full">
-                        Creador
-                      </span>
-                    )}
-                    {!isCreator && isAdmin && (
-                      <span className="px-3 sm:px-4 py-1.5 sm:py-2 bg-accent-100 text-accent-700 text-xs sm:text-sm font-semibold rounded-full">
-                        Admin
-                      </span>
-                    )}
-                    {currentGroup.settings.isPrivate && (
-                      <span className="px-3 sm:px-4 py-1.5 sm:py-2 bg-neutral-100 text-neutral-600 text-xs sm:text-sm font-semibold rounded-full">
-                        🔒 Privado
-                      </span>
-                    )}
-                  </div>
+                  <h1 className="text-4xl font-extrabold text-neutral-950 sm:text-6xl">
+                    {currentGroup.name}
+                  </h1>
+                  <p className="mt-4 max-w-2xl text-base text-neutral-700">
+                    {currentGroup.description ||
+                      'Grupo listo para coordinar miembros, disponibilidad y panoramas compatibles.'}
+                  </p>
+                  <p className="mt-5 text-lg font-semibold text-neutral-800">
+                    {activeMembers.length}{' '}
+                    {activeMembers.length === 1 ? 'miembro' : 'miembros'}
+                  </p>
                 </div>
 
-                <div className="pt-3 sm:pt-4 border-t border-neutral-200">
-                  <div className="flex flex-col gap-3">
-                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
-                      <span className="text-xs sm:text-sm font-semibold text-neutral-500 whitespace-nowrap">
-                        CÓDIGO DEL GRUPO:
-                      </span>
-                      <code className="px-3 sm:px-4 py-2 bg-neutral-100 text-primary-600 font-mono font-bold text-base sm:text-lg rounded-lg break-all">
-                        {currentGroup.code}
-                      </code>
-                    </div>
-                    <div className="flex flex-col sm:flex-row gap-2">
-                      {isAdmin && (
-                        <Button
-                          variant="secondary"
-                          onClick={() => setIsEditing(true)}
-                          className="w-full sm:w-auto justify-center"
-                        >
-                          Editar
-                        </Button>
-                      )}
-                      {isCreator ? (
-                        <Button
-                          variant="secondary"
-                          onClick={handleDelete}
-                          className="text-red-600 border-red-300 hover:bg-red-50 w-full sm:w-auto justify-center"
-                        >
-                          Eliminar grupo
-                        </Button>
-                      ) : (
-                        <Button
-                          variant="secondary"
-                          onClick={handleLeave}
-                          className="text-red-600 border-red-300 hover:bg-red-50 w-full sm:w-auto justify-center"
-                        >
-                          Salir del grupo
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </>
-            )}
-          </div>
-
-          {/* Tabs */}
-          <div className="mb-4 sm:mb-6 border-b border-neutral-200 overflow-x-auto">
-            <div className="flex gap-4 sm:gap-6 lg:gap-8 min-w-max">
-              <button
-                onClick={() => setActiveTab('details')}
-                className={`pb-2 sm:pb-3 px-1 sm:px-2 text-sm sm:text-base font-semibold transition-colors relative whitespace-nowrap ${
-                  activeTab === 'details'
-                    ? 'text-primary-600'
-                    : 'text-neutral-500 hover:text-neutral-700'
-                }`}
-              >
-                Detalles del grupo
-                {activeTab === 'details' && (
-                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-primary-600 to-accent-500" />
-                )}
-              </button>
-              <button
-                onClick={() => setActiveTab('availability')}
-                className={`pb-2 sm:pb-3 px-1 sm:px-2 text-sm sm:text-base font-semibold transition-colors relative whitespace-nowrap ${
-                  activeTab === 'availability'
-                    ? 'text-primary-600'
-                    : 'text-neutral-500 hover:text-neutral-700'
-                }`}
-              >
-                Disponibilidad grupal
-                {activeTab === 'availability' && (
-                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-primary-600 to-accent-500" />
-                )}
-              </button>
-            </div>
-          </div>
-
-          {/* Tab Content */}
-          {activeTab === 'details' && (
-            <>
-              {/* Members Section */}
-              <div className="bg-white rounded-xl sm:rounded-2xl shadow-soft p-4 sm:p-6 lg:p-8 mb-4 sm:mb-6">
-                <h2 className="text-lg sm:text-xl font-bold text-neutral-800 mb-3 sm:mb-4">
-                  Miembros ({activeMembers.length})
-                </h2>
-                <div className="space-y-2 sm:space-y-3">
-                  {activeMembers.map((member) => (
-                    <div
-                      key={member.user._id}
-                      className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-3 sm:p-4 bg-neutral-50 rounded-xl"
+                <div className="rounded-2xl border border-neutral-200 bg-white/80 p-5 shadow-soft">
+                  <p className="text-xs font-bold uppercase text-neutral-500">
+                    Codigo de union
+                  </p>
+                  <div className="mt-2 flex items-center justify-between gap-3">
+                    <code className="amig-time-code text-2xl font-bold text-primary-700">
+                      {currentGroup.code}
+                    </code>
+                    <button
+                      type="button"
+                      onClick={() => navigator.clipboard?.writeText(currentGroup.code)}
+                      className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-primary-100 bg-primary-50 text-primary-700 transition hover:bg-primary-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                      aria-label="Copiar codigo del grupo"
                     >
-                      <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-                        <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-primary-400 to-accent-400 rounded-full flex items-center justify-center text-white font-bold text-sm sm:text-base flex-shrink-0">
-                          {member.user.fullName?.[0]?.toUpperCase() ||
-                            member.user.email[0].toUpperCase()}
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <p className="text-sm sm:text-base font-semibold text-neutral-800 truncate">
-                            {member.user.fullName || member.user.email}
+                      <span aria-hidden="true">[]</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </Card>
+
+          <div className="grid grid-cols-2 border-b border-neutral-200">
+            <button className={tabClass('details')} onClick={() => setActiveTab('details')}>
+              Detalles
+              {activeTab === 'details' && (
+                <span className="absolute inset-x-0 bottom-0 h-1 rounded-full bg-cosmic-action" />
+              )}
+            </button>
+            <button
+              className={tabClass('availability')}
+              onClick={() => setActiveTab('availability')}
+            >
+              Disponibilidad
+              <span className="ml-2 rounded-full bg-primary-100 px-2 py-0.5 text-xs text-primary-700">
+                Nuevo
+              </span>
+              {activeTab === 'availability' && (
+                <span className="absolute inset-x-0 bottom-0 h-1 rounded-full bg-cosmic-action" />
+              )}
+            </button>
+          </div>
+
+          {activeTab === 'details' ? (
+            <div className="grid gap-5 xl:grid-cols-[1fr_360px]">
+              <section aria-labelledby="members-title" className="space-y-4">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <h2 id="members-title" className="text-3xl font-extrabold text-neutral-950">
+                    Miembros
+                  </h2>
+                  {isAdmin && (
+                    <Button onClick={() => document.getElementById('inviteEmail')?.focus()}>
+                      Invitar
+                    </Button>
+                  )}
+                </div>
+
+                <div className="space-y-3">
+                  {activeMembers.map((member) => (
+                    <Card
+                      key={member.user._id}
+                      variant="glass"
+                      padding="md"
+                      className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
+                    >
+                      <div className="flex min-w-0 items-center gap-4">
+                        <Avatar
+                          name={member.user.fullName || member.user.username || member.user.email}
+                          size="lg"
+                          status={member.role === 'admin' ? 'online' : undefined}
+                        />
+                        <div className="min-w-0">
+                          <p className="truncate text-lg font-bold text-neutral-950">
+                            {member.user.fullName || member.user.username || member.user.email}
                           </p>
-                          <p className="text-xs sm:text-sm text-neutral-500 truncate">
+                          <p className="truncate text-sm text-neutral-500">
                             {member.user.email}
                           </p>
                         </div>
                       </div>
-                      <div className="flex items-center justify-between sm:justify-end gap-2 sm:gap-3">
-                        <span className="text-xs sm:text-sm font-semibold text-neutral-600">
-                          {member.role === 'admin'
-                            ? 'Administrador'
-                            : 'Miembro'}
-                        </span>
+                      <div className="flex items-center justify-between gap-3 sm:justify-end">
+                        <Badge variant={member.role === 'admin' ? 'primary' : 'neutral'}>
+                          {member.role === 'admin' ? 'Administrador' : 'Miembro'}
+                        </Badge>
                         {isAdmin &&
                           member.user._id !== user?._id &&
                           member.role !== 'admin' && (
-                            <button
-                              onClick={() =>
-                                handleRemoveMember(member.user._id)
-                              }
-                              className="text-red-600 hover:text-red-700 text-xs sm:text-sm font-semibold"
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleRemoveMember(member.user._id)}
+                              className="text-danger-600 hover:bg-danger-50"
                             >
                               Eliminar
-                            </button>
+                            </Button>
                           )}
                       </div>
-                    </div>
+                    </Card>
                   ))}
                 </div>
-              </div>
+              </section>
 
-              {/* Invite Members Section */}
-              {isAdmin && (
-                <div className="bg-white rounded-xl sm:rounded-2xl shadow-soft p-4 sm:p-6 lg:p-8 mb-4 sm:mb-6">
-                  <h2 className="text-lg sm:text-xl font-bold text-neutral-800 mb-3 sm:mb-4">
-                    Invitar miembros
-                  </h2>
-                  <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
-                    <div className="flex-1">
+              <aside className="space-y-5">
+                {isAdmin && (
+                  <Card variant="glass" padding="lg">
+                    <h2 className="text-xl font-bold text-neutral-950">
+                      Invitar miembros
+                    </h2>
+                    <div className="mt-4">
                       <Input
+                        id="inviteEmail"
                         type="email"
                         name="inviteEmail"
                         value={inviteEmail}
-                        onChange={(e) => setInviteEmail(e.target.value)}
+                        onChange={(event) => setInviteEmail(event.target.value)}
                         placeholder="email@ejemplo.com"
                         label="Email del usuario"
+                        variant="glass"
                       />
+                      <Button
+                        onClick={handleInvite}
+                        disabled={isInviting || !inviteEmail.trim()}
+                        loading={isInviting}
+                        fullWidth
+                      >
+                        Enviar invitacion
+                      </Button>
                     </div>
-                    <Button
-                      onClick={handleInvite}
-                      disabled={isInviting || !inviteEmail.trim()}
-                      className="sm:mt-7 w-full sm:w-auto justify-center"
-                    >
-                      {isInviting ? 'Invitando...' : 'Enviar invitación'}
-                    </Button>
-                  </div>
 
-                  {pendingInvitations.length > 0 && (
-                    <div className="mt-4 sm:mt-6">
-                      <h3 className="text-xs sm:text-sm font-semibold text-neutral-700 mb-2 sm:mb-3">
-                        Invitaciones pendientes ({pendingInvitations.length})
-                      </h3>
-                      <div className="space-y-2">
-                        {pendingInvitations.map(
-                          (invitation: (typeof pendingInvitations)[0]) => (
-                            <div
-                              key={invitation._id}
-                              className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0 p-2 sm:p-3 bg-amber-50 border border-amber-200 rounded-lg"
-                            >
-                              <div className="min-w-0">
-                                <p className="text-xs sm:text-sm font-semibold text-neutral-800 truncate">
-                                  {invitation.invitedUser?.email ||
-                                    invitation.invitedEmail}
-                                </p>
-                                <p className="text-xs text-neutral-500">
-                                  Código:{' '}
-                                  <code className="font-mono font-bold">
-                                    {invitation.code}
-                                  </code>
-                                </p>
-                              </div>
+                    {pendingInvitations.length > 0 && (
+                      <div className="mt-5 space-y-2">
+                        <p className="text-xs font-bold uppercase text-neutral-500">
+                          Pendientes ({pendingInvitations.length})
+                        </p>
+                        {pendingInvitations.map((invitation) => (
+                          <div
+                            key={invitation._id}
+                            className="rounded-xl bg-white/75 p-3 text-sm"
+                          >
+                            <div className="flex items-center justify-between gap-2">
+                              <span className="min-w-0 truncate font-semibold text-neutral-900">
+                                {invitation.invitedUser?.email || invitation.invitedEmail}
+                              </span>
                               <button
-                                onClick={() =>
-                                  handleCancelInvitation(invitation._id)
-                                }
-                                className="text-red-600 hover:text-red-700 text-xs sm:text-sm font-semibold self-end sm:self-auto"
+                                onClick={() => handleCancelInvitation(invitation._id)}
+                                className="text-xs font-bold text-danger-600 hover:text-danger-700"
                               >
                                 Cancelar
                               </button>
                             </div>
-                          )
-                        )}
+                            <code className="amig-time-code mt-1 block text-xs text-primary-700">
+                              {invitation.code}
+                            </code>
+                          </div>
+                        ))}
                       </div>
-                    </div>
-                  )}
-                </div>
-              )}
-            </>
-          )}
+                    )}
+                  </Card>
+                )}
 
-          {/* Availability Tab */}
-          {activeTab === 'availability' && id && currentGroup && (
-            <GroupAvailabilityView groupId={id} groupName={currentGroup.name} />
+                <Card variant="glass" padding="lg">
+                  <h2 className="text-xl font-bold text-neutral-950">
+                    Acciones
+                  </h2>
+                  <div className="mt-4 grid gap-2">
+                    {isCreator ? (
+                      <Button variant="danger" onClick={handleDelete} fullWidth>
+                        Eliminar grupo
+                      </Button>
+                    ) : (
+                      <Button variant="danger" onClick={handleLeave} fullWidth>
+                        Salir del grupo
+                      </Button>
+                    )}
+                  </div>
+                </Card>
+              </aside>
+            </div>
+          ) : (
+            id && <GroupAvailabilityView groupId={id} groupName={currentGroup.name} />
           )}
         </div>
-      </div>
+      </main>
     </>
   );
 };

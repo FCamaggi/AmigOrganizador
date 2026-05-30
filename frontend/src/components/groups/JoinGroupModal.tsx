@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import type { FormEvent, ChangeEvent } from 'react';
+import type { ChangeEvent, FormEvent } from 'react';
 import { useGroupStore } from '../../store/groupStore';
 import Button from '../common/Button';
 import Input from '../common/Input';
@@ -19,20 +19,17 @@ const JoinGroupModal = ({
   const { joinGroupByCode, loading, error, clearError } = useGroupStore();
   const [code, setCode] = useState('');
 
-  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    // Convertir a mayúsculas y limitar a 6 caracteres
-    const value = e.target.value.toUpperCase().slice(0, 6);
+  const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const value = event.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6);
     setCode(value);
     clearError();
   };
 
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
 
-    if (code.length !== 6) {
-      return;
-    }
+    if (code.length !== 6) return;
 
     try {
       await joinGroupByCode(code);
@@ -48,16 +45,43 @@ const JoinGroupModal = ({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="Unirse a Grupo"
+      title="Unirse con codigo"
+      description="Pega el codigo de 6 caracteres que te compartieron."
       size="sm"
-      footer={
-        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full">
+      headerGradient
+    >
+      <form id="join-group-form" onSubmit={handleSubmit} className="space-y-5">
+        {error && (
+          <div className="rounded-xl border border-danger-200 bg-danger-50 p-3 text-sm font-medium text-danger-700">
+            {error}
+          </div>
+        )}
+
+        <Input
+          label="Codigo del grupo"
+          type="text"
+          name="code"
+          value={code}
+          onChange={handleChange}
+          placeholder="ABC123"
+          required
+          variant="glass"
+          className="amig-time-code text-center text-2xl font-bold tracking-normal"
+          hint="Usa exactamente 6 letras o numeros."
+        />
+
+        <div className="rounded-2xl bg-surface-low p-4 text-sm text-neutral-600">
+          Al unirte podras ver miembros, disponibilidad grupal y eventos que
+          calzan con los mejores horarios del grupo.
+        </div>
+
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
           <Button
             type="button"
             onClick={onClose}
             variant="secondary"
             disabled={loading}
-            className="w-full sm:flex-1 justify-center"
+            fullWidth
           >
             Cancelar
           </Button>
@@ -66,38 +90,10 @@ const JoinGroupModal = ({
             variant="primary"
             loading={loading}
             disabled={code.length !== 6}
-            className="w-full sm:flex-1 justify-center"
-            onClick={(e) => {
-              e.preventDefault();
-              const form = document.getElementById('join-group-form') as HTMLFormElement;
-              if (form) form.requestSubmit();
-            }}
+            fullWidth
           >
             Unirse
           </Button>
-        </div>
-      }
-    >
-      <form id="join-group-form" onSubmit={handleSubmit}>
-        {error && (
-          <div className="mb-4 p-3 sm:p-4 bg-danger-50 border border-danger-200 text-danger-700 rounded-xl text-sm sm:text-base">
-            {error}
-          </div>
-        )}
-
-        <div className="mb-4 sm:mb-6">
-          <Input
-            label="Código del Grupo"
-            type="text"
-            name="code"
-            value={code}
-            onChange={handleChange}
-            placeholder="ABC123"
-            required
-          />
-          <p className="text-xs sm:text-sm text-neutral-500 mt-2">
-            Ingresa el código de 6 caracteres del grupo al que deseas unirte
-          </p>
         </div>
       </form>
     </Modal>

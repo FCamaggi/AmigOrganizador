@@ -84,7 +84,7 @@ const ScheduleCalendar = ({ onSelectDay }: ScheduleCalendarProps) => {
     ) {
       setSelectedDate(currentDate);
     }
-  }, []);
+  }, [currentDate, currentSchedule, setSelectedDate]);
 
   useEffect(() => {
     const loadPreviousSchedule = async () => {
@@ -446,7 +446,7 @@ const ScheduleCalendar = ({ onSelectDay }: ScheduleCalendarProps) => {
 
   if (loading) {
     return (
-      <Card padding="lg">
+      <Card variant="glass" padding="lg" className="bg-white/80">
         <div className="flex flex-col justify-center items-center h-96">
           <div className="animate-spin rounded-full h-16 w-16 border-4 border-primary-200 border-t-primary-600 mb-4"></div>
           <p className="text-neutral-600 font-medium">Cargando horario...</p>
@@ -456,7 +456,7 @@ const ScheduleCalendar = ({ onSelectDay }: ScheduleCalendarProps) => {
   }
 
   return (
-    <Card padding="lg">
+    <Card variant="glass" padding="lg" className="bg-white/80">
       {error && (
         <div className="mb-6 p-4 bg-danger-50 border-2 border-danger-200 text-danger-800 rounded-xl flex justify-between items-center shadow-sm">
           <div className="flex items-center gap-3">
@@ -483,7 +483,7 @@ const ScheduleCalendar = ({ onSelectDay }: ScheduleCalendarProps) => {
       )}
 
       {/* Leyenda - Más compacta en móvil */}
-      <div className="mb-4 sm:mb-6 flex flex-wrap gap-2 sm:gap-3 p-3 sm:p-4 bg-neutral-50 rounded-xl border border-neutral-200">
+      <div className="mb-4 sm:mb-6 flex flex-wrap gap-2 sm:gap-3 p-3 sm:p-4 bg-white/70 rounded-xl border border-white/70 shadow-sm">
         <div className="flex items-center gap-1.5 sm:gap-2">
           <div className="w-5 h-5 sm:w-6 sm:h-6 rounded bg-neutral-200 border-2 border-neutral-300"></div>
           <span className="text-xs sm:text-sm font-medium text-neutral-700">
@@ -506,7 +506,7 @@ const ScheduleCalendar = ({ onSelectDay }: ScheduleCalendarProps) => {
         </div>
       </div>
 
-      <div className="calendar-container bg-white rounded-xl overflow-x-auto">
+      <div className="calendar-container bg-white/95 rounded-pebble overflow-x-auto shadow-luxury">
         <Calendar
           localizer={localizer}
           events={events}

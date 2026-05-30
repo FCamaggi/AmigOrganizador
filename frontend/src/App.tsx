@@ -13,14 +13,16 @@ import Profile from './pages/Profile';
 import GroupsPage from './components/groups/GroupsPage';
 import GroupDetail from './components/groups/GroupDetail';
 import PrivateRoute from './components/auth/PrivateRoute';
+import { ToastProvider } from './components/common/Toast';
 import { useAuthStore } from './store/authStore';
 
 function App() {
   const { isAuthenticated } = useAuthStore();
 
   return (
-    <Router>
-      <Routes>
+    <ToastProvider>
+      <Router>
+        <Routes>
         {/* Ruta raíz - redirige según autenticación */}
         <Route
           path="/"
@@ -94,8 +96,9 @@ function App() {
 
         {/* Ruta 404 */}
         <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </Router>
+        </Routes>
+      </Router>
+    </ToastProvider>
   );
 }
 

@@ -10,6 +10,7 @@ import type {
 import Button from '../common/Button';
 import Input from '../common/Input';
 import Modal from '../common/Modal';
+import Textarea from '../common/Textarea';
 
 interface EventModalProps {
   isOpen: boolean;
@@ -218,7 +219,8 @@ const EventModal = ({
         onClose();
         resetForm();
       }}
-      title={eventToEdit ? 'Editar Evento' : 'Crear Nuevo Evento'}
+      title={eventToEdit ? 'Editar evento' : 'Crear nuevo evento'}
+      description="Define fechas, horarios, plantillas y recurrencia."
       size="lg"
       headerGradient={true}
       footer={
@@ -290,24 +292,22 @@ const EventModal = ({
             setFormData({ ...formData, title: e.target.value })
           }
           placeholder="Ej: Reunión de trabajo"
+          variant="glass"
           required
         />
 
         {/* Descripción */}
-        <div>
-          <label className="block text-sm font-semibold text-neutral-700 mb-2">
-            Descripción (opcional)
-          </label>
-          <textarea
-            value={formData.description}
-            onChange={(e) =>
-              setFormData({ ...formData, description: e.target.value })
-            }
-            className="w-full px-3 sm:px-4 py-2 border border-neutral-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm sm:text-base"
-            rows={3}
-            placeholder="Agrega detalles sobre este evento..."
-          />
-        </div>
+        <Textarea
+          name="description"
+          label="Descripcion (opcional)"
+          value={formData.description}
+          onChange={(e) =>
+            setFormData({ ...formData, description: e.target.value })
+          }
+          rows={3}
+          placeholder="Agrega detalles sobre este evento..."
+          variant="glass"
+        />
 
         {/* Fechas */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
@@ -319,6 +319,7 @@ const EventModal = ({
             onChange={(e: ChangeEvent<HTMLInputElement>) =>
               setFormData({ ...formData, startDate: e.target.value })
             }
+            variant="glass"
             required
           />
           <Input
@@ -329,6 +330,7 @@ const EventModal = ({
             onChange={(e: ChangeEvent<HTMLInputElement>) =>
               setFormData({ ...formData, endDate: e.target.value })
             }
+            variant="glass"
             required
           />
         </div>

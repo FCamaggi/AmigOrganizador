@@ -5,15 +5,36 @@
 
 // ========== TOKENS DE COLOR ==========
 export const colors = {
+  cosmic: {
+    start: '#667eea',
+    end: '#764ba2',
+    indigo: '#4648d4',
+    orchid: '#a200ba',
+    coral: '#ef4444',
+    amber: '#f59e0b',
+    mint: '#00873b',
+    canvas: '#fcf9f8',
+  },
+  surface: {
+    base: '#fcf9f8',
+    dim: '#dcd9d9',
+    low: '#f6f3f2',
+    container: '#f0eded',
+    high: '#eae7e7',
+    highest: '#e5e2e1',
+    inverse: '#313030',
+    glass: 'rgba(255, 255, 255, 0.72)',
+    glassBorder: 'rgba(255, 255, 255, 0.34)',
+  },
   primary: {
     50: '#f0f4ff',
     100: '#e0e7ff',
     200: '#c7d2fe',
     300: '#a5b4fc',
     400: '#818cf8',
-    500: '#6366f1',
-    600: '#4f46e5',
-    700: '#4338ca',
+    500: '#6063ee',
+    600: '#4648d4',
+    700: '#3f40c0',
     800: '#3730a3',
     900: '#312e81',
   },
@@ -109,7 +130,7 @@ export const textColors = {
 export const typography = {
   fontFamily: {
     sans: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
-    mono: "'Fira Code', 'Courier New', monospace",
+    mono: "'JetBrains Mono', 'SFMono-Regular', 'Courier New', monospace",
   },
   fontSize: {
     xs: '0.75rem', // 12px
@@ -161,7 +182,9 @@ export const shadows = {
   xl: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
   '2xl': '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
   soft: '0 2px 15px -3px rgba(0, 0, 0, 0.07), 0 10px 20px -2px rgba(0, 0, 0, 0.04)',
-  glow: '0 0 20px rgba(99, 102, 241, 0.2)',
+  glow: '0 0 20px rgba(70, 72, 212, 0.22)',
+  luxury: '0 10px 25px -5px rgba(0, 0, 0, 0.10), 0 8px 10px -6px rgba(0, 0, 0, 0.08)',
+  cosmic: '0 18px 45px -18px rgba(70, 72, 212, 0.45)',
 };
 
 // ========== ANIMACIONES ==========
@@ -184,44 +207,51 @@ export const animations = {
 // Variantes de botones
 export const buttonVariants = {
   primary: {
-    base: 'bg-gradient-to-r from-primary-600 to-primary-700 text-white',
-    hover: 'hover:from-primary-700 hover:to-primary-800',
-    active: 'active:from-primary-800 active:to-primary-900',
+    base: 'bg-cosmic-action text-white',
+    hover: 'hover:shadow-cosmic hover:brightness-105',
+    active: 'active:scale-[0.98] active:brightness-95',
     disabled: 'disabled:opacity-50 disabled:cursor-not-allowed',
-    shadow: 'shadow-lg hover:shadow-xl',
+    shadow: 'shadow-luxury',
   },
   secondary: {
-    base: 'bg-white text-neutral-700 border border-neutral-200',
-    hover: 'hover:bg-neutral-50 hover:border-neutral-300',
+    base: 'bg-white/90 text-neutral-800 border border-white/70 backdrop-blur',
+    hover: 'hover:bg-white hover:border-primary-200 hover:shadow-luxury',
     active: 'active:bg-neutral-100',
     disabled: 'disabled:opacity-50 disabled:cursor-not-allowed',
-    shadow: 'shadow-md hover:shadow-lg',
+    shadow: 'shadow-soft',
   },
   outline: {
     base: 'bg-transparent text-primary-600 border-2 border-primary-500',
-    hover: 'hover:bg-primary-50 hover:border-primary-600',
+    hover: 'hover:bg-primary-50 hover:border-primary-600 hover:shadow-glow',
     active: 'active:bg-primary-100',
     disabled: 'disabled:opacity-50 disabled:cursor-not-allowed',
     shadow: '',
   },
   ghost: {
     base: 'bg-transparent text-neutral-700',
-    hover: 'hover:bg-neutral-100',
+    hover: 'hover:bg-white/60 hover:text-primary-700',
     active: 'active:bg-neutral-200',
     disabled: 'disabled:opacity-50 disabled:cursor-not-allowed',
     shadow: '',
   },
   danger: {
-    base: 'bg-gradient-to-r from-danger-500 to-danger-600 text-white',
-    hover: 'hover:from-danger-600 hover:to-danger-700',
-    active: 'active:from-danger-700 active:to-danger-800',
+    base: 'bg-gradient-to-r from-danger-500 to-cosmic-coral text-white',
+    hover: 'hover:brightness-105 hover:shadow-lg',
+    active: 'active:scale-[0.98] active:brightness-95',
+    disabled: 'disabled:opacity-50 disabled:cursor-not-allowed',
+    shadow: 'shadow-lg hover:shadow-xl',
+  },
+  destructive: {
+    base: 'bg-gradient-to-r from-danger-500 to-cosmic-coral text-white',
+    hover: 'hover:brightness-105 hover:shadow-lg',
+    active: 'active:scale-[0.98] active:brightness-95',
     disabled: 'disabled:opacity-50 disabled:cursor-not-allowed',
     shadow: 'shadow-lg hover:shadow-xl',
   },
   success: {
-    base: 'bg-gradient-to-r from-success-500 to-success-600 text-white',
-    hover: 'hover:from-success-600 hover:to-success-700',
-    active: 'active:from-success-700 active:to-success-800',
+    base: 'bg-gradient-to-r from-success-500 to-cosmic-mint text-white',
+    hover: 'hover:brightness-105 hover:shadow-lg',
+    active: 'active:scale-[0.98] active:brightness-95',
     disabled: 'disabled:opacity-50 disabled:cursor-not-allowed',
     shadow: 'shadow-lg hover:shadow-xl',
   },
@@ -239,8 +269,8 @@ export const buttonSizes = {
 // Variantes de inputs
 export const inputVariants = {
   default: {
-    base: 'w-full px-4 py-3 bg-white border border-neutral-200 rounded-xl',
-    focus: 'focus:ring-2 focus:ring-primary-500 focus:border-transparent',
+    base: 'w-full px-4 py-3 bg-white/95 border border-white/80 rounded-xl shadow-sm',
+    focus: 'focus:ring-2 focus:ring-primary-500 focus:border-transparent focus:shadow-glow',
     disabled: 'disabled:bg-neutral-100 disabled:cursor-not-allowed',
     error: 'border-danger-500 focus:ring-danger-500',
   },
@@ -250,35 +280,50 @@ export const inputVariants = {
     disabled: 'disabled:text-neutral-400 disabled:cursor-not-allowed',
     error: 'border-danger-500 focus:border-danger-600',
   },
+  glass: {
+    base: 'w-full px-4 py-3 bg-white/70 border border-white/50 rounded-xl shadow-sm backdrop-blur-md',
+    focus: 'focus:ring-2 focus:ring-primary-500 focus:border-transparent focus:bg-white/90',
+    disabled: 'disabled:bg-white/40 disabled:cursor-not-allowed',
+    error: 'border-danger-500 focus:ring-danger-500',
+  },
 };
 
 // Variantes de cards
 export const cardVariants = {
   default: {
-    base: 'bg-white rounded-2xl shadow-soft p-6',
+    base: 'bg-white rounded-pebble shadow-soft',
     hover: '',
   },
   elevated: {
-    base: 'bg-white rounded-2xl shadow-lg p-6',
+    base: 'bg-white rounded-pebble shadow-luxury',
     hover: 'hover:shadow-xl transition-shadow',
   },
   interactive: {
-    base: 'bg-white rounded-2xl shadow-soft p-6 cursor-pointer',
-    hover: 'hover:shadow-xl hover:-translate-y-1 transition-all duration-300',
+    base: 'bg-white rounded-pebble shadow-soft cursor-pointer',
+    hover: 'hover:shadow-cosmic hover:-translate-y-1 transition-all duration-300',
   },
   gradient: {
-    base: 'bg-gradient-to-br from-primary-600 to-accent-600 rounded-2xl shadow-lg p-6 text-white',
+    base: 'bg-cosmic-gradient rounded-pebble shadow-cosmic text-white',
     hover: 'hover:shadow-2xl hover:-translate-y-1 transition-all duration-300',
+  },
+  glass: {
+    base: 'amig-glass rounded-pebble',
+    hover: '',
+  },
+  highlight: {
+    base: 'bg-white rounded-pebble border border-primary-100 shadow-glow',
+    hover: 'hover:-translate-y-1 hover:shadow-cosmic transition-all duration-300',
   },
 };
 
 // Variantes de badges
 export const badgeVariants = {
-  primary: 'bg-primary-100 text-primary-700 border border-primary-200',
-  success: 'bg-success-100 text-success-700 border border-success-200',
-  warning: 'bg-warning-100 text-warning-700 border border-warning-200',
-  danger: 'bg-danger-100 text-danger-700 border border-danger-200',
-  neutral: 'bg-neutral-100 text-neutral-700 border border-neutral-200',
+  primary: 'bg-primary-100 text-primary-800 border border-primary-200',
+  success: 'bg-success-100 text-success-800 border border-success-200',
+  warning: 'bg-warning-100 text-warning-800 border border-warning-200',
+  danger: 'bg-danger-100 text-danger-800 border border-danger-200',
+  neutral: 'bg-white/80 text-neutral-700 border border-white/70',
+  glass: 'bg-white/70 text-neutral-800 border border-white/60 backdrop-blur-md',
 };
 
 // ========== UTILIDADES ==========
@@ -303,7 +348,7 @@ export const getButtonClasses = (
   const variantStyles = buttonVariants[variant];
   return cn(
     'rounded-xl font-semibold transition-all duration-200',
-    'flex items-center justify-center gap-2',
+    'flex min-h-11 items-center justify-center gap-2',
     'focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500',
     variantStyles.base,
     variantStyles.hover,

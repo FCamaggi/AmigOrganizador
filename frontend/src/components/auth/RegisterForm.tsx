@@ -1,9 +1,9 @@
-import { useRef, useState, type FormEvent, type ChangeEvent } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useRef, useState, type ChangeEvent, type FormEvent } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../store/authStore';
-import { textColors } from '../../styles/design-system';
-import Input from '../common/Input';
 import Button from '../common/Button';
+import Card from '../common/Card';
+import Input from '../common/Input';
 import {
   isValidEmail,
   isValidPassword,
@@ -41,6 +41,38 @@ interface ApiErrorResponse {
   };
 }
 
+const inputIcons = {
+  user: (
+    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M20 21a8 8 0 0 0-16 0" />
+      <circle cx="12" cy="7" r="4" />
+    </svg>
+  ),
+  at: (
+    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <circle cx="12" cy="12" r="4" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-4 8" />
+    </svg>
+  ),
+  mail: (
+    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <rect width="20" height="16" x="2" y="4" rx="2" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="m22 7-10 6L2 7" />
+    </svg>
+  ),
+  lock: (
+    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <rect width="18" height="11" x="3" y="11" rx="2" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M7 11V7a5 5 0 0 1 10 0v4" />
+    </svg>
+  ),
+  arrow: (
+    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M5 12h14M13 5l7 7-7 7" />
+    </svg>
+  ),
+};
+
 const RegisterForm = () => {
   const navigate = useNavigate();
   const { register, loading, error, clearError } = useAuthStore();
@@ -62,7 +94,6 @@ const RegisterForm = () => {
       ...prev,
       [name]: value,
     }));
-    // Limpiar error del campo cuando el usuario empieza a escribir
     if (formErrors[name]) {
       setFormErrors((prev) => ({
         ...prev,
@@ -76,32 +107,28 @@ const RegisterForm = () => {
   const validateForm = (): boolean => {
     const errors: FormErrors = {};
 
-    // Validar email
     if (!formData.email.trim()) {
       errors.email = 'El email es requerido';
     } else if (!isValidEmail(formData.email)) {
-      errors.email = 'Email inválido';
+      errors.email = 'Email invalido';
     }
 
-    // Validar username
     if (!formData.username.trim()) {
       errors.username = 'El username es requerido';
     } else if (!isValidUsername(formData.username)) {
-      errors.username = 'Username inválido (3-20 caracteres alfanuméricos)';
+      errors.username = 'Username invalido (3-20 caracteres alfanumericos)';
     }
 
-    // Validar contraseña
     if (!formData.password) {
-      errors.password = 'La contraseña es requerida';
+      errors.password = 'La contrasena es requerida';
     } else if (!isValidPassword(formData.password)) {
-      errors.password = 'Mínimo 8 caracteres, una mayúscula y un número';
+      errors.password = 'Minimo 8 caracteres, una mayuscula y un numero';
     }
 
-    // Validar confirmación de contraseña
     if (!formData.confirmPassword) {
-      errors.confirmPassword = 'Confirma tu contraseña';
+      errors.confirmPassword = 'Confirma tu contrasena';
     } else if (formData.password !== formData.confirmPassword) {
-      errors.confirmPassword = 'Las contraseñas no coinciden';
+      errors.confirmPassword = 'Las contrasenas no coinciden';
     }
 
     setFormErrors(errors);
@@ -115,19 +142,21 @@ const RegisterForm = () => {
     if (!validateForm()) return;
 
     try {
-      // No enviamos confirmPassword al backend
-      const { confirmPassword, ...userData } = formData;
+      const userData = {
+        email: formData.email,
+        username: formData.username,
+        password: formData.password,
+        fullName: formData.fullName,
+      };
       const result = await register({
         ...userData,
         registrationRequestId: registrationRequestIdRef.current,
       });
-      // Solo navegar si el registro fue exitoso
-      if (result && result.user) {
+      if (result?.user) {
         registrationRequestIdRef.current = crypto.randomUUID();
         navigate('/dashboard');
       }
     } catch (error) {
-      // El error ya está manejado en el store y se mostrará en la UI
       console.error('Error en registro:', error);
       const apiErrors = (error as ApiErrorResponse).response?.data?.errors;
       if (apiErrors?.length) {
@@ -142,105 +171,97 @@ const RegisterForm = () => {
   };
 
   return (
-    <div className="w-full max-w-md mx-auto px-4 sm:px-0">
-      <div className="card">
-        <h2
-          className={`text-2xl sm:text-3xl font-bold text-center mb-6 sm:mb-8 ${textColors.heading}`}
-        >
-          Crear Cuenta
-        </h2>
-
-        {error && (
-          <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-danger-50 border border-danger-200 text-danger-700 rounded-xl text-sm">
-            {error}
-          </div>
-        )}
-
-        {loading && (
-          <div className="mb-4 sm:mb-6 flex items-center gap-3 rounded-xl border border-primary-200 bg-primary-50 p-3 text-sm text-primary-800">
-            <span className="h-4 w-4 rounded-full border-2 border-primary-300 border-t-primary-700 animate-spin" />
-            <span>
-              Conectando con la API. Si Render estaba dormido, puede tardar unos segundos.
-            </span>
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
-          <Input
-            label="Email"
-            type="email"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-            error={formErrors.email}
-            placeholder="tu@email.com"
-            required
-          />
-
-          <Input
-            label="Username"
-            type="text"
-            name="username"
-            value={formData.username}
-            onChange={handleChange}
-            error={formErrors.username}
-            placeholder="usuario123"
-            required
-          />
-
-          <Input
-            label="Nombre Completo"
-            type="text"
-            name="fullName"
-            value={formData.fullName}
-            onChange={handleChange}
-            error={formErrors.fullName}
-            placeholder="Juan Pérez (opcional)"
-          />
-
-          <Input
-            label="Contraseña"
-            type="password"
-            name="password"
-            value={formData.password}
-            onChange={handleChange}
-            error={formErrors.password}
-            placeholder="Mín. 8 caracteres"
-            required
-          />
-
-          <Input
-            label="Confirmar Contraseña"
-            type="password"
-            name="confirmPassword"
-            value={formData.confirmPassword}
-            onChange={handleChange}
-            error={formErrors.confirmPassword}
-            placeholder="Repite tu contraseña"
-            required
-          />
-
-          <Button
-            type="submit"
-            variant="primary"
-            loading={loading}
-            className="w-full"
-          >
-            Registrarse
-          </Button>
-        </form>
-
-        <div className="mt-6 sm:mt-8 text-center text-xs sm:text-sm text-neutral-600">
-          ¿Ya tienes cuenta?{' '}
-          <Link
-            to="/login"
-            className="text-primary-600 hover:text-primary-700 font-semibold transition-colors"
-          >
-            Inicia sesión aquí
-          </Link>
+    <Card variant="glass" padding="xl" className="border-white/70 bg-white/80 shadow-cosmic">
+      {error && (
+        <div className="mb-5 rounded-xl border border-danger-200 bg-danger-50 p-4 text-sm font-medium text-danger-700">
+          {error}
         </div>
+      )}
+
+      {loading && (
+        <div className="mb-5 flex items-center gap-3 rounded-xl border border-primary-200 bg-primary-50 p-4 text-sm text-primary-800">
+          <span className="h-4 w-4 rounded-full border-2 border-primary-300 border-t-primary-700 animate-spin" />
+          <span>Conectando con la API. Si Render estaba dormido, puede tardar unos segundos.</span>
+        </div>
+      )}
+
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <Input
+          label="Nombre completo"
+          type="text"
+          name="fullName"
+          value={formData.fullName}
+          onChange={handleChange}
+          error={formErrors.fullName}
+          placeholder="Alex Morgan"
+          icon={inputIcons.user}
+          variant="glass"
+        />
+
+        <Input
+          label="Username"
+          type="text"
+          name="username"
+          value={formData.username}
+          onChange={handleChange}
+          error={formErrors.username}
+          placeholder="alex_m"
+          icon={inputIcons.at}
+          variant="glass"
+          required
+        />
+
+        <Input
+          label="Email"
+          type="email"
+          name="email"
+          value={formData.email}
+          onChange={handleChange}
+          error={formErrors.email}
+          placeholder="alex@example.com"
+          icon={inputIcons.mail}
+          variant="glass"
+          required
+        />
+
+        <Input
+          label="Contrasena"
+          type="password"
+          name="password"
+          value={formData.password}
+          onChange={handleChange}
+          error={formErrors.password}
+          placeholder="********"
+          icon={inputIcons.lock}
+          variant="glass"
+          required
+        />
+
+        <Input
+          label="Confirmar contrasena"
+          type="password"
+          name="confirmPassword"
+          value={formData.confirmPassword}
+          onChange={handleChange}
+          error={formErrors.confirmPassword}
+          placeholder="********"
+          icon={inputIcons.lock}
+          variant="glass"
+          required
+        />
+
+        <Button type="submit" variant="primary" loading={loading} fullWidth icon={inputIcons.arrow} iconPosition="right">
+          Crear cuenta
+        </Button>
+      </form>
+
+      <div className="mt-8 text-center text-sm text-neutral-700">
+        Ya tienes cuenta?{' '}
+        <Link to="/login" className="font-bold text-primary-700 transition-colors hover:text-accent-700">
+          Inicia sesion
+        </Link>
       </div>
-    </div>
+    </Card>
   );
 };
 

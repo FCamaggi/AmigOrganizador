@@ -8,7 +8,7 @@ export interface InputProps
   hint?: string;
   icon?: React.ReactNode;
   iconPosition?: 'left' | 'right';
-  variant?: 'default' | 'minimal';
+  variant?: 'default' | 'minimal' | 'glass';
   containerClassName?: string;
 }
 
@@ -38,7 +38,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
         {label && (
           <label
             htmlFor={inputId}
-            className={cn('block text-sm font-bold mb-2', textColors.label)}
+            className={cn('mb-2 block text-xs font-bold uppercase tracking-wide', textColors.label)}
           >
             {label}
             {required && <span className="text-danger-500 ml-1">*</span>}
@@ -64,6 +64,10 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
               icon && iconPosition === 'right' ? 'pr-10' : '',
               className
             )}
+            aria-invalid={error ? true : undefined}
+            aria-describedby={
+              error && inputId ? `${inputId}-error` : hint && inputId ? `${inputId}-hint` : undefined
+            }
             {...rest}
           />
 
@@ -75,10 +79,10 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
         </div>
 
         {hint && !error && (
-          <p className="mt-1.5 text-sm text-neutral-500">{hint}</p>
+          <p id={inputId ? `${inputId}-hint` : undefined} className="mt-1.5 text-sm text-neutral-500">{hint}</p>
         )}
         {error && (
-          <p className="mt-1.5 text-sm text-danger-600 font-medium flex items-center gap-1">
+          <p id={inputId ? `${inputId}-error` : undefined} className="mt-1.5 text-sm text-danger-600 font-medium flex items-center gap-1">
             <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
               <path
                 fillRule="evenodd"

@@ -9,6 +9,7 @@ export interface ButtonProps
     | 'primary'
     | 'secondary'
     | 'danger'
+    | 'destructive'
     | 'success'
     | 'outline'
     | 'ghost';

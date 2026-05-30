@@ -1,7 +1,52 @@
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { useAuthStore } from '../../store/authStore';
 import Button from '../common/Button';
+import Avatar from '../common/Avatar';
+import IconButton from '../common/IconButton';
+import BottomNav from './BottomNav';
+import TopAppBar, { type NavItem } from './TopAppBar';
+import { cn } from '../../styles/design-system';
+
+const iconClassName = 'h-5 w-5';
+
+const icons = {
+  home: (
+    <svg className={iconClassName} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path strokeLinecap="round" strokeLinejoin="round" d="m3 11 9-8 9 8" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M5 10v10h14V10" />
+    </svg>
+  ),
+  schedule: (
+    <svg className={iconClassName} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M8 2v4M16 2v4M3 10h18" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M5 6h14v15H5z" />
+    </svg>
+  ),
+  groups: (
+    <svg className={iconClassName} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+      <circle cx="9" cy="7" r="4" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
+    </svg>
+  ),
+  menu: (
+    <svg className={iconClassName} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+    </svg>
+  ),
+  close: (
+    <svg className={iconClassName} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
+    </svg>
+  ),
+  exit: (
+    <svg className={iconClassName} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="m16 17 5-5-5-5M21 12H9" />
+    </svg>
+  ),
+};
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -16,158 +61,85 @@ const Navbar = () => {
   };
 
   const isActive = (path: string) => location.pathname === path;
-
+  const isGroupsActive = location.pathname.startsWith('/groups');
   const closeMobileMenu = () => setIsMobileMenuOpen(false);
+  const userName = user?.fullName || user?.username || 'Usuario';
+
+  const navItems: NavItem[] = [
+    { label: 'Inicio', to: '/dashboard', icon: icons.home, active: isActive('/dashboard') },
+    { label: 'Mi Horario', to: '/schedule', icon: icons.schedule, active: isActive('/schedule') },
+    { label: 'Grupos', to: '/groups', icon: icons.groups, active: isGroupsActive },
+  ];
+
+  const mobileMenu = (
+    <nav className="space-y-2" aria-label="Menu movil">
+      {[...navItems, { label: userName, to: '/profile', active: isActive('/profile'), icon: <Avatar name={userName} size="xs" /> }].map(item => (
+        <Link
+          key={item.to}
+          to={item.to}
+          onClick={closeMobileMenu}
+          className={cn(
+            'flex min-h-11 items-center gap-3 rounded-xl px-4 py-2 text-sm font-semibold transition-all',
+            item.active ? 'bg-primary-50 text-primary-700' : 'text-neutral-700 hover:bg-white'
+          )}
+          aria-current={item.active ? 'page' : undefined}
+        >
+          {item.icon}
+          <span>{item.label}</span>
+        </Link>
+      ))}
+      <button
+        onClick={handleLogout}
+        className="flex min-h-11 w-full items-center gap-3 rounded-xl px-4 py-2 text-left text-sm font-semibold text-danger-700 transition-all hover:bg-danger-50"
+      >
+        {icons.exit}
+        <span>Cerrar sesion</span>
+      </button>
+    </nav>
+  );
 
   return (
-    <header className="bg-white shadow-soft border-b border-neutral-200 sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-3 sm:py-4">
-        <div className="flex justify-between items-center">
-          <div className="flex items-center gap-4 sm:gap-8">
-            <Link to="/dashboard" onClick={closeMobileMenu}>
-              <h1 className="text-lg sm:text-2xl font-bold bg-gradient-to-r from-primary-600 to-accent-500 bg-clip-text text-transparent hover:opacity-80 transition-opacity">
-                AmigOrganizador
-              </h1>
-            </Link>
-            <nav className="hidden md:flex gap-6">
-              <Link
-                to="/dashboard"
-                className={`text-sm font-semibold transition-colors ${
-                  isActive('/dashboard')
-                    ? 'text-primary-600'
-                    : 'text-neutral-600 hover:text-primary-600'
-                }`}
-              >
-                Inicio
-              </Link>
-              <Link
-                to="/schedule"
-                className={`text-sm font-semibold transition-colors ${
-                  isActive('/schedule')
-                    ? 'text-primary-600'
-                    : 'text-neutral-600 hover:text-primary-600'
-                }`}
-              >
-                Mi Horario
-              </Link>
-              <Link
-                to="/groups"
-                className={`text-sm font-semibold transition-colors ${
-                  location.pathname.startsWith('/groups')
-                    ? 'text-primary-600'
-                    : 'text-neutral-600 hover:text-primary-600'
-                }`}
-              >
-                Grupos
-              </Link>
-            </nav>
-          </div>
-
-          {/* Desktop menu */}
-          <div className="hidden md:flex items-center gap-4">
+    <>
+      <TopAppBar
+        brand={
+          <span className="block truncate text-lg font-extrabold text-transparent bg-clip-text bg-cosmic-action sm:text-2xl">
+            AmigOrganizador
+          </span>
+        }
+        navItems={navItems}
+        actions={
+          <>
             <Link
               to="/profile"
-              className={`text-sm font-semibold transition-colors ${
+              className={cn(
+                'flex min-h-11 items-center gap-2 rounded-xl px-2 pr-3 text-sm font-semibold transition-all',
                 isActive('/profile')
-                  ? 'text-primary-600'
-                  : 'text-neutral-600 hover:text-primary-600'
-              }`}
+                  ? 'bg-primary-50 text-primary-700'
+                  : 'text-neutral-700 hover:bg-white hover:text-primary-700'
+              )}
+              aria-current={isActive('/profile') ? 'page' : undefined}
             >
-              {user?.fullName || user?.username}
+              <Avatar name={userName} size="sm" />
+              <span className="max-w-40 truncate">{userName}</span>
             </Link>
-            <Button onClick={handleLogout} variant="outline" size="sm">
+            <Button onClick={handleLogout} variant="outline" size="sm" icon={icons.exit}>
               Salir
             </Button>
-          </div>
-
-          {/* Mobile hamburger button */}
-          <button
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="md:hidden p-2 rounded-lg text-neutral-600 hover:bg-neutral-100 transition-colors"
-            aria-label="Menú"
-          >
-            <svg
-              className="w-6 h-6"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              {isMobileMenuOpen ? (
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              ) : (
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 6h16M4 12h16M4 18h16"
-                />
-              )}
-            </svg>
-          </button>
-        </div>
-
-        {/* Mobile menu */}
-        {isMobileMenuOpen && (
-          <nav className="md:hidden mt-4 pb-2 border-t border-neutral-200 pt-4 space-y-2">
-            <Link
-              to="/dashboard"
-              onClick={closeMobileMenu}
-              className={`block px-4 py-3 rounded-lg text-sm font-semibold transition-colors ${
-                isActive('/dashboard')
-                  ? 'bg-primary-50 text-primary-600'
-                  : 'text-neutral-600 hover:bg-neutral-50'
-              }`}
-            >
-              🏠 Inicio
-            </Link>
-            <Link
-              to="/schedule"
-              onClick={closeMobileMenu}
-              className={`block px-4 py-3 rounded-lg text-sm font-semibold transition-colors ${
-                isActive('/schedule')
-                  ? 'bg-primary-50 text-primary-600'
-                  : 'text-neutral-600 hover:bg-neutral-50'
-              }`}
-            >
-              📅 Mi Horario
-            </Link>
-            <Link
-              to="/groups"
-              onClick={closeMobileMenu}
-              className={`block px-4 py-3 rounded-lg text-sm font-semibold transition-colors ${
-                location.pathname.startsWith('/groups')
-                  ? 'bg-primary-50 text-primary-600'
-                  : 'text-neutral-600 hover:bg-neutral-50'
-              }`}
-            >
-              👥 Grupos
-            </Link>
-            <Link
-              to="/profile"
-              onClick={closeMobileMenu}
-              className={`block px-4 py-3 rounded-lg text-sm font-semibold transition-colors ${
-                isActive('/profile')
-                  ? 'bg-primary-50 text-primary-600'
-                  : 'text-neutral-600 hover:bg-neutral-50'
-              }`}
-            >
-              👤 {user?.fullName || user?.username}
-            </Link>
-            <button
-              onClick={handleLogout}
-              className="w-full text-left px-4 py-3 rounded-lg text-sm font-semibold text-danger-600 hover:bg-danger-50 transition-colors"
-            >
-              🚪 Cerrar sesión
-            </button>
-          </nav>
-        )}
-      </div>
-    </header>
+          </>
+        }
+        mobileMenuButton={
+          <IconButton
+            onClick={() => setIsMobileMenuOpen(current => !current)}
+            variant="glass"
+            label={isMobileMenuOpen ? 'Cerrar menu' : 'Abrir menu'}
+            icon={isMobileMenuOpen ? icons.close : icons.menu}
+          />
+        }
+        mobileMenu={mobileMenu}
+        isMobileMenuOpen={isMobileMenuOpen}
+      />
+      <BottomNav items={navItems} />
+    </>
   );
 };
 

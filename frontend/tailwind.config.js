@@ -6,7 +6,32 @@ export default {
     ],
     theme: {
         extend: {
+            fontFamily: {
+                sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+                mono: ['"JetBrains Mono"', 'ui-monospace', 'SFMono-Regular', 'monospace'],
+            },
             colors: {
+                cosmic: {
+                    start: '#667eea',
+                    end: '#764ba2',
+                    indigo: '#4648d4',
+                    orchid: '#a200ba',
+                    coral: '#ef4444',
+                    amber: '#f59e0b',
+                    mint: '#00873b',
+                    canvas: '#fcf9f8',
+                },
+                surface: {
+                    DEFAULT: '#fcf9f8',
+                    dim: '#dcd9d9',
+                    bright: '#fcf9f8',
+                    lowest: '#ffffff',
+                    low: '#f6f3f2',
+                    container: '#f0eded',
+                    high: '#eae7e7',
+                    highest: '#e5e2e1',
+                    inverse: '#313030',
+                },
                 primary: {
                     50: '#f0f4ff',
                     100: '#e0e7ff',
@@ -83,10 +108,24 @@ export default {
                     950: '#0a0a0a',
                 }
             },
+            borderRadius: {
+                pebble: '1.5rem',
+            },
             boxShadow: {
                 'soft': '0 2px 15px -3px rgba(0, 0, 0, 0.07), 0 10px 20px -2px rgba(0, 0, 0, 0.04)',
                 'glow': '0 0 20px rgba(99, 102, 241, 0.2)',
-            }
+                'luxury': '0 10px 25px -5px rgba(0, 0, 0, 0.10), 0 8px 10px -6px rgba(0, 0, 0, 0.08)',
+                'cosmic': '0 18px 45px -18px rgba(70, 72, 212, 0.45)',
+            },
+            backgroundImage: {
+                'cosmic-gradient': 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                'cosmic-action': 'linear-gradient(135deg, #4648d4 0%, #a200ba 100%)',
+                'surface-glass': 'linear-gradient(135deg, rgba(255,255,255,0.78), rgba(255,255,255,0.56))',
+            },
+            maxWidth: {
+                content: '1280px',
+                editor: '1024px',
+            },
         },
     },
     plugins: [],

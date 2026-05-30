@@ -10,7 +10,7 @@ AmigOrganizador simplifica la coordinación de horarios entre grupos de amigos. 
 
 - **Frontend:** React + Vite + TailwindCSS → Netlify
 - **Backend:** Node.js + Express + MongoDB → Render
-- **Base de Datos:** MongoDB Atlas (Free Tier)
+- **Base de Datos:** MongoDB (Free Tier)
 
 ## 📁 Estructura del Proyecto
 

@@ -2,7 +2,7 @@ import { getBadgeClasses, cn } from '../../styles/design-system';
 
 interface BadgeProps {
   children: React.ReactNode;
-  variant?: 'primary' | 'success' | 'warning' | 'danger' | 'neutral';
+  variant?: 'primary' | 'success' | 'warning' | 'danger' | 'neutral' | 'glass';
   className?: string;
   icon?: React.ReactNode;
 }
