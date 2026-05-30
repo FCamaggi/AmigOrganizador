@@ -14,7 +14,9 @@ export const config = {
     microsoftClientSecret: process.env.MICROSOFT_CLIENT_SECRET,
     tokenEncryptionKey: process.env.TOKEN_ENCRYPTION_KEY,
     eventScraperApiUrl: process.env.EVENT_SCRAPER_API_URL,
-    eventScraperApiKey: process.env.EVENT_SCRAPER_API_KEY
+    eventScraperApiKey: process.env.EVENT_SCRAPER_API_KEY,
+    eventScraperTimeoutMs: Number(process.env.EVENT_SCRAPER_TIMEOUT_MS) || 25000,
+    eventScraperBatchSize: Number(process.env.EVENT_SCRAPER_BATCH_SIZE) || 10
 };
 
 // Validar variables de entorno críticas
