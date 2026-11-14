@@ -31,3 +31,20 @@ export {
   buildIcs,
   type CalendarInvite,
 } from "./calendar/invite";
+export {
+  answerPlan,
+  type ConfirmedSlot,
+  cancelPlan,
+  confirmPlan,
+  createPlan,
+  joinPlan,
+  type NewPlan,
+  type Participant,
+  type ParticipantAnswer,
+  type Plan,
+  PlanError,
+  type PlanErrorCode,
+  type PlanStatus,
+  suggestOptions,
+} from "./plan/plan";
+export type { PlanRepository } from "./plan/plan-repository";

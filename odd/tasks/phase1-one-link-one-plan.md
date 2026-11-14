@@ -22,7 +22,7 @@ so they can be edited from any device.
 
 ## Tasks
 
-- [ ] T1 (S1, S2) inline: core `Plan` domain (create, join, answer, confirm) + repository port; participants are account ids.
+- [x] T1 (S1, S2) inline: core `Plan` domain (create, join, answer, suggest, confirm, cancel) + `PlanRepository` port; participants are account ids. RED (29 failing on stub) then GREEN (79 tests). Rules in `docs/domain/PLAN.md`.
 - [x] T2 (S5) inline: core `buildIcs` (RFC 5545 escaping and 75-octet folding) and `buildGoogleCalendarUrl`; RED then GREEN (49 tests). Times in UTC ms; adapters convert from local.
 - [ ] T3 (S1, S2) inline: Postgres schema (Drizzle) + Supabase adapter. Blocked: Supabase project.
 - [ ] T4 (S1, S3) inline: create-plan and availability screens (mobile first).
