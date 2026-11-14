@@ -5,7 +5,7 @@
 
 ## Forces
 
-- Guests join by link with no account; optional login later (magic link, Google).
+- Everyone joins by link and signs in with one tap (Google or magic link; see ADR 0003).
 - Live collaboration on one plan (several friends filling availability at once).
 - Calendar OAuth (Google, Microsoft) and ICS feeds, read in the background.
 - Installable PWA with push notifications; link previews for WhatsApp.
@@ -21,7 +21,7 @@
 | Repo | pnpm workspaces + Turborepo | `apps/*` and `packages/*` with cached tasks |
 | Web app | Next.js (App Router) as a PWA | SSR for link previews, server actions, Vercel previews per push |
 | Domain | `packages/core`: pure TS, zero dependencies | The engine and plan rules; test-first |
-| Database | Postgres on Supabase | Auth (magic link, OAuth, anonymous users), realtime, row-level security, cron |
+| Database | Postgres on Supabase | Auth (magic link, Google OAuth), realtime, row-level security, cron |
 | Data access | Drizzle ORM behind repository ports | Typed SQL, migrations in the repo |
 | UI | Tailwind CSS + Radix-based components | Accessible primitives, fast iteration |
 | Tests | Vitest (unit), Playwright (e2e) | Same runner for core and app |
@@ -43,6 +43,6 @@ packages/ui         Shared design-system components
 - **SvelteKit + Supabase:** lighter and fast, smaller ecosystem for the
   auth/calendar pieces; fine if the owner prefers Svelte.
 - **Expo (React Native) first:** best native feel and push, but slower to
-  ship and worse for link-first guests who should never install anything.
+  ship and worse for link-first visitors who should never install anything.
 - **Keep Express + Mongo (v1 stack):** familiar, but brings back cold starts
   and lacks auth, realtime and relational integrity out of the box.
