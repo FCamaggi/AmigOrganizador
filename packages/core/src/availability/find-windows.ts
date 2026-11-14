@@ -226,7 +226,7 @@ function validateMembers(members: readonly MemberAvailability[]): void {
 }
 
 /** Today's intervals plus the overflow of yesterday's past midnight. */
-function intervalsFor(
+export function intervalsFor(
   member: MemberAvailability,
   date: LocalDate,
   pick: (day: DayAvailability) => readonly Interval[],

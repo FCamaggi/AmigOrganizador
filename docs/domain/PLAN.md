@@ -37,3 +37,15 @@ from an anchor date; night 20:00–08:00 spills into the next day).
 
 Answering means "I covered the whole range", so nothing in an answer is
 unknown; only people who have not answered are unknown.
+
+## Reading a plan for the screens
+
+Implementation: `packages/core/src/plan/plan-view.ts`, `packages/core/src/time/zoned.ts`.
+
+- `dayLines(plan, date, span)`: each participant's free / busy / unknown
+  segments on a date, for the line diagram. No answer = one unknown segment.
+- `slotFromOption(window)`: the organizer confirms an option at its start,
+  rounded up to the 15-minute grid.
+- `inviteFor(plan, url)`: the calendar invite of a confirmed plan, with UTC
+  times computed in the plan's timezone (`zonedTimeToUtc`).
+- `todayIn(timeZone, now)`: today's local date, for default ranges.

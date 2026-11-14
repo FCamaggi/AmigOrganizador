@@ -59,3 +59,12 @@ export {
   suggestOptions,
 } from "./plan/plan";
 export type { PlanRepository } from "./plan/plan-repository";
+export {
+  type DayLine,
+  dayLines,
+  inviteFor,
+  type LineSegment,
+  type LineState,
+  slotFromOption,
+} from "./plan/plan-view";
+export { todayIn, zonedTimeToUtc } from "./time/zoned";
