@@ -16,7 +16,9 @@ Goal: a real group goes from link to confirmed plan without help.
 - Create a plan in one screen: title, rough range ("next 2 weeks"), duration.
 - Join by link: the plan is visible first; one-tap sign-in (Google or magic
   link) when answering. No passwords (ADR 0003).
-- Availability input: tap/drag days and times; reusable weekly pattern.
+- Availability input: mark **busy** time by default, helped by recurring
+  profiles (shift work, office week, class schedule); a group can switch to
+  marking free time instead.
 - Engine: ranked options with reasons; free / busy / unknown states.
 - Confirm a plan; `.ics` download and "add to Google Calendar" link.
 - Shareable link preview (Open Graph) made for WhatsApp.
@@ -42,6 +44,8 @@ Goal: the plan includes the activity, not just the date.
 - Suggestions per option: events (tickets), places to eat or drink, activities.
 - Pluggable sources behind one port: event APIs, Google Places, curated
   lists, partner promotions. Scheduled ingestion, not manual scraping.
+- Beta: real venues as suggestions; any promotion that the venue did not
+  provide is clearly labelled as an example, never shown as a real offer.
 - Group taste profile from past plans (categories, budget, area).
 - Splitting costs and RSVPs with a +1.
 
