@@ -121,6 +121,7 @@ interface Segment {
 export function findWindows(input: FindWindowsInput): AvailabilityWindow[] {
   const { settings, members } = input;
   validateSettings(settings);
+  validateMembers(members);
   if (members.length === 0) return [];
 
   const useful: Interval = {
@@ -162,17 +163,62 @@ export function findWindows(input: FindWindowsInput): AvailabilityWindow[] {
 function validateSettings(settings: WindowSettings): void {
   const { usefulStart, usefulEnd, minimumBlockMinutes, alternativeThreshold } =
     settings;
-  if (usefulStart < 0 || usefulEnd > MINUTES_PER_DAY) {
+  if (
+    !Number.isFinite(usefulStart) ||
+    !Number.isFinite(usefulEnd) ||
+    usefulStart < 0 ||
+    usefulEnd > MINUTES_PER_DAY
+  ) {
     throw new RangeError("useful hours must be within 0 and 1440 minutes");
   }
   if (usefulStart >= usefulEnd) {
     throw new RangeError("usefulStart must be before usefulEnd");
   }
-  if (minimumBlockMinutes < 0) {
-    throw new RangeError("minimumBlockMinutes must not be negative");
+  if (!Number.isFinite(minimumBlockMinutes) || minimumBlockMinutes < 0) {
+    throw new RangeError("minimumBlockMinutes must be a non-negative number");
   }
-  if (alternativeThreshold <= 0 || alternativeThreshold > 100) {
+  if (
+    !Number.isFinite(alternativeThreshold) ||
+    alternativeThreshold <= 0 ||
+    alternativeThreshold > 100
+  ) {
     throw new RangeError("alternativeThreshold must be between 1 and 100");
+  }
+  const weights = Object.values(settings.weights);
+  if (
+    weights.some((weight) => !Number.isFinite(weight) || weight < 0) ||
+    weights.reduce((sum, weight) => sum + weight, 0) > 100
+  ) {
+    throw new RangeError(
+      "weights must be non-negative numbers that add up to at most 100",
+    );
+  }
+}
+
+/** Overnight overflow reaches one day ahead, so intervals stay in [0, 2880]. */
+const MAX_INTERVAL_END = 2 * MINUTES_PER_DAY;
+
+function validateMembers(members: readonly MemberAvailability[]): void {
+  const seen = new Set<string>();
+  for (const member of members) {
+    if (seen.has(member.memberId)) {
+      throw new RangeError(`Duplicate memberId: ${member.memberId}`);
+    }
+    seen.add(member.memberId);
+    for (const day of Object.values(member.days)) {
+      for (const interval of [...day.coverage, ...day.busy]) {
+        if (
+          !Number.isFinite(interval.start) ||
+          !Number.isFinite(interval.end) ||
+          interval.start < 0 ||
+          interval.end > MAX_INTERVAL_END
+        ) {
+          throw new RangeError(
+            "intervals must be between 0 and 2880 minutes from local midnight",
+          );
+        }
+      }
+    }
   }
 }
 

@@ -33,3 +33,4 @@ from the same device via a stored token.
 ## Log
 
 - L1 (2026-11-13): created from roadmap Phase 1 after Phase 0 closed (`4aa2789`).
+- L2 (2026-11-13): native review of `92a758f..ca921c2` (risk + reliability) approved and acknowledged (`review-83895a432fb062d7`). Advisory findings fixed in a follow-up commit: CI token `contents: read`; engine rejects non-finite settings, invalid weights, duplicate member ids and intervals outside 0–2880; tests pin coverage spill, `PARTIAL_AVAILABLE` and `LATE` (39 tests).

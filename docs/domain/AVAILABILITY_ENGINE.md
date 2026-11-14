@@ -57,6 +57,14 @@ uncovered time counts as not free.
    `EVENING` or `LATE`, `GOOD_WEEKDAY` (Fri–Sun), and `MISSING_DATA` with
    member ids. The UI turns codes into copy.
 
+## Validation
+
+`findWindows` throws a `RangeError` for: non-finite numbers anywhere in the
+settings; useful hours outside 0–1440 or out of order; a negative minimum
+block; a threshold outside 1–100; negative weights or weights adding up to
+more than 100 (so a score never leaves 0–100); duplicate member ids; and
+intervals outside 0–2880 minutes (overflow reaches one day ahead only).
+
 ## Changes from v1
 
 - `unknown` replaces "no data = free". Windows that depend on unknown members

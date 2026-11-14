@@ -272,3 +272,98 @@ describe("findWindows", () => {
     ).toThrow(/alternativeThreshold/);
   });
 });
+
+describe("findWindows review follow-ups", () => {
+  it("applies overnight coverage from the previous day", () => {
+    const windows = findWindows(
+      input({
+        members: [
+          {
+            memberId: "nurse",
+            days: {
+              "2026-11-12": {
+                coverage: [{ start: h(20), end: h(24 + 14) }],
+                busy: [{ start: h(20), end: h(24 + 10) }],
+              },
+            },
+          },
+        ],
+      }),
+    );
+
+    expect(windows.map((w) => [w.start, w.end])).toEqual([[h(10), h(14)]]);
+  });
+
+  it("explains partial attendance and late windows", () => {
+    const [window] = findWindows(
+      input({
+        members: [
+          answered("ana", FRIDAY, [{ start: h(8), end: h(20) }]),
+          answered("beto", FRIDAY, [{ start: h(8), end: h(20) }]),
+          answered("caro", FRIDAY, [{ start: h(8), end: h(20) }]),
+          answered("dani", FRIDAY, [{ start: h(8), end: h(20) }]),
+          answered("eli", FRIDAY, [{ start: h(8), end: h(24) }]),
+        ],
+        settings: { ...DEFAULT_SETTINGS, usefulEnd: h(24) },
+      }),
+    );
+
+    expect(window).toMatchObject({ start: h(20), end: h(24) });
+    expect(window?.reasons).toEqual([
+      { code: "PARTIAL_AVAILABLE", freeCount: 4, memberCount: 5 },
+      { code: "LONG_BLOCK" },
+      { code: "LATE" },
+      { code: "GOOD_WEEKDAY" },
+    ]);
+  });
+
+  it.each([
+    [
+      "a NaN threshold",
+      { alternativeThreshold: Number.NaN },
+      /alternativeThreshold/,
+    ],
+    [
+      "a NaN minimum block",
+      { minimumBlockMinutes: Number.NaN },
+      /minimumBlockMinutes/,
+    ],
+    [
+      "an infinite useful end",
+      { usefulEnd: Number.POSITIVE_INFINITY },
+      /useful hours/,
+    ],
+    [
+      "a negative weight",
+      { weights: { ...DEFAULT_SETTINGS.weights, duration: -1 } },
+      /weights/,
+    ],
+    [
+      "weights above 100",
+      { weights: { ...DEFAULT_SETTINGS.weights, attendance: 90 } },
+      /weights/,
+    ],
+  ])("rejects %s", (_label, override, error) => {
+    expect(() =>
+      findWindows(input({ settings: { ...DEFAULT_SETTINGS, ...override } })),
+    ).toThrow(error);
+  });
+
+  it("rejects duplicate member ids", () => {
+    expect(() =>
+      findWindows(
+        input({ members: [answered("ana", FRIDAY), answered("ana", FRIDAY)] }),
+      ),
+    ).toThrow(/Duplicate memberId: ana/);
+  });
+
+  it("rejects intervals outside the supported range", () => {
+    expect(() =>
+      findWindows(
+        input({
+          members: [answered("ana", FRIDAY, [{ start: h(20), end: h(49) }])],
+        }),
+      ),
+    ).toThrow(/between 0 and 2880/);
+  });
+});
