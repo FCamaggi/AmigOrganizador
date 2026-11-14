@@ -14,7 +14,8 @@ that is in everyone's calendar.**
 
 ```
 someone says "juntémonos"  ->  shares one link in the group chat
-friends open it            ->  no account, availability in under 30 seconds
+friends open it            ->  see the plan, sign in with one tap (Google or
+                               magic link), availability in under 30 seconds
                                (connect calendar, pick a pattern, or tap days)
 app proposes 3 options     ->  each with a reason and, optionally, what to do
 group reacts / votes       ->  organizer confirms
@@ -23,7 +24,9 @@ everyone gets the invite   ->  .ics / Google / Outlook, plus reminders
 
 ## Principles
 
-1. **Value before account.** The first visit never asks for a password.
+1. **Value before sign-in, sign-in in one tap.** Everyone has an account
+   (ADR 0003), but a plan link shows the plan before asking to sign in, and
+   signing in is Google or a magic link: no passwords, no usernames.
 2. **Read, don't replace.** Calendars are the source of truth; we read free/busy
    and write back invites. We never store event titles we don't need.
 3. **Unknown is not free.** Show who hasn't answered; nudge them, don't guess.

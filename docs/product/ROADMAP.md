@@ -14,7 +14,8 @@ tests, CI green, deploy preview on every push.
 Goal: a real group goes from link to confirmed plan without help.
 
 - Create a plan in one screen: title, rough range ("next 2 weeks"), duration.
-- Guest participation by link: name + availability, no account.
+- Join by link: the plan is visible first; one-tap sign-in (Google or magic
+  link) when answering. No passwords (ADR 0003).
 - Availability input: tap/drag days and times; reusable weekly pattern.
 - Engine: ranked options with reasons; free / busy / unknown states.
 - Confirm a plan; `.ics` download and "add to Google Calendar" link.
@@ -27,7 +28,6 @@ under 60 seconds.
 
 Goal: people stop typing availability.
 
-- Optional account via magic link or Google sign-in; guests can claim their history.
 - Live calendar connection (Google, Microsoft, any ICS URL), free/busy only.
 - Persistent groups with a default pattern per member.
 - Push notifications (PWA) and reminders; nudges to people who haven't answered.

@@ -6,7 +6,8 @@ per week.
 
 ## Product rules (non-negotiable)
 
-- No account is required to take part in a plan.
+- Everyone has an account, but sign-in is one tap (Google or magic link, never
+  passwords) and a plan link shows the plan before asking to sign in (ADR 0003).
 - `unknown` availability is never treated as `free`.
 - We read calendars (free/busy only) and write invites back; we never store
   event titles or descriptions from a user's calendar.

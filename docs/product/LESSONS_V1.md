@@ -11,7 +11,7 @@ killed adoption.
 
 | # | Problem | Evidence in v1 | Rule for v2 |
 |---|---------|----------------|-------------|
-| 1 | Every friend needed a full account (email, username, password) before getting any value. Joining meant typing an 8-character code inside the app. | `backend/src/models/User.js`, `JoinGroupModal.tsx` | Anyone with the link can take part in 10 seconds; an account is optional and comes later. |
+| 1 | Every friend needed a full account (email, username, password) before getting any value. Joining meant typing an 8-character code inside the app. | `backend/src/models/User.js`, `JoinGroupModal.tsx` | Everyone has an account (ADR 0003), but the link shows the plan first and sign-in is one tap (Google or magic link), right when you answer. No passwords, no codes. |
 | 2 | Availability was entered by hand, as **busy** slots, for **each month**. A work week took "15+ pasos, ~5 minutos", and still 2–3 clicks per day after the refactor. | `docs/legacy/REFACTORING_COMPLETE.md` | Weekly pattern + exceptions. Calendar connection as a live feed, never a monthly copy. |
 | 3 | The app competed with people's own calendars instead of reading them. The import was a one-time snapshot. | `CalendarImportModal.tsx` | We never replace a calendar. We read free/busy continuously and write the confirmed plan back as an invite. |
 | 4 | Missing data counted as "free". A member who entered nothing looked available all day. | `availabilityController.js:107-123` | Three states: free, busy, **unknown**. Unknown is never shown as free. |
