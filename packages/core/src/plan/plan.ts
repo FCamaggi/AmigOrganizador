@@ -21,6 +21,10 @@ const MINUTES_PER_DAY = 24 * 60;
 
 export type PlanStatus = "open" | "confirmed" | "cancelled";
 
+/** How participants answer (S3): mark busy time (default) or free time. */
+export type PlanInputMode = "busy" | "free";
+const INPUT_MODES: readonly PlanInputMode[] = ["busy", "free"];
+
 export interface ParticipantAnswer {
   /** Keyed by local date; may include the day before `from` (overnight spill). */
   readonly days: Readonly<Record<string, DayAvailability>>;
@@ -56,6 +60,7 @@ export interface Plan {
   readonly durationMinutes: number;
   /** IANA timezone the local dates and minutes refer to. */
   readonly timezone: string;
+  readonly inputMode: PlanInputMode;
   readonly status: PlanStatus;
   readonly createdAt: number;
   readonly participants: readonly Participant[];
@@ -67,6 +72,7 @@ export type PlanErrorCode =
   | "INVALID_NAME"
   | "INVALID_RANGE"
   | "INVALID_DURATION"
+  | "INVALID_INPUT_MODE"
   | "INVALID_TIME"
   | "DATE_OUT_OF_RANGE"
   | "PLAN_NOT_OPEN"
@@ -93,6 +99,8 @@ export interface NewPlan {
   readonly to: LocalDate;
   readonly durationMinutes: number;
   readonly timezone: string;
+  /** Defaults to `busy`. */
+  readonly inputMode?: PlanInputMode;
   readonly now: number;
 }
 
@@ -156,6 +164,14 @@ export function createPlan(input: NewPlan): Plan {
     );
   }
 
+  const inputMode = input.inputMode ?? "busy";
+  if (!INPUT_MODES.includes(inputMode)) {
+    throw new PlanError(
+      "INVALID_INPUT_MODE",
+      "input mode must be busy or free",
+    );
+  }
+
   return {
     id: input.id,
     title,
@@ -164,6 +180,7 @@ export function createPlan(input: NewPlan): Plan {
     to: input.to,
     durationMinutes,
     timezone: input.timezone,
+    inputMode,
     status: "open",
     createdAt: input.now,
     participants: [

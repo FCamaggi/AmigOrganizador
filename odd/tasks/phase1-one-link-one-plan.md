@@ -28,7 +28,7 @@ so they can be edited from any device.
 - [x] T2 (S5) inline: core `buildIcs` (RFC 5545 escaping and 75-octet folding) and `buildGoogleCalendarUrl`; RED then GREEN (49 tests). Times in UTC ms; adapters convert from local.
 - [ ] T3 (S1, S2) inline: Postgres schema (Drizzle) + Supabase adapter. Blocked: Supabase project.
 - [x] T3b (S2) inline: in-memory `PlanRepository` adapter so screens can be built before Supabase (owner: "si"). Package `@amigo/adapter-memory` (`InMemoryPlanRepository`, `newPlanId` with 128 random bits); RED (8 failing on stub) then GREEN (8 tests).
-- [ ] T3c (S3) inline: core busy templates (shifts, workweek, classes) + plan `inputMode` (`busy` default, `free`).
+- [x] T3c (S3) inline: core busy templates (shifts, workweek, classes) + plan `inputMode` (`busy` default, `free`). `expandBusyTemplates`, `buildAnswerDays`, `workweek`, `shiftCycle`; RED (22 failing on stub) then GREEN (101 core tests). Rules in `docs/domain/PLAN.md`.
 - [~] T4a (S9) inline: design direction (impeccable). PRODUCT.md written; direction chosen by owner on the decision page: "Línea de Metro" (seed:36a938293246d30e); contract in `apps/web/.impeccable/surfaces/src-app-page-tsx.md`. Pending: build, finish review, DESIGN.md.
 - [ ] T4 (S1, S3, S8) inline: create-plan and availability screens (mobile first).
 - [ ] T5 (S4, S5) inline: results and confirm screen.
@@ -44,3 +44,4 @@ so they can be edited from any device.
 - L5 (2026-11-13): owner chose the visual direction "Línea de Metro" (each friend a metro line, shared free span = station) over the assigned "Letrero de feria". Owner asked why 4 challengers were declined (explained: they lost on audience identification and clarity; each donated one discipline).
 - L6 (2026-11-13): owner: "el hook esta causando problemas de continuidad, rompe la lectura integral del chat" -> "si, aplica la 1". Ran `gentle-ai review mode disable --scope clone`; status: off (clone_local). Re-enable with `gentle-ai review mode enable --scope clone` once `rebuild` replaces `master`; ad hoc reviews via /code-review when a change warrants it.
 - L7 (2026-11-13): T3b done. `pnpm check` was already failing on the base: Biome linted the design mocks in `apps/web/.impeccable/`; excluded them (`!**/.impeccable`), they are design artifacts, not shipped code.
+- L8 (2026-11-13): T3c done. Decision (agent, reversible): an answer covers the whole range in both modes, so unmarked time is free in `busy` mode and busy in `free` mode; templates apply only in `busy` mode, with per-date `cleared` overrides for days off.

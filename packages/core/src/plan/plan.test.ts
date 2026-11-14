@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { buildAnswerDays, workweek } from "../availability/busy-templates";
 import { parseLocalDate } from "../availability/local-date";
 import {
   answerPlan,
@@ -61,6 +62,7 @@ describe("createPlan", () => {
       to: SATURDAY,
       durationMinutes: 180,
       timezone: "America/Santiago",
+      inputMode: "busy",
       status: "open",
       createdAt: NOW,
       participants: [
@@ -102,6 +104,46 @@ describe("createPlan", () => {
     ["an empty organizer name", { organizerName: " " }, "INVALID_NAME"],
   ] as const)("rejects %s", (_label, override, code) => {
     expectPlanError(() => createPlan({ ...newPlan, ...override }), code);
+  });
+});
+
+describe("createPlan input mode", () => {
+  it("asks for busy time by default", () => {
+    expect(createPlan(newPlan).inputMode).toBe("busy");
+  });
+
+  it("can ask for free time instead", () => {
+    expect(createPlan({ ...newPlan, inputMode: "free" }).inputMode).toBe(
+      "free",
+    );
+  });
+
+  it("rejects an unknown input mode", () => {
+    expectPlanError(
+      () =>
+        createPlan({
+          ...newPlan,
+          inputMode: "maybe" as unknown as "busy",
+        }),
+      "INVALID_INPUT_MODE",
+    );
+  });
+});
+
+describe("busy templates feed the engine", () => {
+  it("an office worker's workweek leaves the Friday evening free", () => {
+    const plan = answerPlan(createPlan({ ...newPlan, to: FRIDAY }), {
+      accountId: "acc_ana",
+      days: buildAnswerDays({
+        mode: "busy",
+        from: FRIDAY,
+        to: FRIDAY,
+        templates: [workweek()],
+      }),
+      now: NOW,
+    });
+    const [best] = suggestOptions(plan);
+    expect(best).toMatchObject({ date: FRIDAY, start: h(18), end: h(22) });
   });
 });
 

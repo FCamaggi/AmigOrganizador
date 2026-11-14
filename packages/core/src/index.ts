@@ -1,4 +1,14 @@
 export {
+  type BuildAnswerInput,
+  type BusyTemplate,
+  buildAnswerDays,
+  expandBusyTemplates,
+  type ShiftKind,
+  shiftCycle,
+  type WeeklyBlock,
+  workweek,
+} from "./availability/busy-templates";
+export {
   type AvailabilityWindow,
   type DayAvailability,
   DEFAULT_SETTINGS,
@@ -44,6 +54,7 @@ export {
   type Plan,
   PlanError,
   type PlanErrorCode,
+  type PlanInputMode,
   type PlanStatus,
   suggestOptions,
 } from "./plan/plan";
