@@ -61,9 +61,10 @@ uncovered time counts as not free.
 
 `findWindows` throws a `RangeError` for: non-finite numbers anywhere in the
 settings; useful hours outside 0–1440 or out of order; a negative minimum
-block; a threshold outside 1–100; negative weights or weights adding up to
+block; a threshold outside (0, 100]; negative weights or weights adding up to
 more than 100 (so a score never leaves 0–100); duplicate member ids; and
-intervals outside 0–2880 minutes (overflow reaches one day ahead only).
+intervals outside 0–2880 minutes or with start after end (overflow reaches
+one day ahead only).
 
 ## Changes from v1
 

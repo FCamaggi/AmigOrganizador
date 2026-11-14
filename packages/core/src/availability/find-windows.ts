@@ -39,7 +39,7 @@ export interface WindowSettings {
   readonly usefulStart: number;
   readonly usefulEnd: number;
   readonly minimumBlockMinutes: number;
-  /** Minimum share (1–100) of responding members who must be free. */
+  /** Minimum share, in (0, 100], of responding members who must be free. */
   readonly alternativeThreshold: number;
   readonly weights: ScoreWeights;
 }
@@ -182,7 +182,9 @@ function validateSettings(settings: WindowSettings): void {
     alternativeThreshold <= 0 ||
     alternativeThreshold > 100
   ) {
-    throw new RangeError("alternativeThreshold must be between 1 and 100");
+    throw new RangeError(
+      "alternativeThreshold must be greater than 0 and at most 100",
+    );
   }
   const weights = Object.values(settings.weights);
   if (
@@ -211,10 +213,11 @@ function validateMembers(members: readonly MemberAvailability[]): void {
           !Number.isFinite(interval.start) ||
           !Number.isFinite(interval.end) ||
           interval.start < 0 ||
-          interval.end > MAX_INTERVAL_END
+          interval.end > MAX_INTERVAL_END ||
+          interval.start > interval.end
         ) {
           throw new RangeError(
-            "intervals must be between 0 and 2880 minutes from local midnight",
+            "intervals must be between 0 and 2880 minutes from local midnight, with start before end",
           );
         }
       }

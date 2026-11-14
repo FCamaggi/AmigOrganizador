@@ -367,3 +367,28 @@ describe("findWindows review follow-ups", () => {
     ).toThrow(/between 0 and 2880/);
   });
 });
+
+describe("findWindows interval and weight edge cases", () => {
+  it.each([
+    ["a negative start", { start: -1, end: h(10) }],
+    ["a NaN end", { start: h(9), end: Number.NaN }],
+    ["an inverted interval", { start: h(10), end: h(9) }],
+  ])("rejects %s", (_label, interval) => {
+    expect(() =>
+      findWindows(input({ members: [answered("ana", FRIDAY, [interval])] })),
+    ).toThrow(/intervals/);
+  });
+
+  it("rejects a NaN weight", () => {
+    expect(() =>
+      findWindows(
+        input({
+          settings: {
+            ...DEFAULT_SETTINGS,
+            weights: { ...DEFAULT_SETTINGS.weights, weekday: Number.NaN },
+          },
+        }),
+      ),
+    ).toThrow(/weights/);
+  });
+});
