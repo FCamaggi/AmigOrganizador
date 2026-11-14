@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="es-CL">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=390">
+<title>Letrero de feria</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800;900&family=Permanent+Marker&display=swap" rel="stylesheet">
+<style>
+  :root{--ink:#111111;--ground:#FAFAF7;--orange:#FF6B1A;--yellow:#FFE600;--lime:#8BE000;--pink:#FF3EA5}
+  html,body{width:390px;height:844px;overflow:hidden;margin:0}
+  body{background:var(--ground);color:var(--ink);font-family:"Archivo",system-ui,sans-serif;font-size:14px;line-height:1.3}
+  *{box-sizing:border-box}
+  .bar{background:var(--ink);color:#fff;padding:14px 16px 12px}
+  .bar .top{display:flex;justify-content:space-between;align-items:center;font-size:13px;font-weight:700}
+  .bar .top a{color:#fff;text-decoration:none}
+  .bar h1{margin:8px 0 2px;font-size:24px;font-weight:900;letter-spacing:-.01em}
+  .bar p{margin:0;font-size:13px;color:#E6E6E6}
+  .status{display:flex;gap:8px;padding:10px 16px;align-items:center;border-bottom:2px solid var(--ink)}
+  .tag{font-weight:800;font-size:12px;padding:4px 8px;border:2px solid var(--ink);border-radius:4px;background:var(--pink)}
+  .status span{font-size:13px;font-weight:600}
+  .list{padding:10px 16px 0;display:flex;flex-direction:column;gap:10px}
+  .card{border:2.5px solid var(--ink);border-radius:6px;padding:10px 12px;box-shadow:3px 3px 0 var(--ink)}
+  .o1{background:var(--orange)} .o2{background:var(--yellow)} .o3{background:var(--lime)}
+  .row{display:flex;justify-content:space-between;align-items:baseline}
+  .rank{font-weight:900;font-size:12px;text-transform:uppercase;letter-spacing:.04em}
+  .day{font-weight:800;font-size:15px}
+  .time{font-family:"Permanent Marker",cursive;font-size:38px;line-height:1.05;margin:2px 0 4px}
+  .o2 .time,.o3 .time{font-size:30px}
+  .price{text-align:right}
+  .price b{font-family:"Permanent Marker",cursive;font-size:30px;line-height:1;display:block}
+  .price small{font-weight:800;font-size:11px;text-transform:uppercase}
+  .meta{display:flex;justify-content:space-between;align-items:center;margin-top:4px}
+  .chips{display:flex;gap:4px;flex-wrap:wrap}
+  .chip{font-size:11px;font-weight:800;border:1.5px solid var(--ink);border-radius:20px;padding:2px 7px;background:rgba(255,255,255,.55)}
+  .ppl{display:flex;gap:3px}
+  .av{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:10px;font-weight:900;border:2px solid var(--ink)}
+  .yes{background:var(--ink);color:#fff}
+  .no{background:repeating-linear-gradient(45deg,var(--ink) 0 2px,transparent 2px 5px);color:var(--ink);position:relative}
+  .no::after{content:"";position:absolute;left:-2px;right:-2px;top:50%;height:2px;background:var(--ink);transform:rotate(-45deg)}
+  .no{background-color:#fff}
+  .unk{background:#fff;border-style:dashed}
+  .note{font-size:12px;font-weight:700;margin-top:6px}
+  .legend{display:flex;gap:12px;padding:10px 16px 0;font-size:11px;font-weight:700;align-items:center}
+  .legend .av{width:16px;height:16px;font-size:0}
+  .legend i{display:flex;gap:4px;align-items:center;font-style:normal}
+  .actions{position:absolute;left:0;right:0;bottom:0;padding:10px 16px 18px;background:var(--ground);border-top:2px solid var(--ink)}
+  .secondary{display:flex;gap:8px;margin-bottom:8px}
+  .btn2{flex:1;height:44px;border:2.5px solid var(--ink);border-radius:6px;background:#fff;font:800 14px "Archivo",sans-serif;color:var(--ink)}
+  .primary{width:100%;height:54px;border:0;border-radius:6px;background:var(--ink);color:#fff;font:900 17px "Archivo",sans-serif;letter-spacing:.01em}
+</style>
+</head>
+<body>
+  <header class="bar">
+    <div class="top"><a href="#">‹ Planes</a><span>Organiza Ana</span></div>
+    <h1>Asado de fin de año</h1>
+    <p>Próximas 2 semanas · 3 h · 6 invitados</p>
+  </header>
+  <div class="status"><span class="tag">5 de 6 respondieron</span><span>Falta Caro, pero ya hay ganador</span></div>
+  <div class="legend">
+    <i><span class="av yes"></span>Puede</i>
+    <i><span class="av no"></span>No puede</i>
+    <i><span class="av unk"></span>Sin responder</i>
+  </div>
+  <main class="list">
+    <article class="card o1">
+      <div class="row"><span class="rank">N°1 · La mejor</span><span class="day">Vie 19 dic</span></div>
+      <div class="row">
+        <div class="time">19:00–22:00</div>
+        <div class="price"><b>5/6</b><small>pueden</small></div>
+      </div>
+      <div class="meta">
+        <div class="chips"><span class="chip">Bloque largo</span><span class="chip">Tarde/noche</span><span class="chip">Buen día</span></div>
+      </div>
+      <div class="meta">
+        <div class="ppl"><span class="av yes">A</span><span class="av yes">B</span><span class="av unk">C</span><span class="av yes">D</span><span class="av yes">E</span><span class="av yes">F</span></div>
+        <span class="note">Caro sin responder</span>
+      </div>
+    </article>
+    <article class="card o2">
+      <div class="row"><span class="rank">N°2</span><span class="day">Sáb 20 dic</span></div>
+      <div class="row">
+        <div class="time">13:00–16:00</div>
+        <div class="price"><b>4/6</b><small>pueden</small></div>
+      </div>
+      <div class="meta">
+        <div class="ppl"><span class="av yes">A</span><span class="av no">B</span><span class="av unk">C</span><span class="av yes">D</span><span class="av yes">E</span><span class="av yes">F</span></div>
+        <div class="chips"><span class="chip">Buen día</span></div>
+      </div>
+      <div class="note">Beto no puede</div>
+    </article>
+    <article class="card o3">
+      <div class="row"><span class="rank">N°3</span><span class="day">Jue 18 dic</span></div>
+      <div class="row">
+        <div class="time">19:30–22:30</div>
+        <div class="price"><b>4/6</b><small>pueden</small></div>
+      </div>
+      <div class="meta">
+        <div class="ppl"><span class="av yes">A</span><span class="av yes">B</span><span class="av unk">C</span><span class="av yes">D</span><span class="av yes">E</span><span class="av no">F</span></div>
+        <div class="chips"><span class="chip">Tarde/noche</span></div>
+      </div>
+    </article>
+  </main>
+  <footer class="actions">
+    <div class="secondary"><button class="btn2">Invitar a Caro</button><button class="btn2">Compartir link</button></div>
+    <button class="primary">Confirmar viernes 19</button>
+  </footer>
+</body>
+</html>

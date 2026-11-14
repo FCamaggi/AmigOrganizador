@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="es-CL">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=390">
+<title>Línea de Metro</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{--ink:#1D1D1B;--mute:#555552;--line:#E4E4E1;--red:#E1251B;--yellow:#FFC20E;--blue:#0065BD;--green:#00A651}
+  html,body{width:390px;height:844px;overflow:hidden;margin:0}
+  body{background:#FFFFFF;color:var(--ink);font-family:"Roboto Condensed",system-ui,sans-serif;font-size:14px;line-height:1.3}
+  *{box-sizing:border-box}
+  .top{display:flex;align-items:center;justify-content:space-between;padding:14px 16px 0;font-weight:700;font-size:14px}
+  .top a{color:var(--blue);text-decoration:none}
+  .sign{margin:10px 16px 0;background:var(--ink);color:#fff;border-radius:6px;padding:10px 12px;display:flex;align-items:center;gap:10px}
+  .sign .num{width:30px;height:30px;border-radius:50%;background:var(--red);display:grid;place-items:center;font-weight:800;font-size:15px;flex:none}
+  .sign h1{margin:0;font-size:20px;font-weight:800;letter-spacing:.01em}
+  .sign p{margin:1px 0 0;font-size:12px;color:#D6D6D3}
+  .sub{padding:8px 16px 0;font-size:13px;color:var(--mute);font-weight:500}
+  .sub b{color:var(--ink)}
+  .diagram{margin:10px 16px 0;border:1px solid var(--line);border-radius:6px;padding:10px 10px 8px}
+  .diagram h2{margin:0 0 6px;font-size:12px;text-transform:uppercase;letter-spacing:.06em;font-weight:800}
+  .lane{display:grid;grid-template-columns:18px 1fr;align-items:center;height:14px;margin-bottom:3px;font-size:11px;font-weight:800}
+  .track{position:relative;height:14px}
+  .seg{position:absolute;top:5px;height:4px;border-radius:2px}
+  .seg.unk{background:repeating-linear-gradient(90deg,#8A8A86 0 4px,transparent 4px 8px);height:2px;top:6px}
+  .station{position:absolute;border:2px solid var(--ink);border-radius:8px;background:rgba(29,29,27,.04)}
+  .axis{display:grid;grid-template-columns:18px 1fr;font-size:10px;color:var(--mute);margin-top:4px}
+  .axis div{display:flex;justify-content:space-between}
+  .slab{text-align:center;font-size:11px;font-weight:800;margin-top:2px;padding-left:18px}
+  .list{margin:10px 16px 0;border-top:1px solid var(--line)}
+  .row{display:grid;grid-template-columns:28px 1fr auto;gap:10px;padding:10px 0;border-bottom:1px solid var(--line);position:relative}
+  .dot{width:22px;height:22px;border-radius:50%;border:5px solid var(--ink);background:#fff;margin-top:2px}
+  .r1 .dot{border-color:var(--red)} .r2 .dot{border-color:var(--blue)} .r3 .dot{border-color:var(--ink)}
+  .when{font-weight:800;font-size:17px}
+  .when span{font-weight:500;color:var(--mute);font-size:14px}
+  .tags{display:flex;gap:4px;margin-top:4px;flex-wrap:wrap}
+  .tag{font-size:11px;font-weight:700;border:1px solid #BDBDB9;border-radius:3px;padding:1px 5px}
+  .ppl{display:flex;gap:3px;margin-top:6px;align-items:center}
+  .av{width:20px;height:20px;border-radius:50%;display:grid;place-items:center;font-size:10px;font-weight:800;border:1.5px solid var(--ink)}
+  .yes{background:var(--ink);color:#fff}
+  .no{background:#fff;color:var(--ink);position:relative;overflow:hidden}
+  .no::after{content:"";position:absolute;left:-2px;right:-2px;top:50%;height:1.5px;background:var(--ink);transform:rotate(-45deg)}
+  .unk{background:#fff;border-style:dashed;color:var(--mute)}
+  .ppl small{margin-left:6px;font-size:12px;color:var(--mute);font-weight:500}
+  .count{text-align:right;font-weight:800;font-size:20px;line-height:1}
+  .count small{display:block;font-size:11px;font-weight:500;color:var(--mute)}
+  .best{position:absolute;right:0;bottom:10px;font-size:11px;font-weight:800;background:var(--red);color:#fff;border-radius:3px;padding:2px 6px}
+  .actions{position:absolute;left:0;right:0;bottom:0;padding:10px 16px 18px;background:#fff;border-top:1px solid var(--line)}
+  .primary{width:100%;height:50px;border:0;border-radius:6px;background:var(--blue);color:#fff;font:800 17px "Roboto Condensed",sans-serif}
+  .secondary{display:flex;gap:8px;margin-top:8px}
+  .btn2{flex:1;height:42px;border:1.5px solid var(--ink);border-radius:6px;background:#fff;color:var(--ink);font:700 14px "Roboto Condensed",sans-serif}
+</style>
+</head>
+<body>
+  <div class="top"><a href="#">‹ Planes</a><span>Organiza Ana</span></div>
+  <div class="sign">
+    <span class="num">1</span>
+    <div><h1>Asado de fin de año</h1><p>Próximas 2 semanas · 3 h · 6 invitados</p></div>
+  </div>
+  <p class="sub"><b>5 de 6 respondieron.</b> Caro todavía no responde.</p>
+
+  <section class="diagram" aria-label="Disponibilidad viernes 19 dic">
+    <h2>Vie 19 dic · quién está libre</h2>
+    <div class="lane">A<div class="track"><span class="seg" style="left:10%;width:85%;background:var(--red)"></span></div></div>
+    <div class="lane">B<div class="track"><span class="seg" style="left:25%;width:70%;background:var(--yellow)"></span></div></div>
+    <div class="lane">C<div class="track"><span class="seg unk" style="left:0;width:100%"></span></div></div>
+    <div class="lane">D<div class="track"><span class="seg" style="left:15%;width:75%;background:var(--blue)"></span>
+      <span class="station" style="left:27%;width:52%;top:-53px;bottom:-36px"></span></div></div>
+    <div class="lane">E<div class="track"><span class="seg" style="left:20%;width:80%;background:var(--green)"></span></div></div>
+    <div class="lane">F<div class="track"><span class="seg" style="left:5%;width:85%;background:var(--ink)"></span></div></div>
+    <div class="axis"><span></span><div><span>17:00</span><span>19:00</span><span>21:00</span><span>23:00</span></div></div>
+    <div class="slab">Estación común · 19:00–22:00 · línea punteada = sin responder</div>
+  </section>
+
+  <section class="list">
+    <article class="row r1">
+      <span class="dot"></span>
+      <div>
+        <div class="when">Vie 19 dic <span>19:00–22:00</span></div>
+        <div class="tags"><span class="tag">Bloque largo</span><span class="tag">Tarde/noche</span><span class="tag">Buen día</span></div>
+        <div class="ppl"><span class="av yes">A</span><span class="av yes">B</span><span class="av unk">C</span><span class="av yes">D</span><span class="av yes">E</span><span class="av yes">F</span><small>Caro sin responder</small></div>
+      </div>
+      <div class="count">5/6<small>pueden</small></div>
+      <span class="best">Mejor</span>
+    </article>
+    <article class="row r2">
+      <span class="dot"></span>
+      <div>
+        <div class="when">Sáb 20 dic <span>13:00–16:00</span></div>
+        <div class="tags"><span class="tag">Buen día</span></div>
+        <div class="ppl"><span class="av yes">A</span><span class="av no">B</span><span class="av unk">C</span><span class="av yes">D</span><span class="av yes">E</span><span class="av yes">F</span><small>Beto no puede</small></div>
+      </div>
+      <div class="count">4/6<small>pueden</small></div>
+    </article>
+    <article class="row r3">
+      <span class="dot"></span>
+      <div>
+        <div class="when">Jue 18 dic <span>19:30–22:30</span></div>
+        <div class="tags"><span class="tag">Tarde/noche</span></div>
+        <div class="ppl"><span class="av yes">A</span><span class="av yes">B</span><span class="av unk">C</span><span class="av yes">D</span><span class="av yes">E</span><span class="av no">F</span></div>
+      </div>
+      <div class="count">4/6<small>pueden</small></div>
+    </article>
+  </section>
+
+  <footer class="actions">
+    <button class="primary">Confirmar viernes 19</button>
+    <div class="secondary"><button class="btn2">Invitar a Caro</button><button class="btn2">Compartir link</button></div>
+  </footer>
+</body>
+</html>

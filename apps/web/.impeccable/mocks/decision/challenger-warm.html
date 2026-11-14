@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="es-CL">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=390">
+<title>App cálida</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{--ground:#FFF6EC;--card:#FFFFFF;--ink:#2B2118;--mute:#6B5A4B;--act:#FF5A36;--soft:#F3E6D8}
+  html,body{width:390px;height:844px;overflow:hidden;margin:0}
+  body{background:var(--ground);color:var(--ink);font-family:"Nunito",system-ui,sans-serif;font-size:14px;line-height:1.35}
+  *{box-sizing:border-box}
+  .top{display:flex;justify-content:space-between;align-items:center;padding:14px 16px 0}
+  .back{width:36px;height:36px;border-radius:50%;background:var(--card);border:0;font:800 18px "Nunito";color:var(--act)}
+  .share{height:36px;padding:0 14px;border-radius:18px;background:var(--card);border:2px solid var(--act);font:800 13px "Nunito";color:var(--ink)}
+  .head{padding:10px 16px 0}
+  .head h1{margin:0;font-size:26px;font-weight:900;letter-spacing:-.01em}
+  .head p{margin:2px 0 0;color:var(--mute);font-weight:600;font-size:13px}
+  .progress{margin:10px 16px 0;background:var(--card);border-radius:20px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between}
+  .progress b{font-weight:800}
+  .progress span{color:var(--mute);font-size:13px;font-weight:600}
+  .link{background:none;border:0;color:var(--ink);font:800 13px "Nunito";text-decoration:underline;text-decoration-color:var(--act);text-decoration-thickness:2px;text-underline-offset:3px;padding:0}
+  .label{margin:14px 16px 6px;font-size:13px;font-weight:800;color:var(--mute)}
+  .list{display:flex;flex-direction:column;gap:8px;padding:0 16px}
+  .card{background:var(--card);border-radius:20px;padding:12px 14px;box-shadow:0 1px 0 var(--soft)}
+  .card.best{border:2px solid var(--act);padding:11px 13px}
+  .r{display:flex;justify-content:space-between;align-items:flex-start}
+  .when{font-weight:900;font-size:17px}
+  .time{font-weight:700;color:var(--mute);font-size:14px}
+  .n{font-weight:900;font-size:17px;text-align:right}
+  .n small{display:block;font-weight:600;font-size:12px;color:var(--mute)}
+  .badge{display:inline-block;font-size:11px;font-weight:800;background:var(--soft);border-radius:10px;padding:2px 8px;margin-bottom:4px}
+  .chips{display:flex;gap:4px;flex-wrap:wrap;margin-top:6px}
+  .chip{font-size:12px;font-weight:700;background:var(--ground);border-radius:12px;padding:2px 9px}
+  .ppl{display:flex;gap:4px;margin-top:8px;align-items:center}
+  .av{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-size:11px;font-weight:900;border:2px solid var(--ink)}
+  .yes{background:var(--ink);color:#fff}
+  .no{background:#fff;color:var(--ink);position:relative;overflow:hidden}
+  .no::after{content:"";position:absolute;left:-2px;right:-2px;top:50%;height:2px;background:var(--ink);transform:rotate(-45deg)}
+  .unk{background:#fff;border-style:dashed;color:var(--mute)}
+  .ppl small{margin-left:6px;font-size:12px;color:var(--mute);font-weight:700}
+  .cta{margin:12px 16px 0;width:calc(100% - 32px);height:52px;border:0;border-radius:26px;background:var(--act);color:var(--ink);font:900 17px "Nunito"}
+  .legend{display:flex;gap:12px;justify-content:center;margin-top:8px;font-size:11px;color:var(--mute);font-weight:700}
+  .legend i{display:flex;gap:4px;align-items:center;font-style:normal}
+  .legend .av{width:12px;height:12px;border-width:1.5px}
+  nav{position:absolute;left:0;right:0;bottom:0;height:72px;background:var(--card);border-radius:20px 20px 0 0;display:grid;grid-template-columns:repeat(3,1fr);align-items:center;padding-bottom:10px}
+  nav a{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:12px;font-weight:800;color:var(--mute);text-decoration:none}
+  nav a .ic{width:24px;height:24px;border-radius:8px;border:2px solid currentColor}
+  nav a.on{color:var(--ink)}
+  nav a.on .ic{background:var(--act);border-color:var(--act)}
+  nav a.plus .ic{border-radius:50%;display:grid;place-items:center;font-size:18px;line-height:1}
+</style>
+</head>
+<body>
+  <div class="top"><button class="back" aria-label="Volver">‹</button><button class="share">Compartir link</button></div>
+  <div class="head">
+    <h1>Asado de fin de año</h1>
+    <p>Organiza Ana · próximas 2 semanas · 3 h</p>
+  </div>
+  <div class="progress">
+    <div><b>5 de 6</b> <span>ya respondieron</span></div>
+    <button class="link">Invitar a Caro</button>
+  </div>
+
+  <div class="label">Las mejores opciones para juntarnos</div>
+  <div class="list">
+    <article class="card best">
+      <span class="badge">La mejor</span>
+      <div class="r">
+        <div><div class="when">Vie 19 dic</div><div class="time">19:00–22:00</div></div>
+        <div class="n">5 de 6<small>pueden</small></div>
+      </div>
+      <div class="chips"><span class="chip">Bloque largo</span><span class="chip">Tarde/noche</span><span class="chip">Buen día</span></div>
+      <div class="ppl"><span class="av yes">A</span><span class="av yes">B</span><span class="av unk">C</span><span class="av yes">D</span><span class="av yes">E</span><span class="av yes">F</span><small>Caro sin responder</small></div>
+    </article>
+    <article class="card">
+      <div class="r">
+        <div><div class="when">Sáb 20 dic</div><div class="time">13:00–16:00</div></div>
+        <div class="n">4 de 6<small>pueden</small></div>
+      </div>
+      <div class="chips"><span class="chip">Buen día</span></div>
+      <div class="ppl"><span class="av yes">A</span><span class="av no">B</span><span class="av unk">C</span><span class="av yes">D</span><span class="av yes">E</span><span class="av yes">F</span><small>Beto no puede</small></div>
+    </article>
+    <article class="card">
+      <div class="r">
+        <div><div class="when">Jue 18 dic</div><div class="time">19:30–22:30</div></div>
+        <div class="n">4 de 6<small>pueden</small></div>
+      </div>
+      <div class="chips"><span class="chip">Tarde/noche</span></div>
+      <div class="ppl"><span class="av yes">A</span><span class="av yes">B</span><span class="av unk">C</span><span class="av yes">D</span><span class="av yes">E</span><span class="av no">F</span></div>
+    </article>
+  </div>
+
+  <button class="cta">Confirmar viernes 19</button>
+  <div class="legend">
+    <i><span class="av yes"></span>Puede</i><i><span class="av no"></span>No puede</i><i><span class="av unk"></span>Sin responder</i>
+  </div>
+
+  <nav>
+    <a href="#" class="on"><span class="ic"></span>Planes</a>
+    <a href="#" class="plus"><span class="ic">+</span>Crear</a>
+    <a href="#"><span class="ic"></span>Perfil</a>
+  </nav>
+</body>
+</html>
