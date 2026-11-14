@@ -31,3 +31,11 @@ per week.
 - Test-first for `core`: write the failing test, then the code.
 - Conventional Commits. Ask the owner before any commit, push or PR.
 - v1 reference: `git show master:<path>`; v1 docs in `docs/legacy/`.
+
+## Commands
+
+- `pnpm check`: Biome lint, typecheck and tests across the workspace. Run before every commit.
+- `pnpm --filter @amigo/core test:watch`: engine tests in watch mode.
+- `pnpm build`: production build (CI also runs it).
+- Next.js 16 differs from older versions: read `apps/web/AGENTS.md` and the docs in
+  `node_modules/next/dist/docs/` before writing app code.

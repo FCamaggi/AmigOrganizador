@@ -14,5 +14,15 @@ v2 is a clean-slate rebuild. v1 stays on `master` until v2 replaces it.
 | [`docs/legacy/`](docs/legacy/) | v1 documentation, untouched |
 | [`CLAUDE.md`](CLAUDE.md) | Conventions for humans and coding agents |
 
-**Status:** Phase 0 (foundation). The stack is pending:
+**Status:** Phase 0 (foundation). Stack:
 [`docs/adr/0002-stack.md`](docs/adr/0002-stack.md).
+
+## Development
+
+Requires Node 22+ and pnpm 10 (`corepack enable`, or `npx pnpm@10.34.9`).
+
+```bash
+pnpm install
+pnpm dev        # web app on http://localhost:3000
+pnpm check      # lint + typecheck + tests (what CI runs, plus build)
+```

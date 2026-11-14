@@ -12,11 +12,11 @@ Delivery: ask-on-risk. Test runner: Vitest (once the scaffold exists).
 
 ## Tasks
 
-- [x] T1 (S1, S2) inline: replace local copy with `FCamaggi/AmigOrganizador`; branch `rebuild`; remove v1 code; move v1 docs to `docs/legacy/`. Uncommitted.
-- [x] T2 (S1, S3, S4) inline: vision, lessons, roadmap, engine spec, ADR 0001, ADR 0002 (proposed), CLAUDE.md, README. Uncommitted.
-- [ ] T3 (S2) inline: decide stack (ADR 0002) with the owner.
-- [ ] T4 (S2): monorepo scaffold, Biome, Vitest, CI, Vercel preview.
-- [ ] T5 (S1): `packages/core` engine, test-first, from `docs/domain/AVAILABILITY_ENGINE.md`.
+- [x] T1 (S1, S2) inline: replace local copy with `FCamaggi/AmigOrganizador`; branch `rebuild`; remove v1 code; move v1 docs to `docs/legacy/`. Commit `92a758f`.
+- [x] T2 (S1, S3, S4) inline: vision, lessons, roadmap, engine spec, ADR 0001, ADR 0002, CLAUDE.md, README. Commit `b5d50dc`.
+- [x] T3 (S2) inline: stack decided, ADR 0002 accepted.
+- [x] T4 (S2) inline: pnpm + Turborepo monorepo, `apps/web` (Next.js 16, Tailwind 4), `packages/core`, Biome, Vitest, GitHub Actions CI. `pnpm check` and `pnpm build` green locally. Uncommitted. Vercel and Supabase projects pending (need the owner's accounts).
+- [ ] T5 (S1) inline: `packages/core` engine, test-first, from `docs/domain/AVAILABILITY_ENGINE.md`. Started: `mergeIntervals` (RED observed, then GREEN, 4 tests).
 
 ## Log
 
@@ -24,3 +24,5 @@ Delivery: ask-on-risk. Test runner: Vitest (once the scaffold exists).
 - L2 (2026-11-13): local folder held a Mi2ente copy; owner: "ahi si git@github.com:FCamaggi/AmigOrganizador.git, borra esto, es una copia, no importa nada por borrarla". Replaced it.
 - L3 (2026-11-13): post-mortem of v1 + events repo done by a read-only explorer; condensed into `docs/product/LESSONS_V1.md`. Next: T3.
 - L4 (2026-11-13): Engram mirror `odd/phase0-foundation/tasks` pending: project is ambiguous (`amigorganizador` vs `mi2ente`, the folder used to hold a Mi2ente copy).
+- L5 (2026-11-13): native review of the first workspace candidate failed with `lens_context_budget_exceeded` (38,288 lines, almost all v1 deletions). Owner: "si, haz los dos commits y vamos con ese stack". Split into `92a758f` (deletions, too large to review; recoverable from `master`) and `b5d50dc` (docs, assessed medium, `under_budget`).
+- L6 (2026-11-13): pnpm via corepack failed locally (missing cached `pnpm.cjs`); `npx pnpm@10.34.9` works. TypeScript pinned to 5.x (7.0 is latest) for Next.js compatibility.

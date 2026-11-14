@@ -38,3 +38,4 @@ coverage/
 
 # Local agent tooling
 .atl/
+.turbo/

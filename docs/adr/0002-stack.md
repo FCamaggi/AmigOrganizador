@@ -1,6 +1,6 @@
 # ADR 0002 — Stack
 
-- **Status:** proposed (waiting for the owner's decision)
+- **Status:** accepted (owner: "vamos con ese stack", 2026-11-13)
 - **Date:** 2026-11-13
 
 ## Forces
