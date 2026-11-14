@@ -52,6 +52,22 @@ importers:
         specifier: ^5
         version: 5.9.3
 
+  packages/adapter-memory:
+    dependencies:
+      '@amigo/core':
+        specifier: workspace:*
+        version: link:../core
+    devDependencies:
+      '@types/node':
+        specifier: ^22
+        version: 22.20.5
+      typescript:
+        specifier: ^5
+        version: 5.9.3
+      vitest:
+        specifier: 5.1.0
+        version: 5.1.0(@types/node@22.20.5)(vite@8.3.8(@types/node@22.20.5)(jiti@2.7.0))
+
   packages/core:
     devDependencies:
       typescript:
