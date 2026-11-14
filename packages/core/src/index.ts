@@ -26,3 +26,8 @@ export {
 
 /** Availability is never assumed: missing data is `unknown`, not `free`. */
 export type AvailabilityState = "free" | "busy" | "unknown";
+export {
+  buildGoogleCalendarUrl,
+  buildIcs,
+  type CalendarInvite,
+} from "./calendar/invite";

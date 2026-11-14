@@ -23,7 +23,7 @@ so they can be edited from any device.
 ## Tasks
 
 - [ ] T1 (S1, S2) inline: core `Plan` domain (create, join, answer, confirm) + repository port; participants are account ids.
-- [ ] T2 (S5) inline: core `.ics` and Google Calendar link builders.
+- [x] T2 (S5) inline: core `buildIcs` (RFC 5545 escaping and 75-octet folding) and `buildGoogleCalendarUrl`; RED then GREEN (49 tests). Times in UTC ms; adapters convert from local.
 - [ ] T3 (S1, S2) inline: Postgres schema (Drizzle) + Supabase adapter. Blocked: Supabase project.
 - [ ] T4 (S1, S3) inline: create-plan and availability screens (mobile first).
 - [ ] T5 (S4, S5) inline: results and confirm screen.
