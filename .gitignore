@@ -46,3 +46,4 @@ apps/web/.impeccable/review/
 # Supabase CLI
 supabase/.temp/
 supabase/.branches/
+.vercel
