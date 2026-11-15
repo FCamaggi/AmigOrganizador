@@ -9,27 +9,31 @@ calendar for that. v1 asked them to; they didn't. See
 
 ## The bet
 
-**Don't be a calendar. Be the shortest path from "we should meet up" to a plan
-that is in everyone's calendar.**
+**A friend group that always knows which days it can meet.** Each person
+keeps their busy time in one place (work, classes, shifts, one-off plans),
+filled in seconds with helpers and imports, and every group they belong to
+compares everyone's availability on its own. See ADR 0004.
 
 ```
-someone says "juntémonos"  ->  shares one link in the group chat
-friends open it            ->  see the plan, sign in with one tap (Google or
-                               magic link), availability in under 30 seconds
-                               (connect calendar, pick a pattern, or tap days)
-app proposes 3 options     ->  each with a reason and, optionally, what to do
-group reacts / votes       ->  organizer confirms
-everyone gets the invite   ->  .ics / Google / Outlook, plus reminders
+someone creates a group     ->  shares the invite link in the group chat
+friends join (one tap)      ->  set up their profile once: templates
+                               (student, office, shifts) are optional helpers;
+                               import from another calendar; mark busy days
+the group view is live      ->  "these are the days you can all meet",
+                               ranked with reasons; unknown is never free
+someone picks a good day    ->  "juntémonos este viernes", the group confirms
+everyone gets the invite    ->  .ics / Google / Outlook, or a calendar feed
 ```
 
 ## Principles
 
 1. **Value before sign-in, sign-in in one tap.** Everyone has an account
-   (ADR 0003), but a plan link shows the plan before asking to sign in, and
+   (ADR 0003), but a group invite link shows the group before asking to sign in, and
    signing in is Google or a magic link: no passwords, no usernames.
 2. **Read, don't replace.** Calendars are the source of truth; we read free/busy
    and write back invites. We never store event titles we don't need.
-3. **Unknown is not free.** Show who hasn't answered; nudge them, don't guess.
+3. **Unknown is not free.** Show who hasn't set up their profile; nudge them,
+   don't guess.
 4. **Live where the group lives.** The chat is the UI's front door: rich link
    previews, one-tap replies, push notifications.
 5. **Every screen ends in a decision.** Fewer settings, more defaults.

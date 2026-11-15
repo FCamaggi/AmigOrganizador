@@ -7,7 +7,9 @@ per week.
 ## Product rules (non-negotiable)
 
 - Everyone has an account, but sign-in is one tap (Google or magic link, never
-  passwords) and a plan link shows the plan before asking to sign in (ADR 0003).
+  passwords) and a group invite link shows the group before asking to sign in (ADR 0003).
+- The product is groups + one saved availability profile per person (ADR 0004),
+  not one-off plans that everyone answers.
 - `unknown` availability is never treated as `free`.
 - We read calendars (free/busy only) and write invites back; we never store
   event titles or descriptions from a user's calendar.

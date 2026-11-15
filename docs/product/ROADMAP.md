@@ -3,39 +3,41 @@
 Each phase has one goal and one exit test. Nothing in a later phase starts
 before the earlier exit test passes with real friends.
 
-## Phase 0 — Foundation (current)
+## Phase 0 — Foundation (done)
 
 Goal: a clean repo the agentic workflow can build on.
 Exit: stack decided (ADR 0002), monorepo scaffold, pure engine package with
 tests, CI green, deploy preview on every push.
 
-## Phase 1 — "One link, one plan" (MVP)
+## Phase 1 — "Groups that know when they can meet" (MVP)
 
-Goal: a real group goes from link to confirmed plan without help.
+Goal: a real friend group sets up their profiles and finds a day to meet
+without help. Model: ADR 0004.
 
-- Create a plan in one screen: title, rough range ("next 2 weeks"), duration.
-- Join by link: the plan is visible first; one-tap sign-in (Google or magic
-  link) when answering. No passwords (ADR 0003).
-- Availability input: mark **busy** time by default, helped by recurring
-  profiles (shift work, office week, class schedule); a group can switch to
-  marking free time instead.
-- Engine: ranked options with reasons; free / busy / unknown states.
-- Confirm a plan; `.ics` download and "add to Google Calendar" link.
-- Shareable link preview (Open Graph) made for WhatsApp.
+- Create a group and share its invite link; join with one-tap sign-in
+  (Google or magic link; ADR 0003). The link shows the group first.
+- One availability profile per person, shared by all their groups: a calendar
+  of busy time. Optional helpers: templates (student classes, office week,
+  nurse shifts), one-off busy days and exceptions.
+- Import from another calendar by ICS URL (busy time only, never titles).
+- Group view: ranked upcoming days for the whole group, with reasons and the
+  line diagram; members without a profile are unknown.
+- From a good day: propose and confirm a plan; `.ics` and "add to Google
+  Calendar"; export the group's confirmed plans as a subscribable ICS feed.
+- Link preview (Open Graph) for the group invite, made for WhatsApp.
 
-Exit: 3 real friend groups confirm a plan; median time to fill availability
-under 60 seconds.
+Exit: 3 real friend groups confirm a plan; median time to set up a profile
+under 2 minutes.
 
 ## Phase 2 — "It just knows"
 
 Goal: people stop typing availability.
 
-- Live calendar connection (Google, Microsoft, any ICS URL), free/busy only.
-- Persistent groups with a default pattern per member.
-- Push notifications (PWA) and reminders; nudges to people who haven't answered.
-- Quick reactions on options (👍 / 🤷 / 👎) instead of a formal vote.
+- Live calendar connection with Google and Microsoft accounts (free/busy only).
+- Push notifications (PWA) and reminders; nudges to people without a profile.
+- Quick reactions on proposed days (👍 / 🤷 / 👎).
 
-Exit: 50% of active participants have a calendar connected or a saved pattern.
+Exit: 50% of active members have a calendar connected or imported.
 
 ## Phase 3 — "What do we do?"
 

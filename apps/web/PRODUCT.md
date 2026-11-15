@@ -16,51 +16,54 @@ when they set up their profile.
 
 Jobs:
 
-- **Organizer:** turn "we should meet up" into a confirmed plan without a
-  60-message thread.
-- **Participant:** say when they can't make it in under a minute, then get
-  the plan in their calendar.
+- **Member:** keep my busy time (work, classes, shifts, one-off plans) in one
+  place, set up once in a couple of minutes, so all my groups know when I can.
+- **Group:** see at any moment which upcoming days the whole group can meet,
+  pick one, and get it into everyone's calendar.
 
 ## Product Purpose
 
-The shortest path from "juntémonos" to a plan that sits in everyone's
-calendar. Success is plans confirmed per week (a dated plan accepted by at
-least 2 people). Full vision: `docs/product/VISION.md`.
+Friend groups that always know which days they can meet. Each person keeps a
+profile of their busy time; every group compares its members' profiles and
+ranks the days that work. Success is plans confirmed per week (a dated plan
+accepted by at least 2 people). Model: `docs/adr/0004-groups-and-profiles-first.md`.
+Full vision: `docs/product/VISION.md`.
 
 ## Positioning
 
-AmigOrganizador does not compete with personal calendars; it reads them. Its
-mechanism is a ranked list of meeting options, each with a human reason,
-computed from busy time that people describe once through recurring profiles
-(shifts, work week, classes). A friend who hasn't answered is shown as
-unknown, never assumed free.
+AmigOrganizador does not compete with personal calendars; it reads them and
+writes back to them. Its mechanism is a live, ranked view of the days a group
+can meet, each with a human reason, computed from busy time that each person
+describes once: optional templates (student classes, office week, nurse
+shifts), one-off busy days, and imports from other calendars. A member without
+a profile is shown as unknown, never assumed free.
 
 ## Operating Context
 
-- Entry point is a plan link shared in a WhatsApp group; the link preview
-  matters as much as the first screen.
+- Entry point is a group invite link shared in a WhatsApp group; the link
+  preview matters as much as the first screen.
 - Used on a phone, often in short bursts (in transit, between classes).
-- Every participant signs in with one tap (Google or email magic link); the
-  plan is visible before sign-in (ADR 0003, `docs/adr/0003-accounts-for-everyone.md`).
-- The confirmed plan leaves the app as an `.ics` file or an "add to Google
-  Calendar" link.
+- Every member signs in with one tap (Google or email magic link); the group
+  is visible before sign-in (ADR 0003).
+- Profiles are set up once and touched up later (a new shift roster, exams
+  week); groups are opened often to check "when can we meet".
+- A confirmed plan leaves the app as an `.ics` file, an "add to Google
+  Calendar" link, or a subscribable calendar feed.
 
 ## Capabilities and Constraints
 
-- Phase 1 (MVP): create a plan (title, date range up to 60 days, duration),
-  join by link, mark availability, ranked options with reasons, organizer
-  confirms, add to calendar. Rules: `docs/domain/PLAN.md`,
-  `docs/domain/AVAILABILITY_ENGINE.md`.
-- Availability is entered as **busy** time by default, helped by recurring
-  profiles; a group can switch to marking free time instead.
+- Phase 1 (MVP): create and join groups by link; one availability profile per
+  person (busy calendar, optional templates, one-off busy days, ICS import);
+  live group view with ranked days and reasons; propose and confirm a plan;
+  export to calendars. Rules: `docs/domain/AVAILABILITY_ENGINE.md`.
 - Three availability states: free, busy, unknown.
-- Timezone is selectable per plan; default `America/Santiago`.
-- Later phases: live calendar connection, push and reminders, activity
-  suggestions (events, food, places), recurring plans. See
-  `docs/product/ROADMAP.md`.
+- Timezone per group; default `America/Santiago`.
+- Later phases: live Google / Microsoft calendar connection, push and
+  reminders, activity suggestions (events, food, places), recurring plans.
+  See `docs/product/ROADMAP.md`.
 - Stack: Next.js 16 PWA, Tailwind CSS 4, pure TypeScript core; Supabase and
   Vercel (beta on the default `*.vercel.app` domain).
-- Undecided: logo and visual identity; profile "tastes" fields.
+- Undecided: logo; profile "tastes" fields.
 
 ## Brand Commitments
 

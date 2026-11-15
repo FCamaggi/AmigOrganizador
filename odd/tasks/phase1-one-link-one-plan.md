@@ -1,5 +1,6 @@
 # Phase 1 — One link, one plan
 
+Status: SUPERSEDED on 2026-11-15 by `odd/tasks/phase1-groups-and-profiles.md` (ADR 0004).
 Objective: a real friend group goes from a shared link to a confirmed plan without help.
 Branch: `rebuild`. Delivery: ask-on-risk. Test runner: Vitest (core, adapters), Playwright (e2e).
 
@@ -52,3 +53,4 @@ so they can be edited from any device.
 - L13 (2026-11-14): finish review (impeccable reviewer guide, run by a fresh general-purpose subagent because the dedicated agent type is not installed). Round 1: `fix`, 8 material fixes (station must be the confirmable slot, rows must explain ranking, busy hatched in the diagram, kicker on confirmed screen, confirmed screen without the world, trunk count placement, axis end tick, station capsules + purple citation). Round 2: 5 resolved, 3 partial + 1 regression (lost day context); owner: "dale, tercera ronda y después el DESIGN.md". Round 3 (`068efba`): all resolved; verdict `ship` (scoped to the 8 scored fixes). Commits: `39c6d92`, `068efba`.
 - L14 (2026-11-14): DESIGN.md and design.json written (documenter guide, fresh subagent). Open notes: the 6th person's line is ink, the same colour as the busy hatch and the trunk (told apart only by pattern and thickness); pressed blue `#00539c` is hard-coded in `src/lib/ui.ts`. Next: T6 (Open Graph), then T3/T7 when Supabase and Vercel exist.
 - L15 (2026-11-14): T6 done. Verified with a WhatsApp user agent: Next 16 serves blocking metadata to WhatsApp (it is in `HTML_LIMITED_BOT_UA_RE`), so `og:*` tags are in the HTML head; image 200 `image/png` 1200x630 for open, confirmed and long-title plans; unknown plan id falls back to a generic image. `metadataBase` left to Next's Vercel fallback (`VERCEL_PROJECT_PRODUCTION_URL`), matching the default domain decision. `pnpm check` and `pnpm build` green.
+- L16 (2026-11-15): superseded. The owner rejected the plan-first model ("algo tipo when to meet"); see ADR 0004 and `odd/tasks/phase1-groups-and-profiles.md`.
