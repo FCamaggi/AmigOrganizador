@@ -17,7 +17,7 @@ import { useRouter } from "next/navigation";
 import { useMemo, useState, useTransition } from "react";
 import { type MessageKey, t } from "@/i18n/t";
 import { formatTime } from "@/lib/format";
-import { buttonClasses } from "@/lib/ui";
+import { buttonClasses, shellClasses } from "@/lib/ui";
 import type { ProfileInput } from "@/server/group-actions";
 
 const h = (hours: number) => hours * 60;
@@ -245,287 +245,310 @@ export function ProfileEditor({
     });
   }
 
+  // Desktop: routines and calendar import on the left, the 14 days on the
+  // right. Below `lg` everything stacks in DOM order.
   return (
     <>
-      <section aria-labelledby="routines-title" className="mt-4">
-        <h2 id="routines-title" className={legend}>
-          {t("profileEdit.routines")}
-        </h2>
-        <div className="mt-2 flex flex-wrap gap-1.5">
-          <Chip
-            selected={noRoutine}
-            onClick={() =>
-              update({
-                workweek: { ...routines.workweek, on: false },
-                shifts: { ...routines.shifts, on: false },
-                classes: { ...routines.classes, on: false },
-              })
-            }
-          >
-            {t("answer.profile.none")}
-          </Chip>
-          <Chip
-            selected={routines.workweek.on}
-            onClick={() =>
-              update({
-                ...routines,
-                workweek: { ...routines.workweek, on: !routines.workweek.on },
-              })
-            }
-          >
-            {t("answer.profile.workweek")}
-          </Chip>
-          <Chip
-            selected={routines.shifts.on}
-            onClick={() =>
-              update({
-                ...routines,
-                shifts: { ...routines.shifts, on: !routines.shifts.on },
-              })
-            }
-          >
-            {t("answer.profile.shifts")}
-          </Chip>
-          <Chip
-            selected={routines.classes.on}
-            onClick={() =>
-              update({
-                ...routines,
-                classes: { ...routines.classes, on: !routines.classes.on },
-              })
-            }
-          >
-            {t("answer.profile.classes")}
-          </Chip>
-        </div>
-
-        {routines.workweek.on ? (
-          <div className="mt-3 flex items-center gap-2 text-sm">
-            <span className="font-bold">{t("answer.workweek.hours")}</span>
-            {(["start", "end"] as const).map((field) => (
-              <select
-                key={field}
-                aria-label={`${t("answer.workweek.hours")} ${field === "start" ? "1" : "2"}`}
-                value={routines.workweek[field]}
-                onChange={(e) =>
-                  update({
-                    ...routines,
-                    workweek: {
-                      ...routines.workweek,
-                      [field]: Number(e.target.value),
-                    },
-                  })
-                }
-                className="min-h-11 rounded-sign border-[1.5px] border-rule-strong bg-white px-2"
-              >
-                {(field === "start" ? WORK_STARTS : WORK_ENDS).map((m) => (
-                  <option key={m} value={m}>
-                    {formatTime(m)}
-                  </option>
-                ))}
-              </select>
-            ))}
+      <div className="contents lg:grid lg:grid-cols-2 lg:grid-rows-[auto_1fr] lg:items-start lg:gap-x-10">
+        <section
+          aria-labelledby="routines-title"
+          className="mt-4 lg:col-start-1 lg:row-start-1"
+        >
+          <h2 id="routines-title" className={legend}>
+            {t("profileEdit.routines")}
+          </h2>
+          <div className="mt-2 flex flex-wrap gap-1.5">
+            <Chip
+              selected={noRoutine}
+              onClick={() =>
+                update({
+                  workweek: { ...routines.workweek, on: false },
+                  shifts: { ...routines.shifts, on: false },
+                  classes: { ...routines.classes, on: false },
+                })
+              }
+            >
+              {t("answer.profile.none")}
+            </Chip>
+            <Chip
+              selected={routines.workweek.on}
+              onClick={() =>
+                update({
+                  ...routines,
+                  workweek: { ...routines.workweek, on: !routines.workweek.on },
+                })
+              }
+            >
+              {t("answer.profile.workweek")}
+            </Chip>
+            <Chip
+              selected={routines.shifts.on}
+              onClick={() =>
+                update({
+                  ...routines,
+                  shifts: { ...routines.shifts, on: !routines.shifts.on },
+                })
+              }
+            >
+              {t("answer.profile.shifts")}
+            </Chip>
+            <Chip
+              selected={routines.classes.on}
+              onClick={() =>
+                update({
+                  ...routines,
+                  classes: { ...routines.classes, on: !routines.classes.on },
+                })
+              }
+            >
+              {t("answer.profile.classes")}
+            </Chip>
           </div>
-        ) : null}
 
-        {routines.shifts.on ? (
-          <div className="mt-3">
-            <p className="text-mute text-sm">{t("answer.shifts.pattern")}</p>
-            <p className="mt-2 font-bold text-sm">{t("answer.shifts.today")}</p>
-            <div className="mt-1.5 flex flex-wrap gap-1.5">
-              {SHIFT_TODAY.map((key, index) => (
-                <Chip
-                  key={key}
-                  selected={routines.shifts.todayIndex === index}
-                  onClick={() =>
+          {routines.workweek.on ? (
+            <div className="mt-3 flex items-center gap-2 text-sm">
+              <span className="font-bold">{t("answer.workweek.hours")}</span>
+              {(["start", "end"] as const).map((field) => (
+                <select
+                  key={field}
+                  aria-label={`${t("answer.workweek.hours")} ${field === "start" ? "1" : "2"}`}
+                  value={routines.workweek[field]}
+                  onChange={(e) =>
                     update({
                       ...routines,
-                      shifts: { on: true, todayIndex: index },
+                      workweek: {
+                        ...routines.workweek,
+                        [field]: Number(e.target.value),
+                      },
                     })
                   }
+                  className="min-h-11 rounded-sign border-[1.5px] border-rule-strong bg-white px-2"
                 >
-                  {t(`answer.shifts.${key}` as MessageKey)}
-                </Chip>
+                  {(field === "start" ? WORK_STARTS : WORK_ENDS).map((m) => (
+                    <option key={m} value={m}>
+                      {formatTime(m)}
+                    </option>
+                  ))}
+                </select>
               ))}
             </div>
-          </div>
-        ) : null}
+          ) : null}
 
-        {routines.classes.on ? (
-          <div className="mt-3">
-            <p className="text-mute text-sm">{t("answer.classes.hint")}</p>
-            <ul className="mt-2 border-rule border-t">
-              {CLASS_WEEKDAYS.map((weekday) => {
-                const marks = routines.classes.marks[weekday] ?? [];
-                const label = t(`weekday.short.${weekday}` as MessageKey);
-                return (
-                  <li
-                    key={weekday}
-                    className="flex items-center border-rule border-b py-1"
+          {routines.shifts.on ? (
+            <div className="mt-3">
+              <p className="text-mute text-sm">{t("answer.shifts.pattern")}</p>
+              <p className="mt-2 font-bold text-sm">
+                {t("answer.shifts.today")}
+              </p>
+              <div className="mt-1.5 flex flex-wrap gap-1.5">
+                {SHIFT_TODAY.map((key, index) => (
+                  <Chip
+                    key={key}
+                    selected={routines.shifts.todayIndex === index}
+                    onClick={() =>
+                      update({
+                        ...routines,
+                        shifts: { on: true, todayIndex: index },
+                      })
+                    }
                   >
-                    <span className="w-[4.25rem] flex-none font-extrabold text-sm">
-                      {label}
-                    </span>
-                    <span className="relative h-11 flex-1">
-                      <span
-                        aria-hidden="true"
-                        className="absolute inset-x-0 top-1/2 h-px bg-rule-strong"
-                      />
-                      {SEGMENTS.map((seg, index) => {
-                        const on = marks.includes(seg.key);
-                        const style = {
-                          left: `${pct(seg.start)}%`,
-                          width: `${pct(seg.end) - pct(seg.start)}%`,
-                        };
-                        return (
-                          <span key={seg.key}>
-                            {on ? (
-                              <span
-                                aria-hidden="true"
-                                className="hatch-busy absolute top-1/2 -mt-2 h-4 rounded-[3px]"
+                    {t(`answer.shifts.${key}` as MessageKey)}
+                  </Chip>
+                ))}
+              </div>
+            </div>
+          ) : null}
+
+          {routines.classes.on ? (
+            <div className="mt-3">
+              <p className="text-mute text-sm">{t("answer.classes.hint")}</p>
+              <ul className="mt-2 border-rule border-t">
+                {CLASS_WEEKDAYS.map((weekday) => {
+                  const marks = routines.classes.marks[weekday] ?? [];
+                  const label = t(`weekday.short.${weekday}` as MessageKey);
+                  return (
+                    <li
+                      key={weekday}
+                      className="flex items-center border-rule border-b py-1"
+                    >
+                      <span className="w-[4.25rem] flex-none font-extrabold text-sm">
+                        {label}
+                      </span>
+                      <span className="relative h-11 flex-1">
+                        <span
+                          aria-hidden="true"
+                          className="absolute inset-x-0 top-1/2 h-px bg-rule-strong"
+                        />
+                        {SEGMENTS.map((seg, index) => {
+                          const on = marks.includes(seg.key);
+                          const style = {
+                            left: `${pct(seg.start)}%`,
+                            width: `${pct(seg.end) - pct(seg.start)}%`,
+                          };
+                          return (
+                            <span key={seg.key}>
+                              {on ? (
+                                <span
+                                  aria-hidden="true"
+                                  className="hatch-busy absolute top-1/2 -mt-2 h-4 rounded-[3px]"
+                                  style={style}
+                                />
+                              ) : null}
+                              <button
+                                type="button"
+                                aria-pressed={on}
+                                aria-label={`${label}, ${t(`answer.segment.${seg.key}` as MessageKey)}`}
+                                onClick={() =>
+                                  update({
+                                    ...routines,
+                                    classes: {
+                                      on: true,
+                                      marks: {
+                                        ...routines.classes.marks,
+                                        [weekday]: on
+                                          ? marks.filter((k) => k !== seg.key)
+                                          : [...marks, seg.key],
+                                      },
+                                    },
+                                  })
+                                }
+                                className={`absolute inset-y-0 active:bg-ink/[0.06] ${
+                                  index > 0
+                                    ? "border-rule border-l border-dashed"
+                                    : ""
+                                }`}
                                 style={style}
                               />
-                            ) : null}
-                            <button
-                              type="button"
-                              aria-pressed={on}
-                              aria-label={`${label}, ${t(`answer.segment.${seg.key}` as MessageKey)}`}
-                              onClick={() =>
-                                update({
-                                  ...routines,
-                                  classes: {
-                                    on: true,
-                                    marks: {
-                                      ...routines.classes.marks,
-                                      [weekday]: on
-                                        ? marks.filter((k) => k !== seg.key)
-                                        : [...marks, seg.key],
-                                    },
-                                  },
-                                })
-                              }
-                              className={`absolute inset-y-0 active:bg-ink/[0.06] ${
-                                index > 0
-                                  ? "border-rule border-l border-dashed"
-                                  : ""
-                              }`}
-                              style={style}
-                            />
-                          </span>
+                            </span>
+                          );
+                        })}
+                      </span>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          ) : null}
+        </section>
+
+        <section
+          aria-labelledby="days-title"
+          className="mt-5 lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:mt-4"
+        >
+          <h2 id="days-title" className={legend}>
+            {t("profileEdit.days.title")}
+          </h2>
+          <p className="mt-0.5 text-mute text-sm">
+            {t("profileEdit.days.hint")}
+          </p>
+          <div
+            aria-hidden="true"
+            className="mt-2 flex pb-1 text-[0.6875rem] text-mute"
+          >
+            <span className="w-[4.25rem] flex-none" />
+            <span className="relative h-4 flex-1">
+              {SEGMENTS.map((seg) => (
+                <span
+                  key={seg.key}
+                  className="absolute top-0 text-center font-bold uppercase tracking-[0.06em]"
+                  style={{
+                    left: `${pct(seg.start)}%`,
+                    width: `${pct(seg.end) - pct(seg.start)}%`,
+                  }}
+                >
+                  {t(`answer.segment.${seg.key}` as MessageKey)}
+                </span>
+              ))}
+            </span>
+          </div>
+          <ul className="border-rule border-t">
+            {days.map((day) => {
+              const busy = availability[day.date]?.busy ?? [];
+              return (
+                <li
+                  key={day.date}
+                  className="flex items-center border-rule border-b py-1"
+                >
+                  <span className="w-[4.25rem] flex-none font-extrabold text-[0.9375rem]">
+                    {day.label}
+                  </span>
+                  <span className="relative h-11 flex-1">
+                    <span
+                      aria-hidden="true"
+                      className="absolute inset-x-0 top-1/2 -mt-[3px] h-1.5 rounded-full"
+                      style={{ background: lineColor }}
+                    />
+                    {busy
+                      .filter((i) => i.end > TRACK.start && i.start < TRACK.end)
+                      .map((i) => {
+                        const left = pct(Math.max(i.start, TRACK.start));
+                        const right = pct(Math.min(i.end, TRACK.end));
+                        return (
+                          <span
+                            key={i.start}
+                            aria-hidden="true"
+                            className="hatch-busy absolute top-1/2 -mt-2 h-4 rounded-[3px]"
+                            style={{
+                              left: `${left}%`,
+                              width: `${right - left}%`,
+                            }}
+                          />
                         );
                       })}
-                    </span>
-                  </li>
-                );
-              })}
-            </ul>
-          </div>
-        ) : null}
-      </section>
-
-      <section aria-labelledby="days-title" className="mt-5">
-        <h2 id="days-title" className={legend}>
-          {t("profileEdit.days.title")}
-        </h2>
-        <p className="mt-0.5 text-mute text-sm">{t("profileEdit.days.hint")}</p>
-        <div
-          aria-hidden="true"
-          className="mt-2 flex pb-1 text-[0.6875rem] text-mute"
-        >
-          <span className="w-[4.25rem] flex-none" />
-          <span className="relative h-4 flex-1">
-            {SEGMENTS.map((seg) => (
-              <span
-                key={seg.key}
-                className="absolute top-0 text-center font-bold uppercase tracking-[0.06em]"
-                style={{
-                  left: `${pct(seg.start)}%`,
-                  width: `${pct(seg.end) - pct(seg.start)}%`,
-                }}
-              >
-                {t(`answer.segment.${seg.key}` as MessageKey)}
-              </span>
-            ))}
-          </span>
-        </div>
-        <ul className="border-rule border-t">
-          {days.map((day) => {
-            const busy = availability[day.date]?.busy ?? [];
-            return (
-              <li
-                key={day.date}
-                className="flex items-center border-rule border-b py-1"
-              >
-                <span className="w-[4.25rem] flex-none font-extrabold text-[0.9375rem]">
-                  {day.label}
-                </span>
-                <span className="relative h-11 flex-1">
-                  <span
-                    aria-hidden="true"
-                    className="absolute inset-x-0 top-1/2 -mt-[3px] h-1.5 rounded-full"
-                    style={{ background: lineColor }}
-                  />
-                  {busy
-                    .filter((i) => i.end > TRACK.start && i.start < TRACK.end)
-                    .map((i) => {
-                      const left = pct(Math.max(i.start, TRACK.start));
-                      const right = pct(Math.min(i.end, TRACK.end));
+                    {SEGMENTS.map((seg, index) => {
+                      const covered = overlap(busy, seg);
+                      const state =
+                        covered === 0
+                          ? "free"
+                          : covered >= seg.end - seg.start
+                            ? "busy"
+                            : "partial";
                       return (
-                        <span
-                          key={i.start}
-                          aria-hidden="true"
-                          className="hatch-busy absolute top-1/2 -mt-2 h-4 rounded-[3px]"
+                        <button
+                          key={seg.key}
+                          type="button"
+                          onClick={() => tap(day.date, seg.key)}
+                          aria-pressed={state !== "free"}
+                          aria-label={t("answer.segment.label", {
+                            day: day.label,
+                            segment: t(
+                              `answer.segment.${seg.key}` as MessageKey,
+                            ),
+                            from: formatTime(seg.start),
+                            to: formatTime(seg.end),
+                            state: t(
+                              `answer.segment.state.${state}` as MessageKey,
+                            ),
+                          })}
+                          className={`absolute inset-y-0 active:bg-ink/[0.06] ${
+                            index > 0
+                              ? "border-rule border-l border-dashed"
+                              : ""
+                          }`}
                           style={{
-                            left: `${left}%`,
-                            width: `${right - left}%`,
+                            left: `${pct(seg.start)}%`,
+                            width: `${pct(seg.end) - pct(seg.start)}%`,
                           }}
                         />
                       );
                     })}
-                  {SEGMENTS.map((seg, index) => {
-                    const covered = overlap(busy, seg);
-                    const state =
-                      covered === 0
-                        ? "free"
-                        : covered >= seg.end - seg.start
-                          ? "busy"
-                          : "partial";
-                    return (
-                      <button
-                        key={seg.key}
-                        type="button"
-                        onClick={() => tap(day.date, seg.key)}
-                        aria-pressed={state !== "free"}
-                        aria-label={t("answer.segment.label", {
-                          day: day.label,
-                          segment: t(`answer.segment.${seg.key}` as MessageKey),
-                          from: formatTime(seg.start),
-                          to: formatTime(seg.end),
-                          state: t(
-                            `answer.segment.state.${state}` as MessageKey,
-                          ),
-                        })}
-                        className={`absolute inset-y-0 active:bg-ink/[0.06] ${
-                          index > 0 ? "border-rule border-l border-dashed" : ""
-                        }`}
-                        style={{
-                          left: `${pct(seg.start)}%`,
-                          width: `${pct(seg.end) - pct(seg.start)}%`,
-                        }}
-                      />
-                    );
-                  })}
-                </span>
-              </li>
-            );
-          })}
-        </ul>
-      </section>
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
 
-      {children}
+        <div className="lg:col-start-1 lg:row-start-2">{children}</div>
+      </div>
 
-      <div className="sticky bottom-0 z-10 -mx-4 mt-4 border-rule border-t bg-white px-4 pt-2.5 pb-[max(1.125rem,env(safe-area-inset-bottom))]">
-        <p className="mb-2 text-center font-bold text-sm" aria-live="polite">
+      <div
+        className={`${shellClasses.footer} z-10 mt-4 lg:-mx-8 lg:flex lg:items-center lg:justify-end lg:gap-4 lg:px-8`}
+      >
+        <p
+          className="mb-2 text-center font-bold text-sm lg:mb-0"
+          aria-live="polite"
+        >
           {status === "saved"
             ? t("profileEdit.saved")
             : status === "error"
@@ -536,7 +559,7 @@ export function ProfileEditor({
           type="button"
           onClick={submit}
           disabled={pending}
-          className={buttonClasses.primary}
+          className={`${buttonClasses.primary} lg:w-80`}
         >
           {t("profileEdit.save")}
         </button>

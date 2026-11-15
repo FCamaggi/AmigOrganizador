@@ -11,7 +11,7 @@ import {
   groupPlanViews,
   groupStrip,
 } from "@/lib/group-view-model";
-import { buttonClasses } from "@/lib/ui";
+import { buttonClasses, shellClasses } from "@/lib/ui";
 import {
   cancelPlanAction,
   confirmPlanAction,
@@ -46,7 +46,7 @@ export async function generateMetadata({
 
 export default function GroupPage({ params }: PageProps<"/g/[code]">) {
   return (
-    <main className="mx-auto min-h-dvh max-w-md px-4 pt-1">
+    <main className={shellClasses.wide}>
       <Suspense fallback={<GroupSkeleton />}>
         <GroupScreen params={params} />
       </Suspense>
@@ -123,7 +123,7 @@ async function GroupScreen({
 
   if (!isMember) {
     return (
-      <>
+      <div className="mx-auto w-full max-w-2xl">
         {header}
         <h2 className="mt-5 font-extrabold text-2xl leading-tight">
           {t("group.invite.title", { name: group.name })}
@@ -143,7 +143,7 @@ async function GroupScreen({
             </li>
           ))}
         </ul>
-        <div className="sticky bottom-0 -mx-4 mt-6 bg-white px-4 pt-2.5 pb-[max(1.125rem,env(safe-area-inset-bottom))]">
+        <div className={`${shellClasses.footer} mt-6`}>
           {session ? (
             <form action={joinGroupAction.bind(null, group.inviteCode)}>
               <button type="submit" className={buttonClasses.primary}>
@@ -159,7 +159,7 @@ async function GroupScreen({
             </Link>
           )}
         </div>
-      </>
+      </div>
     );
   }
 

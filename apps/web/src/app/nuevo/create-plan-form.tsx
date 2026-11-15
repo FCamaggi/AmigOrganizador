@@ -9,7 +9,7 @@ import {
   RANGES,
   TIMEZONES,
 } from "@/lib/plan-options";
-import { buttonClasses } from "@/lib/ui";
+import { buttonClasses, shellClasses } from "@/lib/ui";
 import { type CreatePlanState, createPlanAction } from "@/server/actions";
 
 const legend = "font-extrabold text-xs uppercase tracking-[0.06em]";
@@ -150,7 +150,7 @@ export function CreatePlanForm({ needsName }: { readonly needsName: boolean }) {
         </select>
       </div>
 
-      <div className="sticky bottom-0 -mx-4 border-rule border-t bg-white px-4 pt-2.5 pb-[max(1.125rem,env(safe-area-inset-bottom))]">
+      <div className={`${shellClasses.footer}`}>
         {error ? (
           <p role="alert" className="mb-2 font-bold text-danger text-sm">
             {error}

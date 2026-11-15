@@ -13,7 +13,7 @@ import { t } from "@/i18n/t";
 import { formatDay, formatTime } from "@/lib/format";
 import { lineColor } from "@/lib/lines";
 import { DEFAULT_TIMEZONE } from "@/lib/plan-options";
-import { buttonClasses } from "@/lib/ui";
+import { buttonClasses, shellClasses } from "@/lib/ui";
 import {
   removeCalendarAction,
   resyncCalendarAction,
@@ -33,7 +33,7 @@ function syncedLabel(syncedAt: number, timeZone: string): string {
 
 export default function ProfilePage({ searchParams }: PageProps<"/perfil">) {
   return (
-    <main className="mx-auto min-h-dvh max-w-md px-4 pt-1">
+    <main className={shellClasses.wide}>
       <Suspense
         fallback={
           <div

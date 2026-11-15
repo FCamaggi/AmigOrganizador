@@ -2,14 +2,14 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { t } from "@/i18n/t";
 import { lineColor } from "@/lib/lines";
-import { buttonClasses } from "@/lib/ui";
+import { buttonClasses, shellClasses } from "@/lib/ui";
 import { signOut } from "@/server/actions";
 import { groups, profiles } from "@/server/repository";
 import { getSession } from "@/server/session";
 
 export default function Home() {
   return (
-    <main className="mx-auto flex min-h-dvh max-w-md flex-col px-4 pt-4">
+    <main className={`${shellClasses.wide} flex flex-col pt-4`}>
       <p className="flex items-baseline gap-2 font-extrabold text-lg">
         {t("app.name")}
         <span className="rounded-chip border border-ink px-1 font-bold text-[0.6875rem] uppercase">
@@ -34,18 +34,22 @@ async function HomeContent() {
   const session = await getSession();
   if (!session) {
     return (
-      <>
-        <h1 className="mt-10 text-balance font-extrabold text-[2.5rem] leading-[1.05]">
+      <div className="contents lg:mt-20 lg:grid lg:grid-cols-2 lg:items-center lg:gap-x-16">
+        <h1 className="mt-10 text-balance font-extrabold text-[2.5rem] leading-[1.05] sm:text-5xl lg:col-start-1 lg:row-start-1 lg:mt-0 lg:text-6xl">
           {t("groups.signedOut.title")}
         </h1>
-        <p className="mt-3 text-lg text-mute">{t("groups.signedOut.body")}</p>
-        <HomeLines />
-        <div className="mt-auto pt-8 pb-[max(1.125rem,env(safe-area-inset-bottom))]">
+        <p className="mt-3 text-lg text-mute sm:max-w-lg lg:col-start-1 lg:row-start-2">
+          {t("groups.signedOut.body")}
+        </p>
+        <div className="lg:col-start-2 lg:row-span-3 lg:row-start-1">
+          <HomeLines />
+        </div>
+        <div className="mt-auto pt-8 pb-[max(1.125rem,env(safe-area-inset-bottom))] sm:max-w-sm lg:col-start-1 lg:row-start-3 lg:mt-0">
           <Link href="/grupos/nuevo" className={buttonClasses.primary}>
             {t("groups.create")}
           </Link>
         </div>
-      </>
+      </div>
     );
   }
 
@@ -60,98 +64,104 @@ async function HomeContent() {
           .length,
     ),
   );
+  // Desktop: who you are, your profile and the create action on the left;
+  // your groups on the right. Below `lg` it stacks with a sticky footer.
   return (
-    <>
-      <div className="mt-6 flex items-baseline justify-between">
-        <h1 className="font-extrabold text-[1.75rem]">{t("groups.title")}</h1>
-        <form action={signOut}>
-          <button
-            type="submit"
-            className="min-h-11 px-1 font-bold text-line-blue text-sm underline"
-          >
-            {t("signin.signOut")}
-          </button>
-        </form>
-      </div>
-      <p className="text-mute text-sm">
-        {t("signin.as", { name: session.displayName })}
-      </p>
-
-      <Link
-        href="/perfil"
-        className={`mt-4 flex items-center gap-3 rounded-sign px-3 py-3 no-underline ${
-          profile ? "border border-rule" : "border-2 border-ink"
-        }`}
-      >
-        <span
-          aria-hidden="true"
-          className="h-1.5 w-10 flex-none rounded-full"
-          style={{ background: lineColor(0).value }}
-        />
-        <span className="min-w-0 flex-1">
-          <span className="block font-extrabold">
-            {profile ? t("profile.cta.ready") : t("profile.cta.title")}
-          </span>
-          <span className="block text-mute text-sm">
-            {profile ? t("profile.cta.edit") : t("profile.cta.body")}
-          </span>
-        </span>
-        <svg
-          aria-hidden="true"
-          viewBox="0 0 16 16"
-          className="size-4 flex-none text-line-blue"
-        >
-          <path
-            d="M6 3l5 5-5 5"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2.2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-      </Link>
-
-      {mine.length === 0 ? (
-        <div className="mt-6 rounded-sign border border-rule border-dashed px-3 py-4">
-          <p className="font-extrabold">{t("groups.empty.title")}</p>
-          <p className="mt-1 text-mute text-sm">{t("groups.empty.body")}</p>
+    <div className="contents lg:grid lg:grid-cols-[minmax(0,20rem)_minmax(0,1fr)] lg:items-start lg:gap-x-12">
+      <div className="lg:col-start-1 lg:row-start-1">
+        <div className="mt-6 flex items-baseline justify-between">
+          <h1 className="font-extrabold text-[1.75rem]">{t("groups.title")}</h1>
+          <form action={signOut}>
+            <button
+              type="submit"
+              className="min-h-11 px-1 font-bold text-line-blue text-sm underline"
+            >
+              {t("signin.signOut")}
+            </button>
+          </form>
         </div>
-      ) : (
-        <ul className="mt-4 border-rule border-t">
-          {mine.map((group, index) => (
-            <li key={group.id}>
-              <Link
-                href={`/g/${group.inviteCode}`}
-                className="flex min-h-16 items-center gap-3 border-rule border-b py-3 no-underline"
-              >
-                <span
-                  aria-hidden="true"
-                  className="size-[1.375rem] flex-none rounded-full border-[5px] bg-white"
-                  style={{ borderColor: "var(--ink)" }}
-                />
-                <span className="min-w-0 flex-1">
-                  <span className="block truncate font-extrabold text-[1.0625rem]">
-                    {group.name}
+        <p className="text-mute text-sm">
+          {t("signin.as", { name: session.displayName })}
+        </p>
+
+        <Link
+          href="/perfil"
+          className={`mt-4 flex items-center gap-3 rounded-sign px-3 py-3 no-underline ${
+            profile ? "border border-rule" : "border-2 border-ink"
+          }`}
+        >
+          <span
+            aria-hidden="true"
+            className="h-1.5 w-10 flex-none rounded-full"
+            style={{ background: lineColor(0).value }}
+          />
+          <span className="min-w-0 flex-1">
+            <span className="block font-extrabold">
+              {profile ? t("profile.cta.ready") : t("profile.cta.title")}
+            </span>
+            <span className="block text-mute text-sm">
+              {profile ? t("profile.cta.edit") : t("profile.cta.body")}
+            </span>
+          </span>
+          <svg
+            aria-hidden="true"
+            viewBox="0 0 16 16"
+            className="size-4 flex-none text-line-blue"
+          >
+            <path
+              d="M6 3l5 5-5 5"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </Link>
+      </div>
+
+      <div className="lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:mt-6">
+        {mine.length === 0 ? (
+          <div className="mt-6 rounded-sign border border-rule border-dashed px-3 py-4 lg:mt-0">
+            <p className="font-extrabold">{t("groups.empty.title")}</p>
+            <p className="mt-1 text-mute text-sm">{t("groups.empty.body")}</p>
+          </div>
+        ) : (
+          <ul className="mt-4 border-rule border-t sm:grid sm:grid-cols-2 sm:gap-x-6 lg:mt-0">
+            {mine.map((group, index) => (
+              <li key={group.id}>
+                <Link
+                  href={`/g/${group.inviteCode}`}
+                  className="flex min-h-16 items-center gap-3 border-rule border-b py-3 no-underline"
+                >
+                  <span
+                    aria-hidden="true"
+                    className="size-[1.375rem] flex-none rounded-full border-[5px] bg-white"
+                    style={{ borderColor: "var(--ink)" }}
+                  />
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate font-extrabold text-[1.0625rem]">
+                      {group.name}
+                    </span>
+                    <span className="block text-mute text-sm">
+                      {t("groups.row.members", {
+                        count: group.members.length,
+                        withProfile: withProfile[index] ?? 0,
+                      })}
+                    </span>
                   </span>
-                  <span className="block text-mute text-sm">
-                    {t("groups.row.members", {
-                      count: group.members.length,
-                      withProfile: withProfile[index] ?? 0,
-                    })}
-                  </span>
-                </span>
-              </Link>
-            </li>
-          ))}
-        </ul>
-      )}
-      <div className="sticky bottom-0 mt-auto bg-white pt-6 pb-[max(1.125rem,env(safe-area-inset-bottom))]">
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+      <div className="sticky bottom-0 mt-auto bg-white pt-6 pb-[max(1.125rem,env(safe-area-inset-bottom))] lg:static lg:col-start-1 lg:row-start-2 lg:mt-0">
         <Link href="/grupos/nuevo" className={buttonClasses.primary}>
           {t("groups.create")}
         </Link>
       </div>
-    </>
+    </div>
   );
 }
 

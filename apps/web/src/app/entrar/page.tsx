@@ -1,11 +1,12 @@
 import { Suspense } from "react";
 import { TopBar } from "@/components/top-bar";
 import { t } from "@/i18n/t";
+import { shellClasses } from "@/lib/ui";
 import { SignInForm } from "./sign-in-form";
 
 export default function SignInPage({ searchParams }: PageProps<"/entrar">) {
   return (
-    <main className="mx-auto min-h-dvh max-w-md px-4 pt-1">
+    <main className={shellClasses.narrow}>
       <Suspense fallback={null}>
         <SignInScreen searchParams={searchParams} />
       </Suspense>

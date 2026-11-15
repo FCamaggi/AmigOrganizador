@@ -12,7 +12,7 @@ import {
 import { useMemo, useState, useTransition } from "react";
 import { type MessageKey, t } from "@/i18n/t";
 import { formatTime } from "@/lib/format";
-import { buttonClasses } from "@/lib/ui";
+import { buttonClasses, shellClasses } from "@/lib/ui";
 import type { AnswerInput } from "@/server/actions";
 
 const h = (hours: number) => hours * 60;
@@ -445,7 +445,7 @@ export function BusyEditor({
         </ul>
       </section>
 
-      <footer className="sticky bottom-0 -mx-4 mt-4 border-rule border-t bg-white px-4 pt-2.5 pb-[max(1.125rem,env(safe-area-inset-bottom))]">
+      <footer className={`${shellClasses.footer} mt-4`}>
         <p className="mb-2 text-center font-bold text-sm" aria-live="polite">
           {error
             ? t("answer.error")

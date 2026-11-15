@@ -21,7 +21,7 @@ import {
 import { diagramSpan } from "@/lib/lines";
 import { planPreview } from "@/lib/plan-preview";
 import { optionViews } from "@/lib/plan-view-model";
-import { buttonClasses } from "@/lib/ui";
+import { buttonClasses, shellClasses } from "@/lib/ui";
 import { confirmAction, joinPlanAction } from "@/server/actions";
 import { requestOrigin } from "@/server/origin";
 import { plans } from "@/server/repository";
@@ -57,7 +57,7 @@ export async function generateMetadata({
 
 export default function PlanPage({ params }: PageProps<"/p/[id]">) {
   return (
-    <main className="mx-auto min-h-dvh max-w-md px-4 pt-1">
+    <main className={shellClasses.narrow}>
       <Suspense fallback={<PlanSkeleton />}>
         <PlanScreen params={params} />
       </Suspense>

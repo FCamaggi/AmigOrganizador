@@ -196,7 +196,7 @@ components:
 
 Each friend is a metro line running across the day. Where every line runs free at once, a station appears, and that station is the day the group can meet. A group is persistent; each person keeps one saved availability profile shared by all their groups, and the group view compares every profile live, so a plan is an output proposed from a good day, never the entry point. The system refuses the category default of a days-by-people check table: availability is read as a transit diagram, not as a grid of ticks.
 
-The material is enamel transit signage: a white ground, ink signs, Santiago Metro line colours, bold condensed type for every label and time. Everything is flat. Depth comes from ink panels and hairline rules, never from shadows or gradients. The density is phone-first and compact, one narrow column, because people check their groups and touch up their profile in short bursts between classes or in transit. Light only, by design: signage is white enamel, and there is no dark theme.
+The material is enamel transit signage: a white ground, ink signs, Santiago Metro line colours, bold condensed type for every label and time. Everything is flat. Depth comes from ink panels and hairline rules, never from shadows or gradients. The density is phone-first and compact, because people check their groups and touch up their profile in short bursts between classes or in transit; every screen is responsive and uses the room a tablet or desktop gives it. Light only, by design: signage is white enamel, and there is no dark theme.
 
 State is carried by shape before colour. A free stretch is a solid coloured line, busy time is an ink hatched "out of service" segment, and a friend who hasn't answered is a grey dashed track that is never drawn as free. The same three shapes appear wherever availability appears: the group diagram, the profile editor and the class routine alike. A member who has not set up a profile is unknown, never free.
 
@@ -206,7 +206,7 @@ State is carried by shape before colour. A free stretch is a solid coloured line
 - The station (the confirmable slot) is marked with dashed guides, an ink time pill and white platforms.
 - Roboto Condensed at heavy weights with tabular numerals for every time and count.
 - Flat: no shadows, no gradients; ink fills and hairline rules give structure.
-- One narrow phone column: sign, then availability (strip, diagram, ranked days), then plans and links, closed by a sticky action footer.
+- On a phone, one column: sign, then availability (strip, diagram, ranked days), then plans and links, closed by a sticky action footer. On desktop, availability on the left and plans with the actions in a sticky aside on the right.
 
 ## Colors
 
@@ -265,7 +265,7 @@ A white enamel ground with ink signage, punctuated by the Santiago Metro line co
 
 ## Layout
 
-One centred column, at most 28rem (448px) wide, with a 16px side gutter on every screen. Desktop shows the same phone column centred on white; there are no breakpoints that change the layout.
+Every screen is responsive; never cap a screen at phone width on a large display. The shells live in `shellClasses` (`src/lib/ui.ts`): full width with a 16px gutter on a phone, a 24px gutter from `sm`, 32px from `lg`. Single-task screens (sign in, create a group) use the narrow shell, a readable measure up to 36rem. Screens with a layout of their own use the wide shell (up to 42rem at `sm`, 48rem at `md`, 72rem at `lg`) and become two columns at `lg`: the group view puts availability left and plans and actions in a sticky 22rem aside; the profile puts routines and calendar import left and the 14 days right; the groups list puts you and your profile left and your groups right, two per row from `sm`. Below `lg` everything stacks in DOM order, and column wrappers use `display: contents` so the sticky footer still sticks to the viewport. On desktop the group footer becomes the top of the aside, and the profile save button keeps its sticky footer, right-aligned and 20rem wide.
 
 Each screen stacks: a top bar (back link left, an optional short context line right), the ink sign (or a Title page heading on screens without one, such as the profile and the groups list), the content, and a sticky footer that bleeds to the column edges, separated by a hairline, holding one full-width primary action and an optional row of secondary buttons that share the width. The footer respects the safe-area inset (at least 18px bottom padding).
 
@@ -293,7 +293,7 @@ Borders are 1.5px for interactive controls (chips, secondary buttons, inputs, av
 ## Components
 
 ### Buttons
-Confident and singular: one primary per screen, always full width at the bottom.
+Confident and singular: one primary per screen, full width at the bottom on a phone; on desktop it leads the aside or sits right-aligned in the footer.
 - **Shape:** enamel corner (rounded.sign).
 - **Primary:** Línea 2 Blue fill, white 800-weight text, 50px tall, full width. The label names what happens ("Proponer Sáb 12 dic", "Guardar perfil", "Unirme al grupo").
 - **Pressed / Disabled:** pressed darkens to Pressed Blue; disabled turns Strong Hairline with ink text.
@@ -366,7 +366,7 @@ Used by the one-off plan answer flow. Each day is the person's own line in their
 - **Do** mark the station as the confirmable slot with dashed guides, the ink time pill and a platform on every line free through it.
 - **Do** span the diagram over the useful day 08:00–24:00, the same track as the busy editor.
 - **Do** collapse beyond 6 people into the ink trunk with the "8/10" capsule, keeping at most 3 blocker lanes and a "Ver a todos" toggle.
-- **Do** keep every tap target at least 44px tall and one full-width primary action in a sticky footer.
+- **Do** keep every tap target at least 44px tall and one primary action: full width in a sticky footer on a phone.
 - **Do** put availability (strip, diagram, ranked days) right under the sign, and plans and links after it, before the footer.
 - **Do** draw a plan as a platform capsule (solid ink border confirmed, dashed grey proposed).
 - **Do** put destructive actions behind a "Más opciones" disclosure as secondary buttons.

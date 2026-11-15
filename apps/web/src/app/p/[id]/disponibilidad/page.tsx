@@ -8,6 +8,7 @@ import { t } from "@/i18n/t";
 import { formatDay, formatDuration, formatShortDate } from "@/lib/format";
 
 import { lineColor } from "@/lib/lines";
+import { shellClasses } from "@/lib/ui";
 import { answerAction } from "@/server/actions";
 import { plans } from "@/server/repository";
 import { getSession } from "@/server/session";
@@ -17,7 +18,7 @@ export default function AnswerPage({
   params,
 }: PageProps<"/p/[id]/disponibilidad">) {
   return (
-    <main className="mx-auto min-h-dvh max-w-md px-4 pt-1">
+    <main className={shellClasses.narrow}>
       <Suspense
         fallback={
           <div

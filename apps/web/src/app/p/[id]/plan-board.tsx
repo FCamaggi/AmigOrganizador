@@ -8,7 +8,7 @@ import { ShareButton, WhatsAppLink } from "@/components/share-buttons";
 import { t } from "@/i18n/t";
 import { formatTime } from "@/lib/format";
 import type { OptionView } from "@/lib/plan-view-model";
-import { buttonClasses } from "@/lib/ui";
+import { buttonClasses, shellClasses } from "@/lib/ui";
 
 export type ViewerRole = "visitor" | "outsider" | "participant" | "organizer";
 
@@ -91,7 +91,7 @@ export function PlanBoard({
         )}
       </section>
 
-      <footer className="sticky bottom-0 -mx-4 mt-4 border-rule border-t bg-white px-4 pt-2.5 pb-[max(1.125rem,env(safe-area-inset-bottom))]">
+      <footer className={`${shellClasses.footer} mt-4`}>
         {role === "organizer" && selected ? (
           <form action={confirm}>
             <input type="hidden" name="date" value={selected.date} />

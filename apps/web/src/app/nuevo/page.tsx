@@ -1,12 +1,13 @@
 import { Suspense } from "react";
 import { TopBar } from "@/components/top-bar";
 import { t } from "@/i18n/t";
+import { shellClasses } from "@/lib/ui";
 import { getSession } from "@/server/session";
 import { CreatePlanForm } from "./create-plan-form";
 
 export default function NewPlanPage() {
   return (
-    <main className="mx-auto min-h-dvh max-w-md px-4 pt-1">
+    <main className={shellClasses.narrow}>
       <TopBar backHref="/" backLabel={t("create.back")} />
       <h1 className="mt-2 font-extrabold text-[1.75rem] leading-tight">
         {t("create.title")}

@@ -9,7 +9,7 @@ import { formatDuration, formatTime } from "@/lib/format";
 import type { StripDay } from "@/lib/group-view-model";
 import type { OptionView } from "@/lib/option-view";
 import { DURATIONS } from "@/lib/plan-options";
-import { buttonClasses } from "@/lib/ui";
+import { buttonClasses, shellClasses } from "@/lib/ui";
 import type { ProposeState } from "@/server/group-actions";
 
 interface GroupBoardProps {
@@ -57,7 +57,7 @@ function Strip({
       <h2 id="strip-title" className={legend}>
         {t("group.strip.title")}
       </h2>
-      <div className="-mx-4 mt-1 overflow-x-auto px-4 pb-1">
+      <div className="-mx-4 mt-1 overflow-x-auto px-4 pb-1 sm:-mx-6 sm:px-6 lg:mx-0 lg:px-0">
         <ol className="relative flex w-max gap-0.5">
           <span
             aria-hidden="true"
@@ -278,77 +278,84 @@ export function GroupBoard({
     );
   }
 
+  // Phone and tablet: one column in DOM order, the footer sticky to the
+  // viewport (the wrappers use `contents` so they never clip it). Desktop:
+  // availability on the left, plans and actions in a sticky aside.
   return (
-    <>
-      <Strip
-        days={strip}
-        selectedKey={selected?.key ?? null}
-        onSelect={select}
-      />
-
-      {selected ? (
-        <div className="mt-3">
-          <LineDiagram
-            dayLabel={selected.dayLabel}
-            span={selected.span}
-            station={{ start: selected.start, end: selected.end }}
-            lines={selected.lines}
-          />
-        </div>
-      ) : null}
-
-      {selected && proposing ? (
-        <ProposeForm
-          option={selected}
-          propose={propose}
-          onClose={() => setProposing(false)}
+    <div className="contents lg:grid lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start lg:gap-x-10">
+      <div className="contents lg:block lg:min-w-0">
+        <Strip
+          days={strip}
+          selectedKey={selected?.key ?? null}
+          onSelect={select}
         />
-      ) : null}
 
-      <section aria-labelledby="days-title" className="mt-4">
-        <h2 id="days-title" className={legend}>
-          {t("group.days.title")}
-        </h2>
-        {options.length > 0 ? (
-          <ul className="mt-1 border-rule border-t">
-            {options.map((option, index) => (
-              <OptionRow
-                key={option.key}
-                option={option}
-                rank={index}
-                selected={option.key === selected?.key}
-                onSelect={() => select(option.key)}
-              />
-            ))}
-          </ul>
-        ) : (
-          <div className="mt-2 rounded-sign border border-rule border-dashed px-3 py-4">
-            <p className="font-extrabold">{t("group.empty.title")}</p>
-            <p className="mt-1 text-mute text-sm">{t("group.empty.body")}</p>
+        {selected ? (
+          <div className="mt-3">
+            <LineDiagram
+              dayLabel={selected.dayLabel}
+              span={selected.span}
+              station={{ start: selected.start, end: selected.end }}
+              lines={selected.lines}
+            />
           </div>
-        )}
-      </section>
-
-      {children}
-
-      <footer
-        hidden={proposing}
-        className="sticky bottom-0 -mx-4 mt-4 border-rule border-t bg-white px-4 pt-2.5 pb-[max(1.125rem,env(safe-area-inset-bottom))]"
-      >
-        {selected && !proposing ? (
-          <button
-            type="button"
-            onClick={() => setProposing(true)}
-            className={buttonClasses.primary}
-          >
-            {t("group.propose", { day: selected.dayLabel })}
-          </button>
         ) : null}
-        <div className={`flex gap-2 ${selected && !proposing ? "mt-2" : ""}`}>
-          <WhatsAppLink label={t("group.share")} text={shareText} />
-          <ShareButton url={inviteUrl} text={shareText} />
-        </div>
-      </footer>
-    </>
+
+        {selected && proposing ? (
+          <ProposeForm
+            option={selected}
+            propose={propose}
+            onClose={() => setProposing(false)}
+          />
+        ) : null}
+
+        <section aria-labelledby="days-title" className="mt-4">
+          <h2 id="days-title" className={legend}>
+            {t("group.days.title")}
+          </h2>
+          {options.length > 0 ? (
+            <ul className="mt-1 border-rule border-t">
+              {options.map((option, index) => (
+                <OptionRow
+                  key={option.key}
+                  option={option}
+                  rank={index}
+                  selected={option.key === selected?.key}
+                  onSelect={() => select(option.key)}
+                />
+              ))}
+            </ul>
+          ) : (
+            <div className="mt-2 rounded-sign border border-rule border-dashed px-3 py-4">
+              <p className="font-extrabold">{t("group.empty.title")}</p>
+              <p className="mt-1 text-mute text-sm">{t("group.empty.body")}</p>
+            </div>
+          )}
+        </section>
+      </div>
+
+      <aside className="contents lg:sticky lg:top-6 lg:flex lg:flex-col">
+        {children}
+
+        <footer
+          hidden={proposing}
+          className={`${shellClasses.footer} mt-4 lg:static lg:order-first lg:mx-0 lg:border-0 lg:px-0 lg:pt-0 lg:pb-0`}
+        >
+          {selected && !proposing ? (
+            <button
+              type="button"
+              onClick={() => setProposing(true)}
+              className={buttonClasses.primary}
+            >
+              {t("group.propose", { day: selected.dayLabel })}
+            </button>
+          ) : null}
+          <div className={`flex gap-2 ${selected && !proposing ? "mt-2" : ""}`}>
+            <WhatsAppLink label={t("group.share")} text={shareText} />
+            <ShareButton url={inviteUrl} text={shareText} />
+          </div>
+        </footer>
+      </aside>
+    </div>
   );
 }
