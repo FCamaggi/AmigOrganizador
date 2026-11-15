@@ -22,6 +22,10 @@ describe("safeNext", () => {
     "/\r\\evil.com",
     "/\t\\evil.com",
     "evil.com",
+    "/.//evil.com",
+    "/..//evil.com",
+    "/%2e%2e//evil.com",
+    "/a/../..//evil.com",
     "",
   ])("sends %j home", (value) => {
     expect(safeNext(value)).toBe("/");

@@ -63,7 +63,10 @@ export function safeNext(value: string | null | undefined): string {
   try {
     const url = new URL(value, PROBE_ORIGIN);
     if (url.origin !== PROBE_ORIGIN) return "/";
-    return url.pathname + url.search + url.hash;
+    // Dot segments are resolved by now, so check the result too:
+    // "/.//evil.com" parses to the path "//evil.com".
+    const path = url.pathname + url.search + url.hash;
+    return path.startsWith("//") ? "/" : path;
   } catch {
     return "/";
   }
