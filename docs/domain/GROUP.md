@@ -33,3 +33,22 @@ Implementation: `packages/core/src/group/outlook.ts`.
   shows up in `MISSING_DATA`. Profiles of people outside the group are ignored.
 - `groupDayLines({ group, profiles, date, span })`: each member's free / busy /
   unknown segments for the line diagram.
+
+## Group plans
+
+Implementation: `packages/core/src/group/group-plan.ts`; storage port:
+`packages/core/src/group/group-plan-repository.ts`.
+
+A plan comes out of a group: someone picks a good day from the group view and
+proposes a slot. Times are local minutes in the group's timezone.
+
+| Action | Who | Rules | Error codes |
+|--------|-----|-------|-------------|
+| `proposeGroupPlan` | any member | Title 1–80 (trimmed); valid date; start within the day on the 15-min grid; duration 15 min–12 h on the grid; end may pass midnight. Any slot is allowed, not only the suggested ones (related to open question Q7). | `NOT_A_MEMBER`, `INVALID_TITLE`, `INVALID_DATE`, `INVALID_TIME`, `INVALID_DURATION` |
+| `confirmGroupPlan` | proposer or group owner | Only a `proposed` plan. | `WRONG_GROUP`, `NOT_A_MEMBER`, `NOT_ALLOWED`, `NOT_PROPOSED` |
+| `cancelGroupPlan` | proposer or group owner | A proposed or confirmed plan. | `WRONG_GROUP`, `NOT_A_MEMBER`, `NOT_ALLOWED`, `ALREADY_CANCELLED` |
+
+`groupPlanInvite` turns a plan into a calendar invite (UTC times from the
+group's timezone). `groupFeed` lists only the confirmed plans, for
+`buildIcsFeed` (`calendar/invite.ts`): one subscribable calendar per group,
+re-read by calendar apps about every hour, so a cancelled plan disappears.

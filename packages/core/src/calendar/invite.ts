@@ -63,15 +63,9 @@ function assertValid(invite: CalendarInvite): void {
   }
 }
 
-/** Builds an `.ics` file with one event. `now` becomes DTSTAMP. */
-export function buildIcs(invite: CalendarInvite, now: number): string {
+function eventLines(invite: CalendarInvite, now: number): string[] {
   assertValid(invite);
-  const properties = [
-    "BEGIN:VCALENDAR",
-    "VERSION:2.0",
-    "PRODID:-//AmigOrganizador//Plans//ES",
-    "CALSCALE:GREGORIAN",
-    "METHOD:PUBLISH",
+  return [
     "BEGIN:VEVENT",
     `UID:${invite.uid}`,
     `DTSTAMP:${formatUtc(now)}`,
@@ -84,9 +78,45 @@ export function buildIcs(invite: CalendarInvite, now: number): string {
     ...(invite.location ? [`LOCATION:${escapeText(invite.location)}`] : []),
     ...(invite.url ? [`URL:${invite.url}`] : []),
     "END:VEVENT",
-    "END:VCALENDAR",
   ];
-  return `${properties.flatMap(foldLine).join("\r\n")}\r\n`;
+}
+
+const CALENDAR_HEADER = [
+  "BEGIN:VCALENDAR",
+  "VERSION:2.0",
+  "PRODID:-//AmigOrganizador//Plans//ES",
+  "CALSCALE:GREGORIAN",
+  "METHOD:PUBLISH",
+];
+
+const serialize = (properties: readonly string[]) =>
+  `${properties.flatMap(foldLine).join("\r\n")}\r\n`;
+
+/** Builds an `.ics` file with one event. `now` becomes DTSTAMP. */
+export function buildIcs(invite: CalendarInvite, now: number): string {
+  return serialize([
+    ...CALENDAR_HEADER,
+    ...eventLines(invite, now),
+    "END:VCALENDAR",
+  ]);
+}
+
+/**
+ * Builds a subscribable calendar (a group's confirmed plans). Calendar apps
+ * re-read it about every hour, so new and cancelled plans show up on their own.
+ */
+export function buildIcsFeed(
+  feed: { name: string; invites: readonly CalendarInvite[] },
+  now: number,
+): string {
+  return serialize([
+    ...CALENDAR_HEADER,
+    `X-WR-CALNAME:${escapeText(feed.name)}`,
+    "REFRESH-INTERVAL;VALUE=DURATION:PT1H",
+    "X-PUBLISHED-TTL:PT1H",
+    ...feed.invites.flatMap((invite) => eventLines(invite, now)),
+    "END:VCALENDAR",
+  ]);
 }
 
 /** Builds a Google Calendar "add event" link prefilled with the invite. */

@@ -40,6 +40,7 @@ export type AvailabilityState = "free" | "busy" | "unknown";
 export {
   buildGoogleCalendarUrl,
   buildIcs,
+  buildIcsFeed,
   type CalendarInvite,
 } from "./calendar/invite";
 export {
@@ -54,6 +55,19 @@ export {
   type NewGroup,
   updateGroup,
 } from "./group/group";
+export {
+  cancelGroupPlan,
+  confirmGroupPlan,
+  type GroupPlan,
+  GroupPlanError,
+  type GroupPlanErrorCode,
+  type GroupPlanStatus,
+  groupFeed,
+  groupPlanInvite,
+  type NewGroupPlan,
+  proposeGroupPlan,
+} from "./group/group-plan";
+export type { GroupPlanRepository } from "./group/group-plan-repository";
 export type { GroupRepository } from "./group/group-repository";
 export {
   DEFAULT_OUTLOOK_DAYS,

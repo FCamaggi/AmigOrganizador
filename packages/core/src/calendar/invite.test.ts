@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   buildGoogleCalendarUrl,
   buildIcs,
+  buildIcsFeed,
   type CalendarInvite,
 } from "./invite";
 
@@ -123,5 +124,47 @@ describe("buildGoogleCalendarUrl", () => {
     );
     expect(url.params.has("details")).toBe(false);
     expect(url.params.has("location")).toBe(false);
+  });
+});
+
+describe("buildIcsFeed", () => {
+  const event = (uid: string, hour: number) => ({
+    uid,
+    title: `Plan ${uid}`,
+    start: Date.UTC(2026, 11, 19, hour),
+    end: Date.UTC(2026, 11, 19, hour + 3),
+  });
+
+  it("puts every event in one subscribable calendar with a name", () => {
+    const ics = buildIcsFeed(
+      { name: "Los del colegio", invites: [event("a", 22), event("b", 12)] },
+      Date.UTC(2026, 10, 15),
+    );
+    const lines = ics.split("\r\n");
+    expect(lines[0]).toBe("BEGIN:VCALENDAR");
+    expect(lines).toContain("X-WR-CALNAME:Los del colegio");
+    expect(lines).toContain("REFRESH-INTERVAL;VALUE=DURATION:PT1H");
+    expect(lines.filter((l) => l === "BEGIN:VEVENT")).toHaveLength(2);
+    expect(lines).toContain("UID:a");
+    expect(lines).toContain("DTSTART:20261219T120000Z");
+    expect(ics.endsWith("END:VCALENDAR\r\n")).toBe(true);
+  });
+
+  it("is a valid empty calendar when there are no events", () => {
+    const ics = buildIcsFeed({ name: "Vacío", invites: [] }, 0);
+    expect(ics).toContain("BEGIN:VCALENDAR");
+    expect(ics).not.toContain("BEGIN:VEVENT");
+  });
+
+  it("escapes the calendar name", () => {
+    expect(
+      buildIcsFeed({ name: "Asado, padel; etc", invites: [] }, 0),
+    ).toContain(String.raw`X-WR-CALNAME:Asado\, padel\; etc`);
+  });
+
+  it("rejects an event that ends before it starts", () => {
+    expect(() =>
+      buildIcsFeed({ name: "x", invites: [{ ...event("a", 10), end: 0 }] }, 0),
+    ).toThrow(RangeError);
   });
 });
