@@ -1,0 +1,22 @@
+{
+  "name": "@amigo/adapter-ics",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@amigo/core": "workspace:*",
+    "ical.js": "2.2.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22",
+    "typescript": "^5",
+    "vitest": "5.1.0"
+  }
+}
