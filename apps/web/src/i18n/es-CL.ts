@@ -122,6 +122,15 @@ export const esCL = {
   "share.nudge":
     "{name}, ¿marcas cuándo no puedes? Falta poco para cerrar el plan: {url}",
 
+  "preview.invite.busy":
+    "{name} te invita. Marca en 1 minuto cuándo no puedes.",
+  "preview.invite.free": "{name} te invita. Marca en 1 minuto cuándo puedes.",
+  "preview.cta.busy": "Marca cuándo no puedes",
+  "preview.cta.free": "Marca cuándo puedes",
+  "preview.confirmed": "Quedó: {day} · {time}. Agrégalo a tu calendario.",
+  "preview.confirmed.badge": "Quedó",
+  "preview.cancelled": "Este plan se canceló.",
+  "preview.alt": "Plan {title}: {status}",
   "confirmed.title": "Plan confirmado",
   "confirmed.when": "{day} · {time}",
   "confirmed.diagram": "Quién llega a la estación",

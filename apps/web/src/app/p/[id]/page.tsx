@@ -4,6 +4,7 @@ import {
   inviteFor,
   type Plan,
 } from "@amigo/core";
+import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
 import { LineDiagram } from "@/components/line-diagram";
@@ -18,6 +19,7 @@ import {
   formatSpan,
 } from "@/lib/format";
 import { diagramSpan } from "@/lib/lines";
+import { planPreview } from "@/lib/plan-preview";
 import { optionViews } from "@/lib/plan-view-model";
 import { buttonClasses } from "@/lib/ui";
 import { confirmAction, joinPlanAction } from "@/server/actions";
@@ -25,6 +27,33 @@ import { requestOrigin } from "@/server/origin";
 import { plans } from "@/server/repository";
 import { getSession } from "@/server/session";
 import { PlanBoard, type ViewerRole } from "./plan-board";
+
+/**
+ * The link preview (S6). The plan id is the share secret (ADR 0003), so plan
+ * pages are never indexed and the preview shows no participant names.
+ */
+export async function generateMetadata({
+  params,
+}: PageProps<"/p/[id]">): Promise<Metadata> {
+  const { id } = await params;
+  const plan = await plans().findById(id);
+  const robots = { index: false, follow: false };
+  if (!plan) return { title: t("plan.notFound.title"), robots };
+  const preview = planPreview(plan);
+  return {
+    title: `${preview.title} · ${t("app.name")}`,
+    description: preview.description,
+    robots,
+    openGraph: {
+      title: preview.title,
+      description: preview.description,
+      siteName: t("app.name"),
+      locale: "es_CL",
+      type: "website",
+    },
+    twitter: { card: "summary_large_image" },
+  };
+}
 
 export default function PlanPage({ params }: PageProps<"/p/[id]">) {
   return (
