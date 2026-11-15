@@ -331,6 +331,10 @@ max_frequency = "5s"
 # Use an external OAuth provider. The full list of providers are: `apple`, `azure`, `bitbucket`,
 # `discord`, `facebook`, `github`, `gitlab`, `google`, `keycloak`, `linkedin_oidc`, `notion`, `twitch`,
 # `twitter`, `x`, `slack_oidc`, `spotify`, `workos`, `zoom`.
+# Google sign-in is configured in the hosted dashboard (client id and secret
+# stay out of the repo). Do not add an [auth.external.google] section here
+# unless it carries the same values, or `config push` would overwrite them.
+
 [auth.external.apple]
 enabled = false
 client_id = ""
