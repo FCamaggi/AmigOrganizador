@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  transpilePackages: ["@amigo/core"],
+  transpilePackages: ["@amigo/core", "@amigo/adapter-memory"],
   cacheComponents: true,
   partialPrefetching: true,
   turbopack: {
