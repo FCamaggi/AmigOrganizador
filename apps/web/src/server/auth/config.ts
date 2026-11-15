@@ -21,12 +21,50 @@ export function googleEnabled(): boolean {
   return process.env.AUTH_GOOGLE_ENABLED === "true";
 }
 
-/** Only same-site paths, so `next` can't send people elsewhere. */
+export type AuthMode = "supabase" | "local";
+
+/**
+ * Supabase when configured. Local mode (forgeable name-only cookie) only in
+ * development or a production build explicitly marked as throwaway with
+ * `AMIGO_LOCAL_MODE=true` (e2e); a real deployment missing the Supabase
+ * variables fails loudly instead of trusting that cookie.
+ */
+export function authMode(): AuthMode {
+  if (supabaseConfig()) return "supabase";
+  if (
+    process.env.NODE_ENV === "production" &&
+    process.env.AMIGO_LOCAL_MODE !== "true"
+  )
+    throw new Error(
+      "Supabase is not configured: set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY",
+    );
+  return "local";
+}
+
+const PROBE_ORIGIN = "http://same.site.invalid";
+
+/** Control characters (URL parsers drop them) and backslashes (read as `/`). */
+function hasUnsafeCharacter(value: string): boolean {
+  for (let i = 0; i < value.length; i++) {
+    const code = value.charCodeAt(i);
+    if (code <= 0x1f || code === 0x7f || code === 0x5c) return true;
+  }
+  return false;
+}
+
+/**
+ * Only same-site paths, so `next` can't send people elsewhere. Parsed the
+ * way browsers parse it (control characters and backslashes are rejected
+ * up front, since URL parsers strip or reinterpret them).
+ */
 export function safeNext(value: string | null | undefined): string {
-  return typeof value === "string" &&
-    value.startsWith("/") &&
-    !value.startsWith("//") &&
-    !value.startsWith("/\\")
-    ? value
-    : "/";
+  if (typeof value !== "string" || !value.startsWith("/")) return "/";
+  if (hasUnsafeCharacter(value)) return "/";
+  try {
+    const url = new URL(value, PROBE_ORIGIN);
+    if (url.origin !== PROBE_ORIGIN) return "/";
+    return url.pathname + url.search + url.hash;
+  } catch {
+    return "/";
+  }
 }

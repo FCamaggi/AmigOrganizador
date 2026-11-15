@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { safeNext, supabaseConfig } from "@/server/auth/config";
+import { authMode, safeNext } from "@/server/auth/config";
 import { supabaseServer } from "@/server/auth/supabase";
 
 /**
@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
   const { searchParams, origin } = request.nextUrl;
   const next = safeNext(searchParams.get("next"));
   const code = searchParams.get("code");
-  if (supabaseConfig() && code) {
+  if (authMode() === "supabase" && code) {
     const supabase = await supabaseServer();
     const { error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) return NextResponse.redirect(new URL(next, origin));

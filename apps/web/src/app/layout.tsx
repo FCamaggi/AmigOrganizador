@@ -11,6 +11,10 @@ const robotoCondensed = Roboto_Condensed({
 });
 
 export const metadata: Metadata = {
+  // Absolute link-preview URLs point at the real site, not the request host.
+  metadataBase: process.env.SITE_URL
+    ? new URL(process.env.SITE_URL)
+    : undefined,
   title: t("app.name"),
   description: t("app.tagline"),
 };

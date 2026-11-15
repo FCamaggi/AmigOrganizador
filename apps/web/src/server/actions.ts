@@ -1,7 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { googleEnabled, safeNext, supabaseConfig } from "./auth/config";
+import { authMode, googleEnabled, safeNext } from "./auth/config";
 import { supabaseServer } from "./auth/supabase";
 import { requestOrigin } from "./origin";
 import { endSession, startSession } from "./session";
@@ -29,7 +29,7 @@ export async function signIn(
   _prev: SignInState,
   formData: FormData,
 ): Promise<SignInState> {
-  if (supabaseConfig()) return { error: true };
+  if (authMode() === "supabase") return { error: true };
   const name = text(formData, "name");
   if (name.length === 0 || name.length > MAX_NAME) return { error: true };
   await startSession(name);
@@ -48,7 +48,7 @@ export async function sendMagicLink(
   _prev: MagicLinkState,
   formData: FormData,
 ): Promise<MagicLinkState> {
-  if (!supabaseConfig()) return { status: "failed" };
+  if (authMode() !== "supabase") return { status: "failed" };
   const name = text(formData, "name");
   const email = text(formData, "email").toLowerCase();
   if (name.length > MAX_NAME || !EMAIL.test(email) || email.length > 254)
@@ -65,7 +65,7 @@ export async function sendMagicLink(
 }
 
 export async function signInWithGoogle(formData: FormData): Promise<void> {
-  if (!supabaseConfig() || !googleEnabled()) redirect("/entrar");
+  if (authMode() !== "supabase" || !googleEnabled()) redirect("/entrar");
   const supabase = await supabaseServer();
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "google",

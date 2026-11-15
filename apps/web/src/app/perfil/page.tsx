@@ -14,6 +14,7 @@ import { formatDay, formatTime } from "@/lib/format";
 import { lineColor } from "@/lib/lines";
 import { DEFAULT_TIMEZONE } from "@/lib/plan-options";
 import { buttonClasses, shellClasses } from "@/lib/ui";
+import { safeNext } from "@/server/auth/config";
 import {
   removeCalendarAction,
   resyncCalendarAction,
@@ -55,9 +56,7 @@ async function ProfileScreen({
 }) {
   const raw = (await searchParams).next;
   const next =
-    typeof raw === "string" && raw.startsWith("/") && !raw.startsWith("//")
-      ? raw
-      : null;
+    typeof raw === "string" && safeNext(raw) !== "/" ? safeNext(raw) : null;
   await connection();
   const session = await getSession();
   if (!session)

@@ -3,7 +3,7 @@ import { TopBar } from "@/components/top-bar";
 import { t } from "@/i18n/t";
 import { shellClasses } from "@/lib/ui";
 import { signInWithGoogle } from "@/server/actions";
-import { googleEnabled, safeNext, supabaseConfig } from "@/server/auth/config";
+import { authMode, googleEnabled, safeNext } from "@/server/auth/config";
 import { MagicLinkForm } from "./magic-link-form";
 import { SignInForm } from "./sign-in-form";
 
@@ -40,7 +40,7 @@ async function SignInScreen({
         </p>
       ) : null}
 
-      {supabaseConfig() ? (
+      {authMode() === "supabase" ? (
         <div className="mt-5">
           {googleEnabled() ? (
             <>

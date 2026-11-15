@@ -1,0 +1,9 @@
+.turbo
+**/.turbo
+**/.next
+**/node_modules
+**/test-results
+**/playwright-report
+.atl
+odd
+docs/legacy

@@ -1,6 +1,6 @@
 import { randomBytes } from "node:crypto";
 import { cookies } from "next/headers";
-import { supabaseConfig } from "./auth/config";
+import { authMode } from "./auth/config";
 import { supabaseServer } from "./auth/supabase";
 
 export interface Session {
@@ -29,7 +29,7 @@ function metadataName(
  * the account id (ADR 0003); otherwise the local-mode cookie below.
  */
 export async function getSession(): Promise<Session | null> {
-  if (supabaseConfig()) {
+  if (authMode() === "supabase") {
     const supabase = await supabaseServer();
     const { data, error } = await supabase.auth.getClaims();
     const claims = data?.claims;
@@ -51,6 +51,7 @@ export async function getSession(): Promise<Session | null> {
  * the person is.
  */
 async function localSession(): Promise<Session | null> {
+  if (authMode() !== "local") return null;
   const raw = (await cookies()).get(COOKIE)?.value;
   if (!raw) return null;
   try {
@@ -69,7 +70,8 @@ async function localSession(): Promise<Session | null> {
 
 /** LOCAL MODE ONLY: signs in by name. */
 export async function startSession(displayName: string): Promise<Session> {
-  if (supabaseConfig()) throw new Error("startSession is local mode only");
+  if (authMode() === "supabase")
+    throw new Error("startSession is local mode only");
   const existing = await localSession();
   const session: Session = {
     accountId:
@@ -86,7 +88,7 @@ export async function startSession(displayName: string): Promise<Session> {
 }
 
 export async function endSession(): Promise<void> {
-  if (supabaseConfig()) {
+  if (authMode() === "supabase") {
     await (await supabaseServer()).auth.signOut();
     return;
   }

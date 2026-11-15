@@ -47,3 +47,7 @@ apps/web/.impeccable/review/
 supabase/.temp/
 supabase/.branches/
 .vercel
+
+# Playwright
+test-results/
+playwright-report/
