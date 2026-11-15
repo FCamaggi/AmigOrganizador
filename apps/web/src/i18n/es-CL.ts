@@ -225,6 +225,7 @@ export const esCL = {
   "group.invite.body":
     "Únete y arma tu perfil una vez: el grupo compara la disponibilidad de todos y muestra qué días pueden juntarse.",
   "group.invite.join": "Unirme al grupo",
+  "og.invite": "Te invitaron a este grupo",
   "group.invite.signIn": "Unirme",
   "group.noProfile.title": "Falta tu perfil",
   "group.noProfile.body": "Mientras no lo armes, apareces como sin responder.",
