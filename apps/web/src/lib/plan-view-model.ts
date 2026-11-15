@@ -5,31 +5,13 @@ import {
   suggestOptions,
   type WindowReason,
 } from "@amigo/core";
-import type { DiagramLine } from "@/components/line-diagram";
 import { type MessageKey, t } from "@/i18n/t";
 import { formatDay } from "./format";
 import { diagramSpan } from "./lines";
 
-export type PersonState = "free" | "busy" | "unknown";
+export type { OptionView, PersonState } from "./option-view";
 
-export interface OptionView {
-  readonly key: string;
-  readonly date: string;
-  readonly dayLabel: string;
-  /** The slot that gets confirmed: the station. */
-  readonly start: number;
-  readonly end: number;
-  /** The whole shared free window around the slot, shown as context. */
-  readonly windowStart: number;
-  readonly windowEnd: number;
-  readonly freeCount: number;
-  readonly memberCount: number;
-  readonly reasons: readonly string[];
-  readonly people: readonly { name: string; state: PersonState }[];
-  readonly note: string | null;
-  readonly span: { start: number; end: number };
-  readonly lines: readonly DiagramLine[];
-}
+import type { OptionView, PersonState } from "./option-view";
 
 const MAX_OPTIONS = 4;
 /** Window-level reasons (block length) say nothing about a fixed-length slot. */

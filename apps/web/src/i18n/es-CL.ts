@@ -193,6 +193,121 @@ export const esCL = {
   "answer.back": "Volver al plan",
   "answer.error": "No pudimos guardar. Prueba de nuevo.",
 
+  "groups.title": "Tus grupos",
+  "groups.empty.title": "Todavía no estás en ningún grupo",
+  "groups.empty.body":
+    "Crea uno para tu grupo de amigos y manda el link por WhatsApp. Cuando cada uno arme su perfil, verán qué días pueden juntarse.",
+  "groups.create": "Crear un grupo",
+  "groups.row.members": "{count} personas · {withProfile} con perfil",
+  "groups.signedOut.title": "Sepan qué días pueden juntarse.",
+  "groups.signedOut.body":
+    "Cada uno anota una vez su trabajo, clases o turnos. El grupo compara a todos y te dice qué días les sirven.",
+
+  "profile.cta.title": "Arma tu perfil",
+  "profile.cta.body":
+    "Así tus grupos saben cuándo puedes. Toma un par de minutos.",
+  "profile.cta.edit": "Tu perfil",
+  "profile.cta.ready": "Tu perfil está listo",
+
+  "groupNew.title": "Nuevo grupo",
+  "groupNew.field.name": "¿Cómo se llama el grupo?",
+  "groupNew.field.name.placeholder": "Los del colegio",
+  "groupNew.submit": "Crear y compartir",
+  "groupNew.error.INVALID_NAME": "Escribe un nombre (hasta 60 letras).",
+  "groupNew.error.INVALID_TIMEZONE": "Elige una zona horaria.",
+
+  "group.back": "Grupos",
+  "group.meta": "{members} · {withProfile} con perfil",
+  "group.notFound.title": "Este grupo no existe",
+  "group.notFound.body":
+    "Revisa que el link esté completo o pídelo de nuevo en el grupo.",
+  "group.invite.title": "Te invitaron a {name}",
+  "group.invite.body":
+    "Únete y arma tu perfil una vez: el grupo compara la disponibilidad de todos y muestra qué días pueden juntarse.",
+  "group.invite.join": "Unirme al grupo",
+  "group.invite.signIn": "Unirme",
+  "group.noProfile.title": "Falta tu perfil",
+  "group.noProfile.body": "Mientras no lo armes, apareces como sin responder.",
+  "group.noProfile.cta": "Armar mi perfil",
+  "group.missing.one": "Falta el perfil de {name}.",
+  "group.missing.few": "Faltan los perfiles de {names}.",
+  "group.missing.many": "Faltan {count} perfiles.",
+  "group.missing.none": "Todos tienen perfil.",
+  "group.strip.title": "Próximas 4 semanas",
+  "group.strip.day": "{day}: {free} de {total} pueden",
+  "group.strip.none": "{day}: no hay horario que le sirva a casi todos",
+  "group.days.title": "Mejores días",
+  "group.alone.title": "Invita a tu grupo",
+  "group.alone.body":
+    "Por ahora estás solo. Manda el link por WhatsApp: cuando se unan y armen su perfil, aquí aparecen los días que les sirven a todos.",
+  "group.empty.title": "Todavía no hay días que comparar",
+  "group.empty.body":
+    "Cuando al menos dos personas tengan su perfil, aquí aparecen los días que le sirven al grupo.",
+  "group.propose": "Proponer {day}",
+  "group.share": "Invitar al grupo",
+  "group.shareText":
+    "Únete a {name} en AmigOrganizador para ver qué días podemos juntarnos: {url}",
+  "group.feed": "Suscribirme al calendario del grupo",
+  "group.feed.hint": "Los planes confirmados aparecen solos en tu calendario.",
+  "group.leave": "Salir del grupo",
+
+  "propose.title": "Proponer un plan",
+  "propose.field.title": "¿Qué hacemos?",
+  "propose.field.title.placeholder": "Asado",
+  "propose.field.start": "Hora",
+  "propose.field.duration": "Duración",
+  "propose.submit": "Proponer al grupo",
+  "propose.cancel": "Cancelar",
+  "propose.error.INVALID_TITLE": "Ponle un nombre al plan (hasta 80 letras).",
+  "propose.error.INVALID_TIME": "Elige una hora.",
+  "propose.error.INVALID_DURATION": "Elige cuánto dura.",
+  "propose.error.generic": "No pudimos proponer el plan. Prueba de nuevo.",
+
+  "plans.title": "Planes",
+  "plans.proposed": "Propuesto por {name}",
+  "plans.confirmed": "Confirmado",
+  "plans.confirm": "Confirmar",
+  "plans.cancel": "Cancelar plan",
+  "plans.google": "Agregar a Google Calendar",
+  "plans.ics": "Descargar para otro calendario (.ics)",
+
+  "profileEdit.title": "Tu perfil",
+  "profileEdit.intro":
+    "Anota cuándo estás ocupado: trabajo, clases, turnos. Las rutinas son ayudas opcionales; lo que no marques cuenta como libre.",
+  "profileEdit.routines": "Rutinas (opcional)",
+  "profileEdit.days.title": "Próximas 2 semanas",
+  "profileEdit.days.hint":
+    "Toca un tramo para marcarlo ocupado o liberarlo solo ese día.",
+  "profileEdit.save": "Guardar perfil",
+  "profileEdit.saved": "Perfil guardado",
+  "profileEdit.error": "No pudimos guardar. Prueba de nuevo.",
+  "profileEdit.back": "Volver",
+  "profileEdit.import.title": "Importar de otro calendario",
+  "profileEdit.import.hint":
+    "Pega el link ICS de tu calendario (en Google: Configuración › tu calendario › Dirección secreta en formato iCal). Solo leemos cuándo estás ocupado, nunca los títulos.",
+  "profileEdit.import.name": "Nombre",
+  "profileEdit.import.name.placeholder": "Trabajo",
+  "profileEdit.import.url": "Link del calendario",
+  "profileEdit.import.submit": "Importar",
+  "profileEdit.import.synced": "{count} eventos ocupados · actualizado {time}",
+  "profileEdit.import.resync": "Actualizar",
+  "profileEdit.import.remove": "Quitar",
+  "profileEdit.import.error.INVALID_URL":
+    "Ese link no sirve: tiene que empezar con https:// o webcal://.",
+  "profileEdit.import.error.BLOCKED_ADDRESS":
+    "Ese link apunta a una dirección que no podemos leer.",
+  "profileEdit.import.error.HTTP_ERROR":
+    "El calendario no respondió. Revisa que el link sea el correcto.",
+  "profileEdit.import.error.TOO_LARGE": "El calendario es demasiado grande.",
+  "profileEdit.import.error.TIMEOUT":
+    "El calendario tardó demasiado. Prueba de nuevo.",
+  "profileEdit.import.error.TOO_MANY_REDIRECTS":
+    "El link redirige demasiadas veces.",
+  "profileEdit.import.error.NETWORK":
+    "No pudimos descargar el calendario. Prueba de nuevo.",
+  "profileEdit.import.error.NOT_CALENDAR": "Ese link no es un calendario ICS.",
+  "profileEdit.import.error.INVALID_NAME": "Ponle un nombre (hasta 40 letras).",
+
   "weekday.short.0": "Dom",
   "weekday.short.1": "Lun",
   "weekday.short.2": "Mar",

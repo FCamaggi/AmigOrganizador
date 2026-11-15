@@ -20,6 +20,9 @@ importers:
 
   apps/web:
     dependencies:
+      '@amigo/adapter-ics':
+        specifier: workspace:*
+        version: link:../../packages/adapter-ics
       '@amigo/adapter-memory':
         specifier: workspace:*
         version: link:../../packages/adapter-memory

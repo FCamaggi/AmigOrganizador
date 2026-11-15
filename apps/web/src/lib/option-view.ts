@@ -1,0 +1,22 @@
+import type { DiagramLine } from "@/components/line-diagram";
+
+export type PersonState = "free" | "busy" | "unknown";
+
+export interface OptionView {
+  readonly key: string;
+  readonly date: string;
+  readonly dayLabel: string;
+  /** The slot that gets confirmed: the station. */
+  readonly start: number;
+  readonly end: number;
+  /** The whole shared free window around the slot, shown as context. */
+  readonly windowStart: number;
+  readonly windowEnd: number;
+  readonly freeCount: number;
+  readonly memberCount: number;
+  readonly reasons: readonly string[];
+  readonly people: readonly { name: string; state: PersonState }[];
+  readonly note: string | null;
+  readonly span: { start: number; end: number };
+  readonly lines: readonly DiagramLine[];
+}

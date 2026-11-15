@@ -9,6 +9,7 @@
     "typecheck": "next typegen && tsc --noEmit"
   },
   "dependencies": {
+    "@amigo/adapter-ics": "workspace:*",
     "@amigo/adapter-memory": "workspace:*",
     "@amigo/core": "workspace:*",
     "next": "16.4.6",

@@ -1,11 +1,10 @@
 import Link from "next/link";
 import { Suspense } from "react";
-import { type MessageKey, t } from "@/i18n/t";
-import { formatShortDate } from "@/lib/format";
+import { t } from "@/i18n/t";
 import { lineColor } from "@/lib/lines";
 import { buttonClasses } from "@/lib/ui";
 import { signOut } from "@/server/actions";
-import { plans } from "@/server/repository";
+import { groups, profiles } from "@/server/repository";
 import { getSession } from "@/server/session";
 
 export default function Home() {
@@ -37,24 +36,34 @@ async function HomeContent() {
     return (
       <>
         <h1 className="mt-10 text-balance font-extrabold text-[2.5rem] leading-[1.05]">
-          {t("home.signedOut.title")}
+          {t("groups.signedOut.title")}
         </h1>
-        <p className="mt-3 text-lg text-mute">{t("home.signedOut.body")}</p>
+        <p className="mt-3 text-lg text-mute">{t("groups.signedOut.body")}</p>
         <HomeLines />
         <div className="mt-auto pt-8 pb-[max(1.125rem,env(safe-area-inset-bottom))]">
-          <Link href="/nuevo" className={buttonClasses.primary}>
-            {t("home.create")}
+          <Link href="/grupos/nuevo" className={buttonClasses.primary}>
+            {t("groups.create")}
           </Link>
         </div>
       </>
     );
   }
 
-  const mine = await plans().listForAccount(session.accountId);
+  const [mine, profile] = await Promise.all([
+    groups().listForAccount(session.accountId),
+    profiles().findByAccount(session.accountId),
+  ]);
+  const withProfile = await Promise.all(
+    mine.map(
+      async (group) =>
+        (await profiles().findByAccounts(group.members.map((m) => m.accountId)))
+          .length,
+    ),
+  );
   return (
     <>
       <div className="mt-6 flex items-baseline justify-between">
-        <h1 className="font-extrabold text-[1.75rem]">{t("home.title")}</h1>
+        <h1 className="font-extrabold text-[1.75rem]">{t("groups.title")}</h1>
         <form action={signOut}>
           <button
             type="submit"
@@ -68,53 +77,78 @@ async function HomeContent() {
         {t("signin.as", { name: session.displayName })}
       </p>
 
+      <Link
+        href="/perfil"
+        className={`mt-4 flex items-center gap-3 rounded-sign px-3 py-3 no-underline ${
+          profile ? "border border-rule" : "border-2 border-ink"
+        }`}
+      >
+        <span
+          aria-hidden="true"
+          className="h-1.5 w-10 flex-none rounded-full"
+          style={{ background: lineColor(0).value }}
+        />
+        <span className="min-w-0 flex-1">
+          <span className="block font-extrabold">
+            {profile ? t("profile.cta.ready") : t("profile.cta.title")}
+          </span>
+          <span className="block text-mute text-sm">
+            {profile ? t("profile.cta.edit") : t("profile.cta.body")}
+          </span>
+        </span>
+        <svg
+          aria-hidden="true"
+          viewBox="0 0 16 16"
+          className="size-4 flex-none text-line-blue"
+        >
+          <path
+            d="M6 3l5 5-5 5"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      </Link>
+
       {mine.length === 0 ? (
         <div className="mt-6 rounded-sign border border-rule border-dashed px-3 py-4">
-          <p className="font-extrabold">{t("home.empty.title")}</p>
-          <p className="mt-1 text-mute text-sm">{t("home.empty.body")}</p>
+          <p className="font-extrabold">{t("groups.empty.title")}</p>
+          <p className="mt-1 text-mute text-sm">{t("groups.empty.body")}</p>
         </div>
       ) : (
         <ul className="mt-4 border-rule border-t">
-          {mine.map((plan, index) => {
-            const answered = plan.participants.filter(
-              (p) => p.answer !== null,
-            ).length;
-            return (
-              <li key={plan.id}>
-                <Link
-                  href={`/p/${plan.id}`}
-                  className="flex min-h-16 items-center gap-3 border-rule border-b py-3 no-underline"
-                >
-                  <span
-                    aria-hidden="true"
-                    className="size-[1.375rem] flex-none rounded-full border-[5px] bg-white"
-                    style={{ borderColor: lineColor(index).value }}
-                  />
-                  <span className="min-w-0 flex-1">
-                    <span className="block truncate font-extrabold text-[1.0625rem]">
-                      {plan.title}
-                    </span>
-                    <span className="block text-mute text-sm">
-                      {formatShortDate(plan.from)} – {formatShortDate(plan.to)}{" "}
-                      ·{" "}
-                      {t("home.row.answers", {
-                        answered,
-                        total: plan.participants.length,
-                      })}
-                    </span>
+          {mine.map((group, index) => (
+            <li key={group.id}>
+              <Link
+                href={`/g/${group.inviteCode}`}
+                className="flex min-h-16 items-center gap-3 border-rule border-b py-3 no-underline"
+              >
+                <span
+                  aria-hidden="true"
+                  className="size-[1.375rem] flex-none rounded-full border-[5px] bg-white"
+                  style={{ borderColor: lineColor(index).value }}
+                />
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate font-extrabold text-[1.0625rem]">
+                    {group.name}
                   </span>
-                  <span className="rounded-chip border border-rule-strong px-1.5 py-px font-bold text-[0.6875rem]">
-                    {t(`home.status.${plan.status}` as MessageKey)}
+                  <span className="block text-mute text-sm">
+                    {t("groups.row.members", {
+                      count: group.members.length,
+                      withProfile: withProfile[index] ?? 0,
+                    })}
                   </span>
-                </Link>
-              </li>
-            );
-          })}
+                </span>
+              </Link>
+            </li>
+          ))}
         </ul>
       )}
       <div className="sticky bottom-0 mt-auto bg-white pt-6 pb-[max(1.125rem,env(safe-area-inset-bottom))]">
-        <Link href="/nuevo" className={buttonClasses.primary}>
-          {t("home.create")}
+        <Link href="/grupos/nuevo" className={buttonClasses.primary}>
+          {t("groups.create")}
         </Link>
       </div>
     </>
