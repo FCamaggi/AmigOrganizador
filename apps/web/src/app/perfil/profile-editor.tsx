@@ -17,6 +17,7 @@ import { useRouter } from "next/navigation";
 import { useMemo, useRef, useState, useTransition } from "react";
 import { type MessageKey, t } from "@/i18n/t";
 import { formatTime } from "@/lib/format";
+import { TIMEZONES } from "@/lib/plan-options";
 import { buttonClasses, shellClasses } from "@/lib/ui";
 import type { ProfileInput } from "@/server/group-actions";
 
@@ -178,6 +179,7 @@ export function ProfileEditor({
     routinesFrom(profile.templates, today),
   );
   const [dayState, setDayState] = useState(profile);
+  const [zone, setZone] = useState(timeZone);
   const [changed, setChanged] = useState<Set<string>>(new Set());
   const [status, setStatus] = useState<"idle" | "saved" | "error">("idle");
   const [pending, startTransition] = useTransition();
@@ -194,8 +196,15 @@ export function ProfileEditor({
   const from = days[0]?.date ?? today;
   const to = days.at(-1)?.date ?? today;
   const availability = useMemo(
-    () => availabilityFor({ ...dayState, templates }, from, to, timeZone),
-    [dayState, templates, from, to, timeZone],
+    // Read in the person's own zone: wall times stay as written.
+    () =>
+      availabilityFor(
+        { ...dayState, templates, timezone: zone },
+        from,
+        to,
+        zone,
+      ),
+    [dayState, templates, from, to, zone],
   );
   const noRoutine =
     !routines.workweek.on && !routines.shifts.on && !routines.classes.on;
@@ -234,6 +243,7 @@ export function ProfileEditor({
       const result = await save({
         setupSeconds:
           started === null ? undefined : (performance.now() - started) / 1000,
+        timezone: zone,
         templates,
         days: Object.fromEntries(
           [...changed].map((date) => [
@@ -439,6 +449,35 @@ export function ProfileEditor({
               </ul>
             </div>
           ) : null}
+
+          <div className="mt-4">
+            <label htmlFor="profile-timezone" className={legend}>
+              {t("profileEdit.timezone")}
+            </label>
+            <select
+              id="profile-timezone"
+              value={zone}
+              aria-describedby="profile-timezone-hint"
+              onChange={(e) => {
+                markEdited();
+                setZone(e.target.value);
+                setStatus("idle");
+              }}
+              className="mt-1.5 block min-h-12 w-full rounded-sign border-[1.5px] border-rule-strong bg-white px-3"
+            >
+              {(TIMEZONES as readonly string[]).includes(zone) ? null : (
+                <option value={zone}>{zone}</option>
+              )}
+              {TIMEZONES.map((option) => (
+                <option key={option} value={option}>
+                  {t(`timezone.${option}` as MessageKey)}
+                </option>
+              ))}
+            </select>
+            <p id="profile-timezone-hint" className="mt-1 text-mute text-sm">
+              {t("profileEdit.timezone.hint")}
+            </p>
+          </div>
         </section>
 
         <section

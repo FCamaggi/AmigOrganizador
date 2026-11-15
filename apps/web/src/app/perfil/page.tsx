@@ -2,6 +2,7 @@ import {
   addDays,
   createProfile,
   dateRange,
+  profileTimezone,
   todayIn,
   utcToLocal,
 } from "@amigo/core";
@@ -12,7 +13,6 @@ import { TopBar } from "@/components/top-bar";
 import { t } from "@/i18n/t";
 import { formatDay, formatTime } from "@/lib/format";
 import { lineColor } from "@/lib/lines";
-import { DEFAULT_TIMEZONE } from "@/lib/plan-options";
 import { buttonClasses, shellClasses } from "@/lib/ui";
 import { safeNext } from "@/server/auth/config";
 import {
@@ -67,8 +67,7 @@ async function ProfileScreen({
   const profile =
     (await profiles().findByAccount(session.accountId)) ??
     createProfile({ accountId: session.accountId, now });
-  // People's own timezone is not stored yet: Chile for now (ADR 0004 notes).
-  const timeZone = DEFAULT_TIMEZONE;
+  const timeZone = profileTimezone(profile);
   const today = todayIn(timeZone, now);
   const days = dateRange(today, addDays(today, EDITOR_DAYS - 1)).map(
     (date) => ({

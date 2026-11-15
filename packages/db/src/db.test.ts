@@ -8,10 +8,12 @@ import {
   type Group,
   joinGroup,
   parseLocalDate,
+  profileTimezone,
   proposeGroupPlan,
   setDay,
   setImportedCalendar,
   setTemplates,
+  setTimezone,
   workweek,
 } from "@amigo/core";
 import { PGlite } from "@electric-sql/pglite";
@@ -142,6 +144,23 @@ describe("PostgresGroupRepository", () => {
     await repo.save(makeGroup("g1", "acc_ana"));
     await repo.delete("g1");
     expect(await repo.findById("g1")).toBeNull();
+  });
+});
+
+describe("PostgresProfileRepository timezone", () => {
+  it("keeps the person's zone, and an old profile without one reads as Santiago", async () => {
+    const repo = new PostgresProfileRepository(db);
+    await repo.save(
+      setTimezone(createProfile({ accountId: "acc_ana", now: NOW }), {
+        timezone: "Europe/Madrid",
+        now: NOW,
+      }),
+    );
+    await repo.save(createProfile({ accountId: "acc_beto", now: NOW }));
+    const ana = await repo.findByAccount("acc_ana");
+    const beto = await repo.findByAccount("acc_beto");
+    expect(ana?.timezone).toBe("Europe/Madrid");
+    expect(beto && profileTimezone(beto)).toBe("America/Santiago");
   });
 });
 

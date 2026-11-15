@@ -15,7 +15,7 @@ import {
   type LocalDate,
   parseLocalDate,
 } from "../availability/local-date";
-import { utcToLocal } from "../time/zoned";
+import { utcToLocal, zonedTimeToUtc } from "../time/zoned";
 
 const MINUTES_PER_DAY = 24 * 60;
 const MAX_INTERVAL_END = 2 * MINUTES_PER_DAY;
@@ -55,6 +55,11 @@ export interface Profile {
   /** Template time freed on a date (a day off); never frees other busy time. */
   readonly exceptions: DayMap;
   readonly importedCalendars: readonly ImportedCalendar[];
+  /**
+   * IANA zone the person's templates and one-off days are written in. Unset
+   * on profiles saved before it existed: read it with `profileTimezone`.
+   */
+  readonly timezone?: string;
   readonly createdAt: number;
   readonly updatedAt: number;
 }
@@ -62,7 +67,8 @@ export interface Profile {
 export type ProfileErrorCode =
   | "INVALID_TEMPLATE"
   | "INVALID_DATE"
-  | "INVALID_TIME";
+  | "INVALID_TIME"
+  | "INVALID_TIMEZONE";
 
 /** A rule of the profile was broken. `code` is stable; the UI maps it to copy. */
 export class ProfileError extends Error {
@@ -149,6 +155,36 @@ function spansToLocal(
 function withDay(days: DayMap, date: string, intervals: Interval[]): DayMap {
   const { [date]: _previous, ...rest } = days;
   return intervals.length > 0 ? { ...rest, [date]: intervals } : rest;
+}
+
+/** The zone of a profile that never chose one (S7: "el default Santiago"). */
+export const DEFAULT_PROFILE_TIMEZONE = "America/Santiago";
+
+/** The zone the profile's wall times are written in. */
+export function profileTimezone(profile: Profile): string {
+  return profile.timezone ?? DEFAULT_PROFILE_TIMEZONE;
+}
+
+function isTimeZone(value: string): boolean {
+  // Only IANA names with a region ("America/Santiago"), plus UTC.
+  if (value !== "UTC" && !value.includes("/")) return false;
+  try {
+    new Intl.DateTimeFormat("en-US", { timeZone: value });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/** Sets the person's zone; must be a valid IANA zone. */
+export function setTimezone(
+  profile: Profile,
+  input: { timezone: string; now: number },
+): Profile {
+  if (!isTimeZone(input.timezone)) {
+    throw new ProfileError("INVALID_TIMEZONE", "unknown time zone");
+  }
+  return { ...profile, timezone: input.timezone, updatedAt: input.now };
 }
 
 export function createProfile(input: {
@@ -238,10 +274,37 @@ export function removeImportedCalendar(
 }
 
 /**
+ * Templates minus exceptions plus one-off busy time, per date from the day
+ * before `from` to `to`, in the person's wall time (the day before carries
+ * only template time that runs past midnight, as `expandBusyTemplates` gives).
+ */
+function wallBusy(
+  profile: Profile,
+  from: LocalDate,
+  to: LocalDate,
+): Record<string, Interval[]> {
+  const fromTemplates = expandBusyTemplates(profile.templates, from, to);
+  const days: Record<string, Interval[]> = {};
+  for (const date of dateRange(addDays(from, -1), to)) {
+    const busy = mergeIntervals([
+      ...subtractIntervals(
+        fromTemplates[date] ?? [],
+        profile.exceptions[date] ?? [],
+      ),
+      ...(profile.busyDays[date] ?? []),
+    ]);
+    if (busy.length > 0) days[date] = busy;
+  }
+  return days;
+}
+
+/**
  * What the profile says about each date from `from` to `to`, ready for the
  * engine, in `timeZone` (the group's). Templates and one-off days are wall
- * time; imported spans are converted from UTC. Having a profile covers the
- * whole range: time not busy is free.
+ * time in the person's zone (`profileTimezone`): read as is when it is the
+ * group's zone, else moved to the group's zone through UTC. Imported spans
+ * are converted from UTC. Having a profile covers the whole range: time not
+ * busy is free.
  * The day before `from` is included, without coverage, only with busy time
  * that runs past midnight into `from` (night shifts).
  */
@@ -251,20 +314,28 @@ export function availabilityFor(
   to: LocalDate,
   timeZone: string,
 ): Record<string, DayAvailability> {
-  const fromTemplates = expandBusyTemplates(profile.templates, from, to);
-  const imported = spansToLocal(
-    profile.importedCalendars.flatMap((c) => c.busy),
-    timeZone,
-  );
-  const busyOn = (date: string): Interval[] =>
-    mergeIntervals([
-      ...subtractIntervals(
-        fromTemplates[date] ?? [],
-        profile.exceptions[date] ?? [],
+  const personZone = profileTimezone(profile);
+  const importedSpans = profile.importedCalendars.flatMap((c) => c.busy);
+  let wall: Record<string, Interval[]> = {};
+  let spans: readonly UtcSpan[] = importedSpans;
+  if (personZone === timeZone) {
+    wall = wallBusy(profile, from, to);
+  } else {
+    // Zones are less than a day apart: one extra day on each side.
+    const moved = wallBusy(profile, addDays(from, -1), addDays(to, 1));
+    spans = [
+      ...importedSpans,
+      ...Object.entries(moved).flatMap(([date, intervals]) =>
+        intervals.map((i) => ({
+          start: zonedTimeToUtc(date as LocalDate, i.start, personZone),
+          end: zonedTimeToUtc(date as LocalDate, i.end, personZone),
+        })),
       ),
-      ...(profile.busyDays[date] ?? []),
-      ...(imported[date] ?? []),
-    ]);
+    ];
+  }
+  const imported = spansToLocal(spans, timeZone);
+  const busyOn = (date: string): Interval[] =>
+    mergeIntervals([...(wall[date] ?? []), ...(imported[date] ?? [])]);
 
   const days: Record<string, DayAvailability> = {};
   const spillDay = addDays(from, -1);

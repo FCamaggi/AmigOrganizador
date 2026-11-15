@@ -100,14 +100,17 @@ export type {
 export {
   availabilityFor,
   createProfile,
+  DEFAULT_PROFILE_TIMEZONE,
   type ImportedCalendar,
   type Profile,
   ProfileError,
   type ProfileErrorCode,
+  profileTimezone,
   removeImportedCalendar,
   setDay,
   setImportedCalendar,
   setTemplates,
+  setTimezone,
   type UtcSpan,
 } from "./profile/profile";
 export type { ProfileRepository } from "./profile/profile-repository";

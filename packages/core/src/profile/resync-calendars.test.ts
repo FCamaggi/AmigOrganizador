@@ -6,6 +6,7 @@ import {
   type Profile,
   removeImportedCalendar,
   setImportedCalendar,
+  setTimezone,
 } from "./profile";
 import type { ProfileRepository } from "./profile-repository";
 import { resyncCalendars } from "./resync-calendars";
@@ -119,6 +120,7 @@ describe("resyncCalendars", () => {
         id: "cal_1",
         name: "Trabajo",
         url: "https://calendar.example/acc_ana/cal_1.ics",
+        timeZone: "America/Santiago",
       },
     ]);
     const saved = await store.findByAccount("acc_ana");
@@ -332,6 +334,28 @@ describe("resyncCalendars", () => {
     });
 
     expect(report).toEqual({ synced: 1, failed: 1, orphaned: 0 });
+  });
+
+  it("reads floating times in the person's own zone", async () => {
+    const madrid = setTimezone(
+      profileWith("acc_ana", calendar("cal_1", "Trabajo")),
+      { timezone: "Europe/Madrid", now: IMPORTED_AT },
+    );
+    const { store, deleteSource } = setup(madrid);
+    const zones: string[] = [];
+
+    await resyncCalendars({
+      sources: [source("acc_ana", "cal_1")],
+      profiles: store,
+      deleteSource,
+      fetchCalendar: async (input) => {
+        zones.push(input.timeZone);
+        return fresh(input);
+      },
+      now: () => NOW,
+    });
+
+    expect(zones).toEqual(["Europe/Madrid"]);
   });
 
   it("does nothing without sources", async () => {

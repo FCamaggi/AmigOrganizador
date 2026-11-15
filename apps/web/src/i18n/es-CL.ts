@@ -311,6 +311,9 @@ export const esCL = {
   "profileEdit.intro":
     "Anota cuándo estás ocupado: trabajo, clases, turnos. Las rutinas son ayudas opcionales; lo que no marques cuenta como libre.",
   "profileEdit.routines": "Rutinas (opcional)",
+  "profileEdit.timezone": "Tu zona horaria",
+  "profileEdit.timezone.hint":
+    "Tus rutinas y días se anotan en esta hora. Cada grupo los ve en su propia zona.",
   "profileEdit.days.title": "Próximas 2 semanas",
   "profileEdit.days.hint":
     "Toca un tramo para marcarlo ocupado o liberarlo solo ese día.",

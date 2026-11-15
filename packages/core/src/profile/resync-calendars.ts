@@ -1,5 +1,9 @@
 import type { CalendarSource } from "./calendar-source-repository";
-import { type ImportedCalendar, setImportedCalendar } from "./profile";
+import {
+  type ImportedCalendar,
+  profileTimezone,
+  setImportedCalendar,
+} from "./profile";
 import type { ProfileRepository } from "./profile-repository";
 
 export interface ResyncCalendarsInput {
@@ -16,6 +20,8 @@ export interface ResyncCalendarsInput {
     id: string;
     name: string;
     url: string;
+    /** The person's zone, for floating times and all-day events. */
+    timeZone: string;
   }) => Promise<ImportedCalendar>;
   readonly now: () => number;
   /** Told about each failure; must not log the source (its URL is a secret). */
@@ -75,7 +81,7 @@ async function resyncSource(
   const known = before?.importedCalendars.find(
     (c) => c.id === source.calendarId,
   );
-  if (!known) {
+  if (!before || !known) {
     await input.deleteSource(source.accountId, source.calendarId);
     return "orphaned";
   }
@@ -83,6 +89,7 @@ async function resyncSource(
     id: known.id,
     name: known.name,
     url: source.url,
+    timeZone: profileTimezone(before),
   });
   // Read again: the person may have edited or removed it meanwhile.
   const current = await input.profiles.findByAccount(source.accountId);

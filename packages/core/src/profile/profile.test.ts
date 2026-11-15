@@ -8,12 +8,15 @@ import { parseLocalDate } from "../availability/local-date";
 import {
   availabilityFor,
   createProfile,
+  DEFAULT_PROFILE_TIMEZONE,
   type Profile,
   ProfileError,
+  profileTimezone,
   removeImportedCalendar,
   setDay,
   setImportedCalendar,
   setTemplates,
+  setTimezone,
 } from "./profile";
 
 const h = (hours: number) => hours * 60;
@@ -279,5 +282,102 @@ describe("imported calendars", () => {
         }),
       "INVALID_TIME",
     );
+  });
+});
+
+describe("profile timezone", () => {
+  const MADRID = "Europe/Madrid"; // UTC+1 in November; Santiago is UTC-3.
+  const LIMA = "America/Lima"; // UTC-5 all year.
+  const THU = parseLocalDate("2026-11-19");
+  const inMadrid = () =>
+    setTimezone(empty(), { timezone: MADRID, now: NOW + 1 });
+
+  it("is Santiago for a profile that never chose one", () => {
+    expect(DEFAULT_PROFILE_TIMEZONE).toBe("America/Santiago");
+    expect(profileTimezone(empty())).toBe("America/Santiago");
+  });
+
+  it("stores the zone the person chose", () => {
+    const profile = inMadrid();
+    expect(profile.timezone).toBe(MADRID);
+    expect(profileTimezone(profile)).toBe(MADRID);
+    expect(profile.updatedAt).toBe(NOW + 1);
+  });
+
+  it.each([
+    "",
+    "Mars/Olympus",
+    "Santiago",
+  ])("rejects %j as a zone", (timezone) => {
+    expectProfileError(
+      () => setTimezone(empty(), { timezone, now: NOW }),
+      "INVALID_TIMEZONE",
+    );
+  });
+
+  it("reads the same as before when the person and the group share a zone", () => {
+    const base = setTemplates(empty(), { templates: [workweek()], now: NOW });
+    const explicit = setTimezone(base, { timezone: TZ, now: NOW });
+    expect(availabilityFor(explicit, FRI, SAT, TZ)).toEqual(
+      availabilityFor(base, FRI, SAT, TZ),
+    );
+  });
+
+  it("moves a routine written in the person's zone into the group's zone", () => {
+    const profile = setTemplates(inMadrid(), {
+      templates: [workweek()],
+      now: NOW,
+    });
+    // Madrid 09:00-18:00 is Santiago 05:00-14:00.
+    expect(availabilityFor(profile, FRI, SAT, TZ)).toEqual({
+      [FRI]: { coverage: WHOLE_DAY, busy: [{ start: h(5), end: h(14) }] },
+      [SAT]: { coverage: WHOLE_DAY, busy: [] },
+    });
+  });
+
+  it("moves busy time into the group's previous day when it starts after the group's midnight", () => {
+    const profile = setDay(inMadrid(), {
+      date: SAT,
+      busy: [{ start: h(2), end: h(4) }],
+      exceptions: [],
+      now: NOW,
+    });
+    // Madrid Saturday 02:00-04:00 is Santiago Friday 22:00-24:00.
+    expect(availabilityFor(profile, FRI, SAT, TZ)).toEqual({
+      [FRI]: { coverage: WHOLE_DAY, busy: [{ start: h(22), end: h(24) }] },
+      [SAT]: { coverage: WHOLE_DAY, busy: [] },
+    });
+  });
+
+  it("carries a night written the day before the range into the first day", () => {
+    const profile = setDay(inMadrid(), {
+      date: THU,
+      busy: [{ start: h(22), end: h(30) }],
+      exceptions: [],
+      now: NOW,
+    });
+    // Madrid Thu 22:00 to Fri 06:00 is Santiago Thu 18:00 to Fri 02:00.
+    expect(availabilityFor(profile, FRI, FRI, TZ)[FRI]?.busy).toEqual([
+      { start: 0, end: h(2) },
+    ]);
+  });
+
+  it("lets an exception free template time on the person's own date", () => {
+    const profile = setDay(
+      setTemplates(inMadrid(), { templates: [workweek()], now: NOW }),
+      { date: FRI, busy: [], exceptions: WHOLE_DAY, now: NOW },
+    );
+    expect(availabilityFor(profile, FRI, FRI, TZ)[FRI]?.busy).toEqual([]);
+  });
+
+  it("reads a group zone west of the person too", () => {
+    const profile = setTemplates(
+      setTimezone(empty(), { timezone: TZ, now: NOW }),
+      { templates: [workweek()], now: NOW },
+    );
+    // Santiago 09:00-18:00 is Lima 07:00-16:00.
+    expect(availabilityFor(profile, FRI, FRI, LIMA)[FRI]?.busy).toEqual([
+      { start: h(7), end: h(16) },
+    ]);
   });
 });

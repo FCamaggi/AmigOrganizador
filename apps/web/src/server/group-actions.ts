@@ -17,11 +17,13 @@ import {
   ProfileError,
   planEvent,
   profileCreatedEvent,
+  profileTimezone,
   proposeGroupPlan,
   removeImportedCalendar,
   setDay,
   setImportedCalendar,
   setTemplates,
+  setTimezone,
 } from "@amigo/core";
 import { refresh } from "next/cache";
 import { redirect } from "next/navigation";
@@ -240,6 +242,8 @@ export interface ProfileInput {
   >;
   /** Seconds from the first edit in the editor to this save (exit test). */
   readonly setupSeconds?: number;
+  /** The zone the person writes their times in; one of `TIMEZONES`. */
+  readonly timezone?: string;
 }
 
 export async function saveProfileAction(
@@ -247,7 +251,14 @@ export async function saveProfileAction(
 ): Promise<{ ok: boolean }> {
   const session = await requireSession("/perfil");
   const now = Date.now();
-  const { profile: base, created } = await myProfile(session.accountId);
+  const { profile: stored, created } = await myProfile(session.accountId);
+  const zone = input.timezone;
+  if (
+    zone !== undefined &&
+    !TIMEZONES.includes(zone as (typeof TIMEZONES)[number])
+  )
+    return { ok: false };
+  const base = zone ? setTimezone(stored, { timezone: zone, now }) : stored;
   try {
     let profile = setTemplates(base, {
       templates: input.templates,
@@ -290,8 +301,13 @@ async function syncCalendar(
   url: string,
 ): Promise<string | null> {
   try {
-    const calendar = await fetchImportedCalendar({ id: calendarId, name, url });
     const { profile: base, created } = await myProfile(accountId);
+    const calendar = await fetchImportedCalendar({
+      id: calendarId,
+      name,
+      url,
+      timeZone: profileTimezone(base),
+    });
     const now = Date.now();
     await profiles().save(setImportedCalendar(base, { calendar, now }));
     if (created) await track(profileCreatedEvent({ accountId, at: now }));
