@@ -15,6 +15,7 @@ import {
   type LocalDate,
   parseLocalDate,
 } from "../availability/local-date";
+import { utcToLocal } from "../time/zoned";
 
 const MINUTES_PER_DAY = 24 * 60;
 const MAX_INTERVAL_END = 2 * MINUTES_PER_DAY;
@@ -22,15 +23,22 @@ const WHOLE_DAY: Interval = { start: 0, end: MINUTES_PER_DAY };
 
 type DayMap = Readonly<Record<string, readonly Interval[]>>;
 
+/** A span of absolute time, in UTC milliseconds. */
+export interface UtcSpan {
+  readonly start: number;
+  readonly end: number;
+}
+
 /**
  * Busy time read from another calendar (ICS URL now; Google or Microsoft
- * later). Only busy intervals per local date are kept, never event titles.
+ * later). Only busy spans are kept, as UTC instants, never event titles; each
+ * group reads them in its own timezone.
  */
 export interface ImportedCalendar {
   readonly id: string;
   /** A label the person gives it ("Trabajo"), not taken from the events. */
   readonly name: string;
-  readonly busy: DayMap;
+  readonly busy: readonly UtcSpan[];
   readonly syncedAt: number;
 }
 
@@ -93,13 +101,49 @@ function checkDate(date: string): LocalDate {
   }
 }
 
-function checkDayMap(days: DayMap): Record<string, Interval[]> {
-  const clean: Record<string, Interval[]> = {};
-  for (const [date, intervals] of Object.entries(days)) {
-    const merged = checkIntervals(intervals);
-    if (merged.length > 0) clean[checkDate(date)] = merged;
+function checkSpans(spans: readonly UtcSpan[]): UtcSpan[] {
+  for (const span of spans) {
+    if (
+      !Number.isFinite(span.start) ||
+      !Number.isFinite(span.end) ||
+      span.start >= span.end
+    ) {
+      throw new ProfileError(
+        "INVALID_TIME",
+        "a busy span must end after it starts",
+      );
+    }
   }
-  return clean;
+  return [...spans].sort((a, b) => a.start - b.start);
+}
+
+/** Local busy intervals per date for UTC spans, split at local midnight. */
+function spansToLocal(
+  spans: readonly UtcSpan[],
+  timeZone: string,
+): Record<string, Interval[]> {
+  const days: Record<string, Interval[]> = {};
+  const add = (date: string, start: number, end: number) => {
+    if (end <= start) return;
+    days[date] = [...(days[date] ?? []), { start, end }];
+  };
+  for (const span of spans) {
+    const start = utcToLocal(span.start, timeZone);
+    const end = utcToLocal(span.end, timeZone);
+    if (start.date === end.date) {
+      add(start.date, start.minutes, end.minutes);
+      continue;
+    }
+    add(start.date, start.minutes, MINUTES_PER_DAY);
+    for (const date of dateRange(
+      addDays(start.date, 1),
+      addDays(end.date, -1),
+    )) {
+      add(date, 0, MINUTES_PER_DAY);
+    }
+    add(end.date, 0, end.minutes);
+  }
+  return days;
 }
 
 function withDay(days: DayMap, date: string, intervals: Interval[]): DayMap {
@@ -168,7 +212,7 @@ export function setImportedCalendar(
 ): Profile {
   const calendar: ImportedCalendar = {
     ...input.calendar,
-    busy: checkDayMap(input.calendar.busy),
+    busy: checkSpans(input.calendar.busy),
   };
   return {
     ...profile,
@@ -195,7 +239,9 @@ export function removeImportedCalendar(
 
 /**
  * What the profile says about each date from `from` to `to`, ready for the
- * engine. Having a profile covers the whole range: time not busy is free.
+ * engine, in `timeZone` (the group's). Templates and one-off days are wall
+ * time; imported spans are converted from UTC. Having a profile covers the
+ * whole range: time not busy is free.
  * The day before `from` is included, without coverage, only with busy time
  * that runs past midnight into `from` (night shifts).
  */
@@ -203,8 +249,13 @@ export function availabilityFor(
   profile: Profile,
   from: LocalDate,
   to: LocalDate,
+  timeZone: string,
 ): Record<string, DayAvailability> {
   const fromTemplates = expandBusyTemplates(profile.templates, from, to);
+  const imported = spansToLocal(
+    profile.importedCalendars.flatMap((c) => c.busy),
+    timeZone,
+  );
   const busyOn = (date: string): Interval[] =>
     mergeIntervals([
       ...subtractIntervals(
@@ -212,7 +263,7 @@ export function availabilityFor(
         profile.exceptions[date] ?? [],
       ),
       ...(profile.busyDays[date] ?? []),
-      ...profile.importedCalendars.flatMap((c) => c.busy[date] ?? []),
+      ...(imported[date] ?? []),
     ]);
 
   const days: Record<string, DayAvailability> = {};

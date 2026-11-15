@@ -62,3 +62,14 @@ export function todayIn(timeZone: string, now: number): LocalDate {
     .toISOString()
     .slice(0, 10) as LocalDate;
 }
+
+/** The local date and minutes after local midnight of a UTC instant. */
+export function utcToLocal(
+  utcMs: number,
+  timeZone: string,
+): { date: LocalDate; minutes: number } {
+  const wall = wallClockAsUtc(utcMs, timeZone);
+  const date = new Date(wall).toISOString().slice(0, 10) as LocalDate;
+  const midnight = Date.parse(`${date}T00:00:00Z`);
+  return { date, minutes: Math.round((wall - midnight) / 60_000) };
+}

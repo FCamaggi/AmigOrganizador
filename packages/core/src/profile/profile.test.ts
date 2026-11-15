@@ -22,6 +22,8 @@ const NOW = Date.UTC(2026, 10, 15, 12, 0);
 const FRI = parseLocalDate("2026-11-20");
 const SAT = parseLocalDate("2026-11-21");
 const WHOLE_DAY = [{ start: 0, end: h(24) }];
+// Santiago is UTC-3 in November.
+const TZ = "America/Santiago";
 
 function expectProfileError(action: () => unknown, code: ProfileError["code"]) {
   try {
@@ -52,7 +54,7 @@ describe("createProfile", () => {
 
 describe("availabilityFor", () => {
   it("covers every date in the range, so time not marked busy is free", () => {
-    expect(availabilityFor(empty(), FRI, SAT)).toEqual({
+    expect(availabilityFor(empty(), FRI, SAT, TZ)).toEqual({
       [FRI]: { coverage: WHOLE_DAY, busy: [] },
       [SAT]: { coverage: WHOLE_DAY, busy: [] },
     });
@@ -63,7 +65,7 @@ describe("availabilityFor", () => {
       templates: [workweek()],
       now: NOW,
     });
-    expect(availabilityFor(profile, FRI, SAT)).toEqual({
+    expect(availabilityFor(profile, FRI, SAT, TZ)).toEqual({
       [FRI]: { coverage: WHOLE_DAY, busy: [{ start: h(9), end: h(18) }] },
       [SAT]: { coverage: WHOLE_DAY, busy: [] },
     });
@@ -77,7 +79,7 @@ describe("availabilityFor", () => {
       exceptions: [],
       now: NOW,
     });
-    expect(availabilityFor(profile, FRI, FRI)[FRI]?.busy).toEqual([
+    expect(availabilityFor(profile, FRI, FRI, TZ)[FRI]?.busy).toEqual([
       { start: h(9), end: h(21) },
     ]);
   });
@@ -94,12 +96,17 @@ describe("availabilityFor", () => {
       calendar: {
         id: "work",
         name: "Trabajo",
-        busy: { [FRI]: [{ start: h(15), end: h(16) }] },
+        busy: [
+          {
+            start: Date.UTC(2026, 10, 20, 18),
+            end: Date.UTC(2026, 10, 20, 19),
+          },
+        ],
         syncedAt: NOW,
       },
       now: NOW,
     });
-    expect(availabilityFor(profile, FRI, FRI)[FRI]?.busy).toEqual([
+    expect(availabilityFor(profile, FRI, FRI, TZ)[FRI]?.busy).toEqual([
       { start: h(10), end: h(11) },
       { start: h(15), end: h(16) },
     ]);
@@ -116,7 +123,7 @@ describe("availabilityFor", () => {
       exceptions: [],
       now: NOW,
     });
-    expect(availabilityFor(profile, FRI, FRI)["2026-11-19"]).toEqual({
+    expect(availabilityFor(profile, FRI, FRI, TZ)["2026-11-19"]).toEqual({
       coverage: [],
       busy: [{ start: h(20), end: h(32) }],
     });
@@ -195,11 +202,48 @@ describe("setDay", () => {
 });
 
 describe("imported calendars", () => {
-  const calendar = (busyStart: number) => ({
+  // Saturday 21 Nov, 09:00 local = 12:00 UTC.
+  const calendar = (localHour: number) => ({
     id: "work",
     name: "Trabajo",
-    busy: { [SAT]: [{ start: h(busyStart), end: h(busyStart + 1) }] },
+    busy: [
+      {
+        start: Date.UTC(2026, 10, 21, localHour + 3),
+        end: Date.UTC(2026, 10, 21, localHour + 4),
+      },
+    ],
     syncedAt: NOW,
+  });
+
+  it("stores busy time as UTC instants and reads it in the group's timezone", () => {
+    const profile = setImportedCalendar(empty(), {
+      calendar: calendar(9),
+      now: NOW,
+    });
+    expect(availabilityFor(profile, SAT, SAT, TZ)[SAT]?.busy).toEqual([
+      { start: h(9), end: h(10) },
+    ]);
+    expect(availabilityFor(profile, SAT, SAT, "UTC")[SAT]?.busy).toEqual([
+      { start: h(12), end: h(13) },
+    ]);
+  });
+
+  it("splits an event that crosses local midnight across both dates", () => {
+    const profile = setImportedCalendar(empty(), {
+      calendar: {
+        id: "party",
+        name: "Otro",
+        // Fri 22:00 to Sat 02:00 local.
+        busy: [
+          { start: Date.UTC(2026, 10, 21, 1), end: Date.UTC(2026, 10, 21, 5) },
+        ],
+        syncedAt: NOW,
+      },
+      now: NOW,
+    });
+    const days = availabilityFor(profile, FRI, SAT, TZ);
+    expect(days[FRI]?.busy).toEqual([{ start: h(22), end: h(24) }]);
+    expect(days[SAT]?.busy).toEqual([{ start: 0, end: h(2) }]);
   });
 
   it("replaces a calendar with the same id on a new sync", () => {
@@ -212,7 +256,7 @@ describe("imported calendars", () => {
       now: NOW,
     });
     expect(profile.importedCalendars).toHaveLength(1);
-    expect(availabilityFor(profile, SAT, SAT)[SAT]?.busy).toEqual([
+    expect(availabilityFor(profile, SAT, SAT, TZ)[SAT]?.busy).toEqual([
       { start: h(14), end: h(15) },
     ]);
   });
@@ -226,14 +270,11 @@ describe("imported calendars", () => {
     expect(profile.importedCalendars).toEqual([]);
   });
 
-  it("rejects invalid busy times", () => {
+  it("rejects an event that ends before it starts", () => {
     expectProfileError(
       () =>
         setImportedCalendar(empty(), {
-          calendar: {
-            ...calendar(9),
-            busy: { [SAT]: [{ start: -5, end: 10 }] },
-          },
+          calendar: { ...calendar(9), busy: [{ start: NOW, end: NOW - 1 }] },
           now: NOW,
         }),
       "INVALID_TIME",

@@ -14,9 +14,10 @@ their groups. All functions are pure and return a new profile; they throw
 - **One-off busy days**: busy time on a local date (a dentist, an exam).
 - **Exceptions**: template time freed on a date (a day off, holidays). An
   exception never frees one-off or imported busy time.
-- **Imported calendars**: busy time per local date read from another calendar
-  (ICS URL in this phase). Only busy intervals are kept, never event titles.
-  A re-sync replaces the calendar with the same id.
+- **Imported calendars**: busy spans read from another calendar (ICS URL in
+  this phase), stored as UTC instants so each group reads them in its own
+  timezone. Only busy spans are kept, never event titles. A re-sync replaces
+  the calendar with the same id.
 
 ## Actions
 
@@ -25,7 +26,7 @@ their groups. All functions are pure and return a new profile; they throw
 | `createProfile` | Starts empty (nothing busy). | — |
 | `setTemplates` | Replaces all templates; each must be valid. | `INVALID_TEMPLATE` |
 | `setDay` | Replaces one date's one-off busy time and exceptions; a date with nothing left is removed. | `INVALID_DATE`, `INVALID_TIME` |
-| `setImportedCalendar` | Adds or replaces (same id) an imported calendar. | `INVALID_DATE`, `INVALID_TIME` |
+| `setImportedCalendar` | Adds or replaces (same id) an imported calendar; every span must end after it starts. | `INVALID_TIME` |
 | `removeImportedCalendar` | Removes an imported calendar by id. | — |
 
 Intervals are minutes from local midnight, non-empty, within 0–2880 (an
@@ -33,8 +34,10 @@ interval past 1440 runs into the next day).
 
 ## Reading a profile
 
-`availabilityFor(profile, from, to)` returns what the engine needs per date:
-busy = (templates − exceptions) + one-off busy + imported busy. Having a
+`availabilityFor(profile, from, to, timezone)` returns what the engine needs
+per date, in the reading group's timezone: busy = (templates − exceptions) +
+one-off busy + imported busy (converted from UTC and split at local midnight).
+Templates and one-off days are wall time. Having a
 profile covers the whole range, so time not busy is free. The day before
 `from` is included without coverage, only with busy time that runs past
 midnight into `from`. A group member **without** a profile has no entry at

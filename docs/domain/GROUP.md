@@ -19,3 +19,17 @@ shared by all their groups (T2).
 The invite code is the secret in the invite link (ADR 0003). Adapters must
 generate it with at least 128 bits of randomness; it is separate from the
 group id so it can be rotated later.
+
+## Group view (outlook)
+
+Implementation: `packages/core/src/group/outlook.ts`.
+
+- `outlookRange(timezone, now, days = 28)`: from today in the group's
+  timezone, 4 weeks ahead by default (agent assumption, ADR 0004).
+- `groupOutlook({ group, profiles, from, to, minimumMinutes? })`: compares
+  every member's profile with `findWindows` in the group's timezone. Returns
+  the members (with `hasProfile`), the ranked windows, and every date with its
+  best window or `null`. A member without a profile is unknown, never free, and
+  shows up in `MISSING_DATA`. Profiles of people outside the group are ignored.
+- `groupDayLines({ group, profiles, date, span })`: each member's free / busy /
+  unknown segments for the line diagram.

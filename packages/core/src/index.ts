@@ -56,6 +56,14 @@ export {
 } from "./group/group";
 export type { GroupRepository } from "./group/group-repository";
 export {
+  DEFAULT_OUTLOOK_DAYS,
+  type GroupOutlook,
+  groupDayLines,
+  groupOutlook,
+  type OutlookMember,
+  outlookRange,
+} from "./group/outlook";
+export {
   answerPlan,
   type ConfirmedSlot,
   cancelPlan,
@@ -92,6 +100,7 @@ export {
   setDay,
   setImportedCalendar,
   setTemplates,
+  type UtcSpan,
 } from "./profile/profile";
 export type { ProfileRepository } from "./profile/profile-repository";
-export { todayIn, zonedTimeToUtc } from "./time/zoned";
+export { todayIn, utcToLocal, zonedTimeToUtc } from "./time/zoned";
