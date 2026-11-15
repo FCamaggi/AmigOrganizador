@@ -1,7 +1,6 @@
 "use server";
 
 import { IcsError, IcsFetchError, importIcsCalendar } from "@amigo/adapter-ics";
-import { newInviteCode, newPlanId } from "@amigo/adapter-memory";
 import {
   type BusyTemplate,
   cancelGroupPlan,
@@ -25,6 +24,7 @@ import {
 import { refresh } from "next/cache";
 import { redirect } from "next/navigation";
 import { DEFAULT_TIMEZONE, TIMEZONES } from "@/lib/plan-options";
+import { newId } from "./ids";
 import { calendarSources, groupPlans, groups, profiles } from "./repository";
 import { getSession, startSession } from "./session";
 
@@ -73,8 +73,8 @@ export async function createGroupAction(
   let group: ReturnType<typeof createGroup>;
   try {
     group = createGroup({
-      id: newPlanId(),
-      inviteCode: newInviteCode(),
+      id: newId(),
+      inviteCode: newId(),
       name,
       ownerId: session.accountId,
       ownerName: session.displayName,
@@ -131,7 +131,7 @@ export async function proposePlanAction(
   const group = await loadGroup(code);
   try {
     const plan = proposeGroupPlan(group, {
-      id: newPlanId(),
+      id: newId(),
       accountId: session.accountId,
       title: text(formData, "title"),
       date: text(formData, "date"),
@@ -274,7 +274,7 @@ export async function importCalendarAction(
     return { error: "INVALID_NAME" };
   }
   const url = text(formData, "url");
-  const calendarId = newPlanId();
+  const calendarId = newId();
   const error = await syncCalendar(session.accountId, calendarId, name, url);
   if (error) return { error };
   await calendarSources().save({

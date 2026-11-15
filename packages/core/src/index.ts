@@ -37,6 +37,12 @@ export {
 
 /** Availability is never assumed: missing data is `unknown`, not `free`. */
 export type AvailabilityState = "free" | "busy" | "unknown";
+export type {
+  DayLine,
+  LineSegment,
+  LineState,
+} from "./availability/day-lines";
+export { slotFromOption } from "./availability/slot";
 export {
   buildGoogleCalendarUrl,
   buildIcs,
@@ -77,32 +83,6 @@ export {
   type OutlookMember,
   outlookRange,
 } from "./group/outlook";
-export {
-  answerPlan,
-  type ConfirmedSlot,
-  cancelPlan,
-  confirmPlan,
-  createPlan,
-  joinPlan,
-  type NewPlan,
-  type Participant,
-  type ParticipantAnswer,
-  type Plan,
-  PlanError,
-  type PlanErrorCode,
-  type PlanInputMode,
-  type PlanStatus,
-  suggestOptions,
-} from "./plan/plan";
-export type { PlanRepository } from "./plan/plan-repository";
-export {
-  type DayLine,
-  dayLines,
-  inviteFor,
-  type LineSegment,
-  type LineState,
-  slotFromOption,
-} from "./plan/plan-view";
 export type {
   CalendarSource,
   CalendarSourceRepository,

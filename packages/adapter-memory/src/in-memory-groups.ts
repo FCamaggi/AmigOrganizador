@@ -1,4 +1,3 @@
-import { randomBytes } from "node:crypto";
 import type {
   CalendarSource,
   CalendarSourceRepository,
@@ -136,9 +135,4 @@ export class InMemoryCalendarSourceRepository
       InMemoryCalendarSourceRepository.#key(accountId, calendarId),
     );
   }
-}
-
-/** A group invite code is the secret in the link (ADR 0003): 128 random bits. */
-export function newInviteCode(): string {
-  return randomBytes(16).toString("base64url");
 }

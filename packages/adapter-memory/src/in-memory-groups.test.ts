@@ -12,7 +12,6 @@ import {
   InMemoryGroupPlanRepository,
   InMemoryGroupRepository,
   InMemoryProfileRepository,
-  newInviteCode,
 } from "./in-memory-groups";
 
 const NOW = Date.UTC(2026, 10, 15, 12);
@@ -146,13 +145,5 @@ describe("InMemoryCalendarSourceRepository", () => {
     await repo.delete("acc_ana", "work");
     expect(await repo.listForAccount("acc_ana")).toEqual([]);
     expect(await repo.listForAccount("acc_beto")).toHaveLength(1);
-  });
-});
-
-describe("newInviteCode", () => {
-  it("is URL-safe, carries 128 bits and does not repeat", () => {
-    const codes = new Set(Array.from({ length: 1000 }, newInviteCode));
-    expect(codes.size).toBe(1000);
-    for (const code of codes) expect(code).toMatch(/^[A-Za-z0-9_-]{22}$/);
   });
 });
