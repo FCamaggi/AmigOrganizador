@@ -14,7 +14,16 @@ export default function NewGroupPage() {
       <h1 className="mt-2 font-extrabold text-[1.75rem] leading-tight">
         {t("groupNew.title")}
       </h1>
-      <Suspense fallback={<CreateGroupForm needsName={false} />}>
+      {/* A skeleton, not a form: an interactive fallback would be swapped out
+          and lose whatever someone had started typing. */}
+      <Suspense
+        fallback={
+          <div
+            aria-hidden="true"
+            className="mt-4 h-64 animate-pulse rounded-sign bg-panel"
+          />
+        }
+      >
         <SessionAwareForm />
       </Suspense>
     </main>

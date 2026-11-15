@@ -52,6 +52,12 @@ async function loadGroup(code: string) {
 
 export interface CreateGroupState {
   readonly error: GroupErrorCode | null;
+  /** What was typed, so a failed submit doesn't wipe the form. */
+  readonly values?: {
+    readonly groupName: string;
+    readonly name: string;
+    readonly timezone: string;
+  };
 }
 
 export async function createGroupAction(
@@ -61,17 +67,22 @@ export async function createGroupAction(
   const existing = await getSession();
   if (!existing && authMode() === "supabase")
     redirect(`/entrar?next=${encodeURIComponent("/grupos/nuevo")}`);
-  const ownerName = existing?.displayName ?? text(formData, "name");
+  const values = {
+    groupName: text(formData, "groupName"),
+    name: text(formData, "name"),
+    timezone: text(formData, "timezone") || DEFAULT_TIMEZONE,
+  };
+  const ownerName = existing?.displayName ?? values.name;
   if (ownerName.length === 0 || ownerName.length > MAX_NAME) {
-    return { error: "INVALID_NAME" };
+    return { error: "INVALID_NAME", values };
   }
-  const timezone = text(formData, "timezone") || DEFAULT_TIMEZONE;
+  const timezone = values.timezone;
   if (!TIMEZONES.includes(timezone as (typeof TIMEZONES)[number])) {
-    return { error: "INVALID_TIMEZONE" };
+    return { error: "INVALID_TIMEZONE", values };
   }
-  const name = text(formData, "groupName");
+  const name = values.groupName;
   if (name.length === 0 || name.length > MAX_NAME)
-    return { error: "INVALID_NAME" };
+    return { error: "INVALID_NAME", values };
   const session = existing ?? (await startSession(ownerName));
   let group: ReturnType<typeof createGroup>;
   try {
@@ -85,7 +96,7 @@ export async function createGroupAction(
       now: Date.now(),
     });
   } catch (error) {
-    if (error instanceof GroupError) return { error: error.code };
+    if (error instanceof GroupError) return { error: error.code, values };
     throw error;
   }
   await groups().save(group);

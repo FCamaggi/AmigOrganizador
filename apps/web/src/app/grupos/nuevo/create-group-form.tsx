@@ -34,6 +34,7 @@ export function CreateGroupForm({
           required
           maxLength={60}
           placeholder={t("groupNew.field.name.placeholder")}
+          defaultValue={state.values?.groupName}
           aria-invalid={state.error === "INVALID_NAME"}
           className="mt-1.5 block min-h-12 w-full rounded-sign border-[1.5px] border-ink bg-white px-3 font-bold text-lg"
         />
@@ -49,6 +50,7 @@ export function CreateGroupForm({
             required
             maxLength={60}
             autoComplete="given-name"
+            defaultValue={state.values?.name}
             aria-describedby="name-hint"
             className="mt-1.5 block min-h-12 w-full rounded-sign border-[1.5px] border-ink bg-white px-3 text-lg"
           />
@@ -64,7 +66,7 @@ export function CreateGroupForm({
         <select
           id="timezone"
           name="timezone"
-          defaultValue={DEFAULT_TIMEZONE}
+          defaultValue={state.values?.timezone ?? DEFAULT_TIMEZONE}
           className="mt-1.5 block min-h-12 w-full rounded-sign border-[1.5px] border-rule-strong bg-white px-3"
         >
           {TIMEZONES.map((zone) => (
