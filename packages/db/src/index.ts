@@ -4,6 +4,7 @@ export {
   PostgresCalendarSourceRepository,
   PostgresGroupPlanRepository,
   PostgresGroupRepository,
+  PostgresProductEventRepository,
   PostgresProfileRepository,
 } from "./repositories";
 export * as schema from "./schema";
@@ -12,5 +13,6 @@ export {
   calendarSources,
   groupPlans,
   groups,
+  productEvents,
   profiles,
 } from "./schema";

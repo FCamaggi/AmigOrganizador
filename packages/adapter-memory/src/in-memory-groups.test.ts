@@ -11,6 +11,7 @@ import {
   InMemoryCalendarSourceRepository,
   InMemoryGroupPlanRepository,
   InMemoryGroupRepository,
+  InMemoryProductEventRepository,
   InMemoryProfileRepository,
 } from "./in-memory-groups";
 
@@ -145,5 +146,55 @@ describe("InMemoryCalendarSourceRepository", () => {
     await repo.delete("acc_ana", "work");
     expect(await repo.listForAccount("acc_ana")).toEqual([]);
     expect(await repo.listForAccount("acc_beto")).toHaveLength(1);
+  });
+});
+
+describe("InMemoryCalendarSourceRepository.listAll", () => {
+  it("lists every account's sources, oldest first", async () => {
+    const repo = new InMemoryCalendarSourceRepository();
+    const beto = {
+      accountId: "acc_beto",
+      calendarId: "u",
+      url: "https://a.test/b.ics",
+      createdAt: NOW + 1,
+    };
+    const ana = {
+      accountId: "acc_ana",
+      calendarId: "work",
+      url: "https://a.test/a.ics",
+      createdAt: NOW,
+    };
+    await repo.save(beto);
+    await repo.save(ana);
+    expect(await repo.listAll()).toEqual([ana, beto]);
+    await repo.delete("acc_ana", "work");
+    expect(await repo.listAll()).toEqual([beto]);
+  });
+});
+
+describe("InMemoryProductEventRepository", () => {
+  it("keeps recorded events in order, as copies", async () => {
+    const repo = new InMemoryProductEventRepository();
+    const created = {
+      kind: "profile_created" as const,
+      accountId: "acc_ana",
+      at: NOW,
+      setupSeconds: 80,
+    };
+    await repo.record(created);
+    await repo.record({
+      kind: "plan_proposed",
+      accountId: "acc_ana",
+      groupId: "g_1",
+      planId: "p_1",
+      at: NOW + 1,
+    });
+    const events = repo.list();
+    expect(events.map((e) => e.kind)).toEqual([
+      "profile_created",
+      "plan_proposed",
+    ]);
+    expect(events[0]).toEqual(created);
+    expect(events[0]).not.toBe(created);
   });
 });

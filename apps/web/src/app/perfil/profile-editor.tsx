@@ -14,7 +14,7 @@ import {
   workweek,
 } from "@amigo/core";
 import { useRouter } from "next/navigation";
-import { useMemo, useState, useTransition } from "react";
+import { useMemo, useRef, useState, useTransition } from "react";
 import { type MessageKey, t } from "@/i18n/t";
 import { formatTime } from "@/lib/format";
 import { buttonClasses, shellClasses } from "@/lib/ui";
@@ -181,6 +181,11 @@ export function ProfileEditor({
   const [changed, setChanged] = useState<Set<string>>(new Set());
   const [status, setStatus] = useState<"idle" | "saved" | "error">("idle");
   const [pending, startTransition] = useTransition();
+  // When the first edit happened (performance.now), to measure setup time.
+  const firstEdit = useRef<number | null>(null);
+  const markEdited = () => {
+    firstEdit.current ??= performance.now();
+  };
 
   const templates = useMemo(
     () => templatesFrom(routines, today),
@@ -196,11 +201,13 @@ export function ProfileEditor({
     !routines.workweek.on && !routines.shifts.on && !routines.classes.on;
 
   function update(next: Routines) {
+    markEdited();
     setRoutines(next);
     setStatus("idle");
   }
 
   function tap(date: LocalDate, key: SegmentKey) {
+    markEdited();
     const seg = segmentOf(key);
     const busyNow = overlap(availability[date]?.busy ?? [], seg) > 0;
     const oneOff = dayState.busyDays[date] ?? [];
@@ -222,8 +229,11 @@ export function ProfileEditor({
   }
 
   function submit() {
+    const started = firstEdit.current;
     startTransition(async () => {
       const result = await save({
+        setupSeconds:
+          started === null ? undefined : (performance.now() - started) / 1000,
         templates,
         days: Object.fromEntries(
           [...changed].map((date) => [

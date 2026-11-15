@@ -18,6 +18,7 @@ const SECTIONS: readonly {
       "privacy.collect.profile",
       "privacy.collect.calendar",
       "privacy.collect.groups",
+      "privacy.collect.usage",
     ],
   },
   { title: "privacy.use.title", body: ["privacy.use.body"] },

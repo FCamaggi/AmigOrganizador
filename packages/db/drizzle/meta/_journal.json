@@ -15,6 +15,13 @@
       "when": 1794777047272,
       "tag": "0001_typical_hellcat",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1794780894055,
+      "tag": "0002_product_events",
+      "breakpoints": true
     }
   ]
 }

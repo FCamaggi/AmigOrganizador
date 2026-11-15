@@ -1,6 +1,6 @@
 "use server";
 
-import { IcsError, IcsFetchError, importIcsCalendar } from "@amigo/adapter-ics";
+import { IcsError, IcsFetchError } from "@amigo/adapter-ics";
 import {
   type BusyTemplate,
   cancelGroupPlan,
@@ -15,6 +15,8 @@ import {
   joinGroup,
   leaveGroup,
   ProfileError,
+  planEvent,
+  profileCreatedEvent,
   proposeGroupPlan,
   removeImportedCalendar,
   setDay,
@@ -25,7 +27,9 @@ import { refresh } from "next/cache";
 import { redirect } from "next/navigation";
 import { DEFAULT_TIMEZONE, TIMEZONES } from "@/lib/plan-options";
 import { authMode } from "./auth/config";
+import { fetchImportedCalendar } from "./calendar-sync";
 import { newId } from "./ids";
+import { track } from "./product-events";
 import { calendarSources, groupPlans, groups, profiles } from "./repository";
 import { getSession, startSession } from "./session";
 
@@ -154,6 +158,12 @@ export async function proposePlanAction(
       now: Date.now(),
     });
     await groupPlans().save(plan);
+    await track(
+      planEvent("plan_proposed", plan, {
+        accountId: session.accountId,
+        at: plan.createdAt,
+      }),
+    );
   } catch (error) {
     if (error instanceof GroupPlanError) return { error: error.code };
     return { error: "generic" };
@@ -172,14 +182,24 @@ async function decide(
   const plan = await groupPlans().findById(planId);
   if (!plan) return;
   try {
-    await groupPlans().save(
-      action === "confirm"
-        ? confirmGroupPlan(plan, group, {
-            accountId: session.accountId,
-            now: Date.now(),
-          })
-        : cancelGroupPlan(plan, group, { accountId: session.accountId }),
-    );
+    if (action === "confirm") {
+      const now = Date.now();
+      const confirmed = confirmGroupPlan(plan, group, {
+        accountId: session.accountId,
+        now,
+      });
+      await groupPlans().save(confirmed);
+      await track(
+        planEvent("plan_confirmed", confirmed, {
+          accountId: session.accountId,
+          at: now,
+        }),
+      );
+    } else {
+      await groupPlans().save(
+        cancelGroupPlan(plan, group, { accountId: session.accountId }),
+      );
+    }
   } catch (error) {
     if (!(error instanceof GroupPlanError)) throw error;
   }
@@ -200,11 +220,13 @@ export async function cancelPlanAction(
   await decide(code, planId, "cancel");
 }
 
+/** The stored profile, or a new empty one (`created` says which). */
 async function myProfile(accountId: string) {
-  return (
-    (await profiles().findByAccount(accountId)) ??
-    createProfile({ accountId, now: Date.now() })
-  );
+  const stored = await profiles().findByAccount(accountId);
+  return {
+    profile: stored ?? createProfile({ accountId, now: Date.now() }),
+    created: stored === null,
+  };
 }
 
 export interface ProfileInput {
@@ -216,6 +238,8 @@ export interface ProfileInput {
       { busy: readonly Interval[]; exceptions: readonly Interval[] }
     >
   >;
+  /** Seconds from the first edit in the editor to this save (exit test). */
+  readonly setupSeconds?: number;
 }
 
 export async function saveProfileAction(
@@ -223,8 +247,9 @@ export async function saveProfileAction(
 ): Promise<{ ok: boolean }> {
   const session = await requireSession("/perfil");
   const now = Date.now();
+  const { profile: base, created } = await myProfile(session.accountId);
   try {
-    let profile = setTemplates(await myProfile(session.accountId), {
+    let profile = setTemplates(base, {
       templates: input.templates,
       now,
     });
@@ -241,6 +266,15 @@ export async function saveProfileAction(
     if (error instanceof ProfileError) return { ok: false };
     throw error;
   }
+  if (created) {
+    await track(
+      profileCreatedEvent({
+        accountId: session.accountId,
+        at: now,
+        setupSeconds: input.setupSeconds,
+      }),
+    );
+  }
   refresh();
   return { ok: true };
 }
@@ -256,19 +290,11 @@ async function syncCalendar(
   url: string,
 ): Promise<string | null> {
   try {
-    const calendar = await importIcsCalendar({
-      id: calendarId,
-      name,
-      url,
-      // Floating times and all-day events: the person's zone (Chile for now).
-      timeZone: DEFAULT_TIMEZONE,
-      now: Date.now(),
-    });
-    const profile = setImportedCalendar(await myProfile(accountId), {
-      calendar,
-      now: Date.now(),
-    });
-    await profiles().save(profile);
+    const calendar = await fetchImportedCalendar({ id: calendarId, name, url });
+    const { profile: base, created } = await myProfile(accountId);
+    const now = Date.now();
+    await profiles().save(setImportedCalendar(base, { calendar, now }));
+    if (created) await track(profileCreatedEvent({ accountId, at: now }));
     return null;
   } catch (error) {
     if (error instanceof IcsFetchError) return error.code;

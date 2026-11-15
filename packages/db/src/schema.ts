@@ -3,6 +3,7 @@ import { sql } from "drizzle-orm";
 import {
   bigint,
   index,
+  integer,
   jsonb,
   pgSchema,
   primaryKey,
@@ -58,4 +59,21 @@ export const calendarSources = appSchema.table(
       columns: [table.accountId, table.calendarId],
     }),
   ],
+);
+
+/** Phase 1 exit test events (`docs/product/METRICS.md`): ids and times only. */
+export const productEvents = appSchema.table(
+  "product_events",
+  {
+    id: bigint("id", { mode: "number" })
+      .primaryKey()
+      .generatedAlwaysAsIdentity(),
+    kind: text("kind").notNull(),
+    accountId: text("account_id").notNull(),
+    groupId: text("group_id"),
+    planId: text("plan_id"),
+    setupSeconds: integer("setup_seconds"),
+    at: timestamp("at", { withTimezone: true }).notNull(),
+  },
+  (table) => [index("product_events_kind_at_idx").on(table.kind, table.at)],
 );

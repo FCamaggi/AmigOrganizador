@@ -2,12 +2,14 @@ import {
   InMemoryCalendarSourceRepository,
   InMemoryGroupPlanRepository,
   InMemoryGroupRepository,
+  InMemoryProductEventRepository,
   InMemoryProfileRepository,
 } from "@amigo/adapter-memory";
 import type {
   CalendarSourceRepository,
   GroupPlanRepository,
   GroupRepository,
+  ProductEventRepository,
   ProfileRepository,
 } from "@amigo/core";
 import {
@@ -15,6 +17,7 @@ import {
   PostgresCalendarSourceRepository,
   PostgresGroupPlanRepository,
   PostgresGroupRepository,
+  PostgresProductEventRepository,
   PostgresProfileRepository,
 } from "@amigo/db";
 import { demoGroups } from "./demo-groups";
@@ -24,6 +27,7 @@ interface Stores {
   readonly profiles: ProfileRepository;
   readonly groupPlans: GroupPlanRepository;
   readonly calendarSources: CalendarSourceRepository;
+  readonly productEvents: ProductEventRepository;
 }
 
 const globalForStores = globalThis as typeof globalThis & {
@@ -43,6 +47,7 @@ function postgresStores(url: string): Stores {
     profiles: new PostgresProfileRepository(db),
     groupPlans: new PostgresGroupPlanRepository(db),
     calendarSources: new PostgresCalendarSourceRepository(db, key),
+    productEvents: new PostgresProductEventRepository(db),
   };
 }
 
@@ -64,6 +69,7 @@ function memoryStores(): Stores {
     profiles: new InMemoryProfileRepository(demo.profiles),
     groupPlans: new InMemoryGroupPlanRepository(demo.plans),
     calendarSources: new InMemoryCalendarSourceRepository(),
+    productEvents: new InMemoryProductEventRepository(),
   };
 }
 
@@ -79,3 +85,4 @@ export const groups = () => stores().groups;
 export const profiles = () => stores().profiles;
 export const groupPlans = () => stores().groupPlans;
 export const calendarSources = () => stores().calendarSources;
+export const productEvents = () => stores().productEvents;

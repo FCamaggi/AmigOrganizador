@@ -5,6 +5,8 @@ import type {
   GroupPlan,
   GroupPlanRepository,
   GroupRepository,
+  ProductEvent,
+  ProductEventRepository,
   Profile,
   ProfileRepository,
 } from "@amigo/core";
@@ -120,6 +122,17 @@ export class InMemoryCalendarSourceRepository
       .map((source) => structuredClone(source));
   }
 
+  async listAll(): Promise<CalendarSource[]> {
+    return [...this.#sources.values()]
+      .sort(
+        (a, b) =>
+          a.createdAt - b.createdAt ||
+          a.accountId.localeCompare(b.accountId) ||
+          a.calendarId.localeCompare(b.calendarId),
+      )
+      .map((source) => structuredClone(source));
+  }
+
   async save(source: CalendarSource): Promise<void> {
     this.#sources.set(
       InMemoryCalendarSourceRepository.#key(
@@ -134,5 +147,18 @@ export class InMemoryCalendarSourceRepository
     this.#sources.delete(
       InMemoryCalendarSourceRepository.#key(accountId, calendarId),
     );
+  }
+}
+
+/** Product events in memory (dev and e2e); `list` is for inspection. */
+export class InMemoryProductEventRepository implements ProductEventRepository {
+  readonly #events: ProductEvent[] = [];
+
+  async record(event: ProductEvent): Promise<void> {
+    this.#events.push(structuredClone(event));
+  }
+
+  list(): ProductEvent[] {
+    return this.#events.map((event) => structuredClone(event));
   }
 }

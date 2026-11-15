@@ -83,6 +83,16 @@ export {
   type OutlookMember,
   outlookRange,
 } from "./group/outlook";
+export {
+  MAX_SETUP_SECONDS,
+  type PlanEvent,
+  type ProductEvent,
+  type ProductEventKind,
+  type ProfileCreatedEvent,
+  planEvent,
+  profileCreatedEvent,
+} from "./metrics/product-event";
+export type { ProductEventRepository } from "./metrics/product-event-repository";
 export type {
   CalendarSource,
   CalendarSourceRepository,
@@ -101,4 +111,9 @@ export {
   type UtcSpan,
 } from "./profile/profile";
 export type { ProfileRepository } from "./profile/profile-repository";
+export {
+  type ResyncCalendarsInput,
+  type ResyncReport,
+  resyncCalendars,
+} from "./profile/resync-calendars";
 export { todayIn, utcToLocal, zonedTimeToUtc } from "./time/zoned";

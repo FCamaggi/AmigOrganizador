@@ -1,6 +1,8 @@
 import { defineConfig, devices } from "@playwright/test";
 
 const PORT = 3100;
+/** Test-only value: lets e2e call the cron route like Vercel Cron does. */
+export const E2E_CRON_SECRET = "e2e-cron-secret-not-for-production";
 
 /**
  * End-to-end tests run the production build in local mode: in-memory data
@@ -28,6 +30,7 @@ export default defineConfig({
       NEXT_PUBLIC_SUPABASE_URL: "",
       NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: "",
       DATABASE_URL: "",
+      CRON_SECRET: E2E_CRON_SECRET,
     },
   },
 });

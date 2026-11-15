@@ -27,7 +27,9 @@ import {
   PostgresCalendarSourceRepository,
   PostgresGroupPlanRepository,
   PostgresGroupRepository,
+  PostgresProductEventRepository,
   PostgresProfileRepository,
+  productEvents,
   schema,
 } from "./index";
 
@@ -68,12 +70,12 @@ afterAll(async () => {
 
 beforeEach(async () => {
   await db.execute(
-    sql`TRUNCATE TABLE app.groups, app.profiles, app.group_plans, app.calendar_sources`,
+    sql`TRUNCATE TABLE app.groups, app.profiles, app.group_plans, app.calendar_sources, app.product_events`,
   );
 });
 
 describe("migrations and RLS", () => {
-  it("enables row level security on all four app tables", async () => {
+  it("enables row level security on every app table", async () => {
     const result = await db.execute<{
       tablename: string;
       rowsecurity: boolean;
@@ -84,6 +86,7 @@ describe("migrations and RLS", () => {
       { tablename: "calendar_sources", rowsecurity: true },
       { tablename: "group_plans", rowsecurity: true },
       { tablename: "groups", rowsecurity: true },
+      { tablename: "product_events", rowsecurity: true },
       { tablename: "profiles", rowsecurity: true },
     ]);
   });
@@ -264,6 +267,71 @@ describe("PostgresCalendarSourceRepository", () => {
     await repo.delete("acc_ana", "work");
     expect(await repo.listForAccount("acc_ana")).toEqual([]);
     expect(await repo.listForAccount("acc_beto")).toHaveLength(1);
+  });
+});
+
+describe("PostgresCalendarSourceRepository.listAll", () => {
+  it("lists every account's sources decrypted, oldest first", async () => {
+    const repo = new PostgresCalendarSourceRepository(db, TEST_KEY);
+    const beto = {
+      accountId: "acc_beto",
+      calendarId: "u",
+      url: "https://a.test/b.ics",
+      createdAt: NOW + 1,
+    };
+    const ana = {
+      accountId: "acc_ana",
+      calendarId: "work",
+      url: "https://a.test/a.ics",
+      createdAt: NOW,
+    };
+    await repo.save(beto);
+    await repo.save(ana);
+    expect(await repo.listAll()).toEqual([ana, beto]);
+  });
+});
+
+describe("PostgresProductEventRepository", () => {
+  it("stores each event as a row with its own columns", async () => {
+    const repo = new PostgresProductEventRepository(db);
+    await repo.record({
+      kind: "profile_created",
+      accountId: "acc_ana",
+      at: NOW,
+      setupSeconds: 95,
+    });
+    await repo.record({
+      kind: "plan_confirmed",
+      accountId: "acc_beto",
+      groupId: "g_1",
+      planId: "p_1",
+      at: NOW + 1000,
+    });
+
+    const rows = await db
+      .select()
+      .from(productEvents)
+      .orderBy(productEvents.at);
+    expect(
+      rows.map(({ id: _id, ...row }) => ({ ...row, at: row.at.getTime() })),
+    ).toEqual([
+      {
+        kind: "profile_created",
+        accountId: "acc_ana",
+        groupId: null,
+        planId: null,
+        setupSeconds: 95,
+        at: NOW,
+      },
+      {
+        kind: "plan_confirmed",
+        accountId: "acc_beto",
+        groupId: "g_1",
+        planId: "p_1",
+        setupSeconds: null,
+        at: NOW + 1000,
+      },
+    ]);
   });
 });
 

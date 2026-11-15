@@ -14,6 +14,8 @@ export interface CalendarSource {
 /** Port for storing calendar sources. Adapters must never log `url`. */
 export interface CalendarSourceRepository {
   listForAccount(accountId: string): Promise<CalendarSource[]>;
+  /** Every account's sources, oldest first (the periodic re-sync). */
+  listAll(): Promise<CalendarSource[]>;
   /** Inserts or replaces the source with the same account and calendar id. */
   save(source: CalendarSource): Promise<void>;
   delete(accountId: string, calendarId: string): Promise<void>;

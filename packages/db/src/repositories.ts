@@ -5,13 +5,21 @@ import type {
   GroupPlan,
   GroupPlanRepository,
   GroupRepository,
+  ProductEvent,
+  ProductEventRepository,
   Profile,
   ProfileRepository,
 } from "@amigo/core";
 import { and, asc, eq, inArray, sql } from "drizzle-orm";
 import type { Database } from "./client";
 import { decryptUrl, encryptUrl } from "./crypto";
-import { calendarSources, groupPlans, groups, profiles } from "./schema";
+import {
+  calendarSources,
+  groupPlans,
+  groups,
+  productEvents,
+  profiles,
+} from "./schema";
 
 export class PostgresGroupRepository implements GroupRepository {
   readonly #db: Database;
@@ -196,6 +204,23 @@ export class PostgresCalendarSourceRepository
     }));
   }
 
+  async listAll(): Promise<CalendarSource[]> {
+    const rows = await this.#db
+      .select()
+      .from(calendarSources)
+      .orderBy(
+        asc(calendarSources.createdAt),
+        asc(calendarSources.accountId),
+        asc(calendarSources.calendarId),
+      );
+    return rows.map((row) => ({
+      accountId: row.accountId,
+      calendarId: row.calendarId,
+      url: decryptUrl(row.urlCiphertext, this.#key),
+      createdAt: row.createdAt,
+    }));
+  }
+
   async save(source: CalendarSource): Promise<void> {
     const urlCiphertext = encryptUrl(source.url, this.#key);
     await this.#db
@@ -224,5 +249,25 @@ export class PostgresCalendarSourceRepository
           eq(calendarSources.calendarId, calendarId),
         ),
       );
+  }
+}
+
+export class PostgresProductEventRepository implements ProductEventRepository {
+  readonly #db: Database;
+
+  constructor(db: Database) {
+    this.#db = db;
+  }
+
+  async record(event: ProductEvent): Promise<void> {
+    await this.#db.insert(productEvents).values({
+      kind: event.kind,
+      accountId: event.accountId,
+      groupId: event.kind === "profile_created" ? null : event.groupId,
+      planId: event.kind === "profile_created" ? null : event.planId,
+      setupSeconds:
+        event.kind === "profile_created" ? event.setupSeconds : null,
+      at: new Date(event.at),
+    });
   }
 }

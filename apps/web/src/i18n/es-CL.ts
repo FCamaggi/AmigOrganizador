@@ -244,12 +244,14 @@ export const esCL = {
   "privacy.collect.profile":
     "Tu perfil de disponibilidad: las rutinas y los días ocupados que anotas. Lo ven los grupos a los que perteneces.",
   "privacy.collect.calendar":
-    "Si importas un calendario por link ICS: solo cuándo estás ocupado. Nunca guardamos títulos, descripciones ni lugares de tus eventos. El link se guarda cifrado y solo se usa para volver a leer tu calendario.",
+    "Si importas un calendario por link ICS: solo cuándo estás ocupado. Nunca guardamos títulos, descripciones ni lugares de tus eventos. El link se guarda cifrado y solo se usa para volver a leer tu calendario, una vez al día o cuando tocas Actualizar.",
+  "privacy.collect.usage":
+    "Registros de uso, sin contenido: cuándo creas tu perfil y cuántos segundos te tomó, y cuándo se propone o confirma un plan. Solo guardan identificadores y horas, nunca nombres ni títulos.",
   "privacy.collect.groups":
     "Tus grupos y planes: el nombre del grupo, quién es miembro y los planes que se proponen o confirman.",
   "privacy.use.title": "Para qué los usamos",
   "privacy.use.body":
-    "Solo para mostrarle a tu grupo qué días les sirven a todos y para armar las invitaciones de calendario. No vendemos tus datos, no mostramos publicidad y no los compartimos con terceros para marketing.",
+    "Para mostrarle a tu grupo qué días les sirven a todos, para armar las invitaciones de calendario y, con los registros de uso, para saber si la app de verdad ayuda a juntarse. No usamos herramientas de analítica de terceros. No vendemos tus datos, no mostramos publicidad y no los compartimos con terceros para marketing.",
   "privacy.share.title": "Quién más los procesa",
   "privacy.share.body":
     "Usamos Supabase (base de datos y cuentas) y Vercel (el sitio). Si entras con Google, Google te identifica y nos entrega tu nombre y correo. Ninguno de ellos usa tus datos para otra cosa por encargo nuestro.",

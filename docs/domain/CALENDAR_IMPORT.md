@@ -53,4 +53,22 @@ in error messages. It is stored apart from the profile, as a
 `CalendarSource { accountId, calendarId, url }` behind the
 `CalendarSourceRepository` port (`core/src/profile/calendar-source-repository.ts`):
 profiles are read by every group a person belongs to, sources only to re-sync.
-The Supabase adapter (T10) should encrypt `url` at rest.
+The Postgres adapter encrypts `url` at rest (AES-256-GCM, `CALENDAR_URL_KEY`).
+
+## Periodic re-sync
+
+Links are read on import, on "Actualizar", and once a day by Vercel Cron
+(`apps/web/vercel.json`, 09:00 UTC) calling `GET /api/cron/resync-calendars`
+with `Authorization: Bearer $CRON_SECRET` (at least 16 characters; without it
+the route answers 401 to everyone). The route runs core `resyncCalendars`
+(`core/src/profile/resync-calendars.ts`):
+
+- A source whose calendar is no longer in the profile is deleted, not read.
+- A calendar that can't be read keeps its previous busy time.
+- The profile is read again after the fetch and only that calendar's busy
+  time and `syncedAt` change: edits saved meanwhile survive, and a calendar
+  removed meanwhile is not brought back.
+- One account's calendars run one after another (no lost update on the same
+  profile); up to 4 accounts run at the same time.
+- The answer and the log carry counts only (`synced`, `failed`, `orphaned`),
+  never links or accounts.
