@@ -91,7 +91,13 @@ function Lane({
               />
             );
           }
-          return null;
+          return (
+            <span
+              key={segment.start}
+              className="move-line hatch-busy absolute top-2 h-1 rounded-[2px]"
+              style={style}
+            />
+          );
         })}
       </span>
     </li>
@@ -176,8 +182,12 @@ function Trunk({
               />
               {width >= 9 ? (
                 <span
-                  className="absolute top-0 text-center font-extrabold text-[0.6875rem] leading-none"
-                  style={{ left: `${left}%`, width: `${width}%` }}
+                  className="absolute text-center font-extrabold text-[0.6875rem] leading-none"
+                  style={{
+                    left: `${left}%`,
+                    width: `${width}%`,
+                    bottom: 5 + thickness / 2 + 4,
+                  }}
                 >
                   {step.free}
                 </span>
@@ -192,8 +202,9 @@ function Trunk({
 
 function Axis({ span }: { readonly span: LineDiagramProps["span"] }) {
   const ticks: number[] = [];
-  const first = Math.ceil(span.start / 120) * 120;
-  for (let minute = first; minute <= span.end; minute += 120)
+  const step = span.end - span.start <= 8 * 60 ? 60 : 120;
+  const first = Math.ceil(span.start / step) * step;
+  for (let minute = first; minute <= span.end; minute += step)
     ticks.push(minute);
   return (
     <div aria-hidden="true" className="mt-1 flex">
@@ -262,15 +273,19 @@ export function LineDiagram({
         ) : null}
       </figcaption>
 
-      <div className="relative">
+      <div className="relative pt-3.5">
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-y-[-4px] right-0 left-6"
+          className="pointer-events-none absolute top-1.5 right-0 bottom-[-4px] left-6"
         >
           <span
-            className="move-station absolute inset-y-0 rounded-lg border-2 border-ink bg-ink/[0.04]"
+            className="move-station absolute inset-y-0 rounded-2xl border-2 border-ink"
             style={{ left: `${stationLeft}%`, width: `${stationWidth}%` }}
-          />
+          >
+            <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full border-2 border-ink bg-white px-2 font-extrabold text-[0.6875rem] leading-4">
+              {formatSpan(station.start, station.end)}
+            </span>
+          </span>
         </div>
         <ul className="relative space-y-1">
           {collapsed ? (

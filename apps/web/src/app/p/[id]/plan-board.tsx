@@ -124,6 +124,19 @@ function OptionRow({
               {formatSpan(option.start, option.end)}
             </span>
           </span>
+          {option.windowEnd - option.windowStart > option.end - option.start ? (
+            <span className="mt-0.5 block text-[0.8125rem] text-mute">
+              {t(
+                option.start > option.windowStart + 15
+                  ? "options.window.evening"
+                  : "options.window",
+                {
+                  from: formatTime(option.windowStart),
+                  to: formatTime(option.windowEnd),
+                },
+              )}
+            </span>
+          ) : null}
           {option.reasons.length > 0 ? (
             <span className="mt-1 flex flex-wrap gap-1">
               {option.reasons.map((reason) => (
@@ -249,10 +262,10 @@ export function PlanBoard({
         {role === "organizer" && selected ? (
           <form action={confirm}>
             <input type="hidden" name="date" value={selected.date} />
-            <input type="hidden" name="start" value={selected.confirmStart} />
+            <input type="hidden" name="start" value={selected.start} />
             <button type="submit" className={buttonClasses.primary}>
               {t("actions.confirm", {
-                day: `${selected.dayLabel}, ${formatTime(selected.confirmStart)}`,
+                day: `${selected.dayLabel}, ${formatTime(selected.start)}`,
               })}
             </button>
           </form>

@@ -66,7 +66,7 @@ export const esCL = {
   "diagram.title": "{day} · quién está libre",
   "diagram.station": "Estación común · {time}",
   "diagram.legend":
-    "Línea llena: libre · punteada: sin responder · vacío: ocupado",
+    "Línea de color: libre · rayado: ocupado · punteada: sin responder",
   "diagram.legend.trunk":
     "Línea gruesa: cuántos están libres · abajo, quienes no pueden o no responden",
   "diagram.trunkOf": "{free} de {total} personas",
@@ -98,10 +98,13 @@ export const esCL = {
   "reason.PARTIAL_AVAILABLE": "Casi todos",
   "reason.LONG_BLOCK": "Bloque largo",
   "reason.ENOUGH_DURATION": "Alcanza el tiempo",
-  "reason.EVENING": "Tarde/noche",
+  "reason.EVENING": "Tarde-noche",
   "reason.LATE": "Tarde en la noche",
   "reason.GOOD_WEEKDAY": "Buen día",
   "reason.MISSING_DATA": "Falta gente",
+  "reason.SOONER": "Más pronto",
+  "options.window": "Libres de {from} a {to}",
+  "options.window.evening": "Libres de {from} a {to} · elegimos la tarde-noche",
 
   "actions.confirm": "Confirmar {day}",
   "actions.confirm.pick": "Elige una opción",
@@ -121,7 +124,9 @@ export const esCL = {
 
   "confirmed.title": "Plan confirmado",
   "confirmed.when": "{day} · {time}",
-  "confirmed.who": "{free} de {total} pueden",
+  "confirmed.who.free": "Van:",
+  "confirmed.who.busy": "No pueden:",
+  "confirmed.who.unknown": "Sin responder:",
   "confirmed.google": "Agregar a Google Calendar",
   "confirmed.ics": "Descargar para otro calendario (.ics)",
   "confirmed.share": "Avisar al grupo",

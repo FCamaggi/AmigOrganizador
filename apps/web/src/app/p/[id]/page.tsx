@@ -1,6 +1,12 @@
-import { buildGoogleCalendarUrl, inviteFor, type Plan } from "@amigo/core";
+import {
+  buildGoogleCalendarUrl,
+  dayLines,
+  inviteFor,
+  type Plan,
+} from "@amigo/core";
 import Link from "next/link";
 import { Suspense } from "react";
+import { LineDiagram } from "@/components/line-diagram";
 import { PlanSign } from "@/components/plan-sign";
 import { ShareButton, WhatsAppLink } from "@/components/share-buttons";
 import { TopBar } from "@/components/top-bar";
@@ -134,26 +140,62 @@ async function PlanScreen({
     const invite = inviteFor(plan, planUrl);
     const day = formatDay(slot.date);
     const time = formatSpan(slot.start, slot.end);
+    const span = {
+      start: Math.max(0, Math.floor((slot.start - 120) / 60) * 60),
+      end: Math.min(1440, Math.ceil((slot.end + 60) / 60) * 60),
+    };
+    const lines = dayLines(plan, slot.date, span).map((line, index) => ({
+      ...line,
+      colorIndex: index,
+    }));
+    const stateIn = (line: (typeof lines)[number]) =>
+      line.segments.some(
+        (s) =>
+          s.state === "free" &&
+          s.start <= slot.start &&
+          s.end >= Math.min(slot.end, span.end),
+      )
+        ? "free"
+        : line.answered
+          ? "busy"
+          : "unknown";
+    const who = {
+      free: [] as string[],
+      busy: [] as string[],
+      unknown: [] as string[],
+    };
+    for (const line of lines) who[stateIn(line)].push(line.displayName);
     return (
       <>
         {header}
-        <section className="mt-5" aria-labelledby="confirmed-title">
-          <h2
-            id="confirmed-title"
-            className="font-extrabold text-xs uppercase tracking-[0.06em]"
-          >
-            {t("confirmed.title")}
-          </h2>
-          <div className="mt-2 flex items-center gap-3 rounded-[1.25rem] border-[3px] border-ink px-4 py-3">
-            <span
-              aria-hidden="true"
-              className="size-5 flex-none rounded-full border-[5px] border-line-red bg-white"
-            />
-            <p className="font-extrabold text-2xl leading-tight">
-              {t("confirmed.when", { day, time })}
-            </p>
-          </div>
-        </section>
+        <h2 className="mt-5 flex items-center gap-3 rounded-[1.25rem] border-[3px] border-ink px-4 py-3">
+          <span
+            aria-hidden="true"
+            className="size-5 flex-none rounded-full border-[5px] border-line-red bg-white"
+          />
+          <span className="font-extrabold text-2xl leading-tight">
+            <span className="sr-only">{t("confirmed.title")}: </span>
+            {t("confirmed.when", { day, time })}
+          </span>
+        </h2>
+        <div className="mt-3">
+          <LineDiagram
+            dayLabel={day}
+            span={span}
+            station={{ start: slot.start, end: slot.end }}
+            lines={lines}
+          />
+        </div>
+        <ul className="mt-3 space-y-1 text-sm">
+          {(["free", "busy", "unknown"] as const).map((state) =>
+            who[state].length > 0 ? (
+              <li key={state}>
+                <b className="font-bold">{t(`confirmed.who.${state}`)}</b>{" "}
+                <span className="text-mute">{who[state].join(", ")}</span>
+              </li>
+            ) : null,
+          )}
+        </ul>
         <div className="mt-5 space-y-2">
           {invite ? (
             <a
