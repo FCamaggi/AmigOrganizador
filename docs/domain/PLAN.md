@@ -44,8 +44,10 @@ Implementation: `packages/core/src/plan/plan-view.ts`, `packages/core/src/time/z
 
 - `dayLines(plan, date, span)`: each participant's free / busy / unknown
   segments on a date, for the line diagram. No answer = one unknown segment.
-- `slotFromOption(window)`: the organizer confirms an option at its start,
-  rounded up to the 15-minute grid.
+- `slotFromOption(window, duration)`: the slot the organizer confirms for an
+  option, as close to 19:00 as the window allows, on the 15-minute grid
+  (evenings rank best in the engine; a whole free Saturday must not become
+  an 08:00 asado).
 - `inviteFor(plan, url)`: the calendar invite of a confirmed plan, with UTC
   times computed in the plan's timezone (`zonedTimeToUtc`).
 - `todayIn(timeZone, now)`: today's local date, for default ranges.

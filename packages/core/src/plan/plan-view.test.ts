@@ -83,20 +83,34 @@ describe("dayLines", () => {
 });
 
 describe("slotFromOption", () => {
-  const window = {
-    date: SAT,
-    start: h(18) + 10,
-    end: h(22),
-  } as AvailabilityWindow;
+  const window = (start: number, end: number) =>
+    ({ date: SAT, start, end }) as AvailabilityWindow;
 
-  it("starts at the window start, rounded up to the 15-minute grid", () => {
-    expect(slotFromOption(window)).toEqual({ date: SAT, start: h(18) + 15 });
-  });
-
-  it("keeps a start already on the grid", () => {
-    expect(slotFromOption({ ...window, start: h(19) })).toEqual({
+  it("starts at 19:00 when the window allows it", () => {
+    expect(slotFromOption(window(h(8), h(22)), 180)).toEqual({
       date: SAT,
       start: h(19),
+    });
+  });
+
+  it("starts as late as the window allows when it ends before 19:00 + duration", () => {
+    expect(slotFromOption(window(h(8), h(21)), 180)).toEqual({
+      date: SAT,
+      start: h(18),
+    });
+  });
+
+  it("starts at the window start, rounded up to the grid, when it begins after 19:00", () => {
+    expect(slotFromOption(window(h(19) + 10, h(23)), 180)).toEqual({
+      date: SAT,
+      start: h(19) + 15,
+    });
+  });
+
+  it("keeps the slot on the 15-minute grid inside the window", () => {
+    expect(slotFromOption(window(h(14), h(20) + 50), 120)).toEqual({
+      date: SAT,
+      start: h(18) + 45,
     });
   });
 });
