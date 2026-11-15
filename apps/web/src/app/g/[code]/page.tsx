@@ -191,10 +191,10 @@ async function GroupScreen({
               <div className="flex items-start gap-2.5">
                 <span
                   aria-hidden="true"
-                  className={`mt-0.5 size-[1.375rem] flex-none rounded-full border-[5px] bg-white ${
+                  className={`mt-1 h-3.5 w-7 flex-none rounded-full border-2 bg-white ${
                     plan.status === "confirmed"
-                      ? "border-line-red"
-                      : "border-rule-strong border-dashed"
+                      ? "border-ink"
+                      : "border-mute border-dashed"
                   }`}
                 />
                 <div className="min-w-0 flex-1">
@@ -245,8 +245,22 @@ async function GroupScreen({
                 ) : null}
               </div>
               {plan.canDecide ? (
-                <details className="mt-1 pl-8 text-sm">
-                  <summary className="flex min-h-11 cursor-pointer items-center font-bold text-mute">
+                <details className="group mt-1 pl-8 text-sm">
+                  <summary className="flex min-h-11 cursor-pointer list-none items-center font-bold text-ink [&::-webkit-details-marker]:hidden">
+                    <svg
+                      aria-hidden="true"
+                      viewBox="0 0 16 16"
+                      className="mr-1 size-4 transition-transform group-open:rotate-90"
+                    >
+                      <path
+                        d="M6 3l5 5-5 5"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2.2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
                     {t("plans.more")}
                   </summary>
                   <form
@@ -313,8 +327,22 @@ async function GroupScreen({
             {t("group.feed")}
           </a>
           <p className="text-mute">{t("group.feed.hint")}</p>
-          <details className="mt-2">
-            <summary className="flex min-h-11 cursor-pointer items-center font-bold text-mute">
+          <details className="group mt-2">
+            <summary className="flex min-h-11 cursor-pointer list-none items-center font-bold text-ink [&::-webkit-details-marker]:hidden">
+              <svg
+                aria-hidden="true"
+                viewBox="0 0 16 16"
+                className="mr-1 size-4 transition-transform group-open:rotate-90"
+              >
+                <path
+                  d="M6 3l5 5-5 5"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
               {t("group.more")}
             </summary>
             <form action={leaveGroupAction.bind(null, group.inviteCode)}>
