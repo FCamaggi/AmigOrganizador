@@ -75,3 +75,39 @@ describe("authMode", () => {
     expect(authMode()).toBe("local");
   });
 });
+
+describe("safeNext never leaves the site", () => {
+  const parts = [
+    "/",
+    "//",
+    ".",
+    "..",
+    "%2e",
+    "%2E%2e",
+    "\\",
+    "%5c",
+    "%2f",
+    "\t",
+    "@",
+    ":",
+    "evil.com",
+    "?",
+    "#",
+  ];
+  const inputs: string[] = [];
+  for (const a of parts)
+    for (const b of parts)
+      for (const c of parts)
+        inputs.push(`/${a}${b}${c}`, `/${a}/${b}/${c}evil.com`);
+
+  it(`keeps all ${inputs.length} crafted inputs on the same origin`, () => {
+    const origin = "https://amigorganizador.vercel.app";
+    for (const input of inputs) {
+      const target = safeNext(input);
+      expect(target.startsWith("/") && !target.startsWith("//"), input).toBe(
+        true,
+      );
+      expect(new URL(target, origin).origin, input).toBe(origin);
+    }
+  });
+});
