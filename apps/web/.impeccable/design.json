@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-11-14T00:00:00Z",
+  "generatedAt": "2026-11-15T00:00:00Z",
   "title": "Design System: AmigOrganizador",
   "extensions": {
     "colorMeta": {
@@ -216,9 +216,17 @@
       }
     },
     "typographyMeta": {
+      "display-hero": {
+        "displayName": "Display hero",
+        "purpose": "Signed-out home headline only."
+      },
+      "title-page": {
+        "displayName": "Title page",
+        "purpose": "Page title on screens without a sign (groups list, profile)."
+      },
       "display": {
         "displayName": "Display",
-        "purpose": "Plan title inside the ink sign."
+        "purpose": "Group or plan name inside the ink sign."
       },
       "headline": {
         "displayName": "Headline",
@@ -247,6 +255,10 @@
       "button": {
         "displayName": "Button",
         "purpose": "Primary button text."
+      },
+      "button-small": {
+        "displayName": "Button small",
+        "purpose": "Secondary buttons, chips and profile-editor day labels."
       }
     },
     "shadows": [],
@@ -291,7 +303,10 @@
       "track": "08:00–24:00",
       "maxSeparateLines": 6,
       "maxBlockerLanes": 3,
-      "trunkThickness": "3px–10px by free share"
+      "trunkThickness": "3px–10px by free share",
+      "stripDays": 28,
+      "stripCell": "40px",
+      "groupOrder": "sign, strip, diagram, ranked days, plans, links, sticky footer"
     }
   },
   "components": [
@@ -300,7 +315,7 @@
       "kind": "button",
       "refersTo": "button-primary",
       "description": "The single full-width action in the sticky footer; the label names the outcome.",
-      "html": "<button class=\"ds-btn-primary\">Confirmar Sáb 21 nov, 19:00</button>",
+      "html": "<button class=\"ds-btn-primary\">Proponer Sáb 12 dic</button>",
       "css": ".ds-btn-primary{font-family:var(--font-sign, 'Roboto Condensed','Arial Narrow',sans-serif);display:flex;align-items:center;justify-content:center;width:100%;height:3.125rem;padding:0 16px;border:none;border-radius:6px;background:var(--color-line-blue,#0065bd);color:#fff;font-weight:800;font-size:1.0625rem;cursor:pointer}.ds-btn-primary:active{background:#00539c}.ds-btn-primary:focus-visible{outline:3px solid var(--color-line-blue,#0065bd);outline-offset:2px;}.ds-btn-primary:disabled{background:var(--color-rule-strong,#bdbdb9);color:var(--color-ink,#1d1d1b)}"
     },
     {
@@ -308,15 +323,15 @@
       "kind": "button",
       "refersTo": "button-secondary",
       "description": "White ink-bordered buttons that share the row under the primary action.",
-      "html": "<div class=\"ds-row\"><button class=\"ds-btn-secondary\">Avisar a los que faltan</button><button class=\"ds-btn-secondary\">Compartir link</button></div>",
+      "html": "<div class=\"ds-row\"><button class=\"ds-btn-secondary\">Invitar al grupo</button><button class=\"ds-btn-secondary\">Compartir link</button></div>",
       "css": ".ds-row{display:flex;gap:8px}.ds-btn-secondary{font-family:var(--font-sign, 'Roboto Condensed','Arial Narrow',sans-serif);flex:1;display:flex;align-items:center;justify-content:center;min-height:2.75rem;padding:0 12px;border:1.5px solid var(--color-ink,#1d1d1b);border-radius:6px;background:#fff;color:var(--color-ink,#1d1d1b);font-weight:700;font-size:0.9375rem;cursor:pointer}.ds-btn-secondary:active{background:var(--color-panel,#f4f4f2)}.ds-btn-secondary:focus-visible{outline:3px solid var(--color-line-blue,#0065bd);outline-offset:2px;}"
     },
     {
       "name": "Routine Chips",
       "kind": "chip",
       "refersTo": "chip",
-      "description": "Toggle chips; selected inverts to ink. Used for routine profiles, range, duration.",
-      "html": "<div class=\"ds-chips\"><button class=\"ds-chip\" aria-pressed=\"true\">Nada fijo</button><button class=\"ds-chip\" aria-pressed=\"false\">Trabajo L-V</button><button class=\"ds-chip\" aria-pressed=\"false\">Turnos</button><button class=\"ds-chip\" aria-pressed=\"false\">Clases</button></div>",
+      "description": "Combinable toggle chips; selected inverts to ink. Nada fijo is on only when no routine is.",
+      "html": "<div class=\"ds-chips\"><button class=\"ds-chip\" aria-pressed=\"false\">Nada fijo</button><button class=\"ds-chip\" aria-pressed=\"false\">Trabajo L-V</button><button class=\"ds-chip\" aria-pressed=\"true\">Turnos</button><button class=\"ds-chip\" aria-pressed=\"true\">Clases</button></div>",
       "css": ".ds-chips{display:flex;flex-wrap:wrap;gap:6px}.ds-chip{font-family:var(--font-sign, 'Roboto Condensed','Arial Narrow',sans-serif);min-height:2.75rem;padding:0 12px;border:1.5px solid var(--color-rule-strong,#bdbdb9);border-radius:6px;background:#fff;color:var(--color-ink,#1d1d1b);font-weight:700;font-size:0.9375rem;cursor:pointer}.ds-chip[aria-pressed=true]{background:var(--color-ink,#1d1d1b);border-color:var(--color-ink,#1d1d1b);color:#fff}.ds-chip:hover{border-color:var(--color-ink,#1d1d1b)}.ds-chip:focus-visible{outline:3px solid var(--color-line-blue,#0065bd);outline-offset:2px;}"
     },
     {
@@ -339,8 +354,8 @@
       "name": "Plan Sign",
       "kind": "card",
       "refersTo": "plan-sign",
-      "description": "The ink enamel sign at the top of every plan screen with a line-colour badge.",
-      "html": "<header class=\"ds-sign\"><span class=\"ds-badge\">C</span><div><h1 class=\"ds-sign-title\">Cumpleaños de Javi</h1><p class=\"ds-sign-meta\">15 nov al 28 nov · 3 h · 10 personas</p></div></header>",
+      "description": "The ink enamel sign at the top of every group and plan screen with a line-colour badge.",
+      "html": "<header class=\"ds-sign\"><span class=\"ds-badge\">L</span><div><h1 class=\"ds-sign-title\">Los del colegio</h1><p class=\"ds-sign-meta\">6 personas · 5 con perfil</p></div></header>",
       "css": ".ds-sign{font-family:var(--font-sign, 'Roboto Condensed','Arial Narrow',sans-serif);display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:6px;background:var(--color-ink,#1d1d1b);color:#fff}.ds-badge{display:grid;place-items:center;flex:none;width:32px;height:32px;border-radius:9999px;background:var(--color-line-red,#e1251b);font-weight:800}.ds-sign-title{margin:0;font-weight:800;font-size:1.25rem;line-height:1.25;letter-spacing:0.01em}.ds-sign-meta{margin:1px 0 0;font-size:0.75rem;color:var(--color-sign-sub,#d6d6d3)}"
     },
     {
@@ -363,21 +378,45 @@
       "name": "Busy Editor Day",
       "kind": "custom",
       "refersTo": "busy-editor-day",
-      "description": "A day is the person's own line; busy time lays the ink hatch over it; three 44px tap segments.",
+      "description": "A day is the person's own line; busy time lays the ink hatch over it; three 44px tap segments. Reused by the profile editor and, with a hairline baseline, the class routine.",
       "html": "<div class=\"ds-day-row\"><span class=\"ds-day-label\">Lun 17</span><span class=\"ds-day-track\"><span class=\"ds-own\"></span><span class=\"ds-hatch\" style=\"left:6.25%;width:62.5%\"></span><button class=\"ds-seg\" style=\"left:0;width:31.25%\" aria-label=\"Mañana\"></button><button class=\"ds-seg ds-seg-div\" style=\"left:31.25%;width:37.5%\" aria-label=\"Tarde\"></button><button class=\"ds-seg ds-seg-div\" style=\"left:68.75%;width:31.25%\" aria-label=\"Noche\"></button></span></div>",
       "css": ".ds-day-row{font-family:var(--font-sign, 'Roboto Condensed','Arial Narrow',sans-serif);display:flex;align-items:center;padding:4px 0;border-bottom:1px solid var(--color-rule,#e4e4e1);color:var(--color-ink,#1d1d1b)}.ds-day-label{width:4.25rem;flex:none;font-weight:800;font-size:0.9375rem}.ds-day-track{position:relative;flex:1;height:2.75rem}.ds-own{position:absolute;left:0;right:0;top:50%;margin-top:-3px;height:6px;border-radius:9999px;background:var(--color-line-green,#00a651)}.ds-hatch{position:absolute;top:50%;margin-top:-8px;height:16px;border-radius:3px;background-color:var(--color-ink,#1d1d1b);background-image:repeating-linear-gradient(-45deg,transparent 0 4px,rgb(255 255 255/.28) 4px 6px)}.ds-seg{position:absolute;top:0;bottom:0;border:0;background:transparent;cursor:pointer}.ds-seg-div{border-left:1px dashed var(--color-rule,#e4e4e1)}.ds-seg:active{background:rgb(29 29 27/.06)}.ds-seg:focus-visible{outline:3px solid var(--color-line-blue,#0065bd);outline-offset:2px;}"
+    },
+    {
+      "name": "Day Strip",
+      "kind": "custom",
+      "refersTo": "strip-station-all",
+      "description": "Four weeks as one ink line: filled station = everyone with a profile can come, hollow ring = some, grey dot = none; selected day outlined.",
+      "html": "<section class=\"ds-strip\"><h2 class=\"ds-cap\">Próximas 4 semanas</h2><ol><li><button aria-pressed=\"false\"><small>Do</small><i class=\"ds-st ds-st-all\"></i><b>15</b><small>5/6</small></button></li><li><button aria-pressed=\"true\"><small>Lu</small><i class=\"ds-st ds-st-some\"></i><b>16</b><small>4/6</small></button></li><li><span><small>Ma</small><i class=\"ds-st ds-st-none\"></i><b>17</b><small>–</small></span></li><li><button aria-pressed=\"false\"><small>Mi</small><i class=\"ds-st ds-st-all\"></i><b>18</b><small>5/6</small></button></li></ol></section>",
+      "css": ".ds-strip{font-family:var(--font-sign, 'Roboto Condensed','Arial Narrow',sans-serif);color:var(--color-ink,#1d1d1b);font-variant-numeric:tabular-nums}.ds-strip .ds-cap{margin:0;font-weight:800;font-size:0.75rem;letter-spacing:0.06em;text-transform:uppercase}.ds-strip ol{position:relative;display:flex;gap:2px;margin:4px 0 0;padding:0;list-style:none}.ds-strip ol::before{content:'';position:absolute;top:1.9rem;left:16px;right:16px;height:4px;border-radius:9999px;background:var(--color-ink,#1d1d1b)}.ds-strip button,.ds-strip span{position:relative;display:flex;flex-direction:column;align-items:center;gap:2px;width:40px;min-height:44px;padding:4px 0;border:0;border-radius:6px;background:transparent;font:inherit;color:inherit;cursor:pointer}.ds-strip span{cursor:default}.ds-strip button[aria-pressed=true]{background:var(--color-panel,#f4f4f2);outline:2px solid var(--color-ink,#1d1d1b)}.ds-strip button:focus-visible{outline:3px solid var(--color-line-blue,#0065bd);outline-offset:2px}.ds-strip small{font-size:0.6875rem;color:var(--color-mute,#555552);line-height:1}.ds-strip b{font-weight:800;font-size:0.75rem}.ds-st{display:grid;place-items:center;height:24px}.ds-st::after{content:'';display:block;border-radius:9999px}.ds-st-all::after{width:20px;height:20px;box-sizing:border-box;border:3px solid var(--color-ink,#1d1d1b);background:var(--color-ink,#1d1d1b)}.ds-st-some::after{width:20px;height:20px;box-sizing:border-box;border:3px solid var(--color-ink,#1d1d1b);background:#fff}.ds-st-none::after{width:8px;height:8px;background:var(--color-rule-strong,#bdbdb9)}"
+    },
+    {
+      "name": "Plan Row",
+      "kind": "custom",
+      "refersTo": "plan-marker",
+      "description": "Platform-capsule marker (dashed grey when proposed), title with muted day/time, equal secondary calendar buttons, destructive action behind a disclosure.",
+      "html": "<ul class=\"ds-plans\"><li><div class=\"ds-plan-head\"><span class=\"ds-pm ds-pm-proposed\"></span><div><p class=\"ds-plan-title\">Pichanga <span>Sáb 12 dic · 19:00–22:00</span></p><p class=\"ds-plan-status\">Propuesto por Ana</p></div></div><div class=\"ds-plan-actions\"><button class=\"ds-btn2\">Google Calendar</button><button class=\"ds-btn2\">Archivo .ics</button></div><details class=\"ds-more\"><summary><svg viewBox=\"0 0 16 16\" width=\"16\" height=\"16\" aria-hidden=\"true\"><path d=\"M6 3l5 5-5 5\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg>Más opciones</summary><button class=\"ds-btn2\">Cancelar plan</button></details></li></ul>",
+      "css": ".ds-plans{font-family:var(--font-sign, 'Roboto Condensed','Arial Narrow',sans-serif);margin:0;padding:0;list-style:none;border-top:1px solid var(--color-rule,#e4e4e1);color:var(--color-ink,#1d1d1b)}.ds-plans li{padding:12px 0;border-bottom:1px solid var(--color-rule,#e4e4e1)}.ds-plan-head{display:flex;align-items:flex-start;gap:10px}.ds-pm{flex:none;width:28px;height:14px;margin-top:4px;box-sizing:border-box;border:2px solid var(--color-ink,#1d1d1b);border-radius:9999px;background:#fff}.ds-pm-proposed{border-style:dashed;border-color:var(--color-mute,#555552)}.ds-plan-title{margin:0;font-weight:800;font-size:1.0625rem;line-height:1.25}.ds-plan-title span{font-weight:500;color:var(--color-mute,#555552)}.ds-plan-status{margin:0;font-size:0.875rem;color:var(--color-mute,#555552)}.ds-plan-actions{display:flex;gap:8px;margin-top:8px;padding-left:32px}.ds-btn2{flex:1;min-height:44px;padding:0 12px;border:1.5px solid var(--color-ink,#1d1d1b);border-radius:6px;background:#fff;color:var(--color-ink,#1d1d1b);font:inherit;font-weight:700;font-size:0.9375rem;cursor:pointer}.ds-btn2:active{background:var(--color-panel,#f4f4f2)}.ds-btn2:focus-visible{outline:3px solid var(--color-line-blue,#0065bd);outline-offset:2px}.ds-more{margin-top:4px;padding-left:32px;font-size:0.875rem}.ds-more summary{display:flex;align-items:center;gap:4px;min-height:44px;font-weight:700;list-style:none;cursor:pointer}.ds-more summary::-webkit-details-marker{display:none}.ds-more svg{transition:transform 150ms}.ds-more[open] svg{transform:rotate(90deg)}"
+    },
+    {
+      "name": "Action Panel",
+      "kind": "card",
+      "refersTo": "action-panel",
+      "description": "2px ink-bordered panel for the one thing the screen needs first: the one-person group invite, the profile prompt, the propose form.",
+      "html": "<section class=\"ds-panel\"><h2>Por ahora estás solo</h2><p>Invita a tu grupo para comparar disponibilidad.</p><div class=\"ds-row\"><button class=\"ds-btn2\">Invitar al grupo</button><button class=\"ds-btn2\">Compartir link</button></div></section>",
+      "css": ".ds-panel{font-family:var(--font-sign, 'Roboto Condensed','Arial Narrow',sans-serif);padding:16px 12px;border:2px solid var(--color-ink,#1d1d1b);border-radius:6px;background:#fff;color:var(--color-ink,#1d1d1b)}.ds-panel h2{margin:0;font-weight:800;font-size:1.125rem}.ds-panel p{margin:4px 0 0;font-size:0.875rem;color:var(--color-mute,#555552)}.ds-panel .ds-row{display:flex;gap:8px;margin-top:12px}.ds-panel .ds-btn2{flex:1;min-height:44px;padding:0 12px;border:1.5px solid var(--color-ink,#1d1d1b);border-radius:6px;background:#fff;color:var(--color-ink,#1d1d1b);font:inherit;font-weight:700;font-size:0.9375rem;cursor:pointer}.ds-panel .ds-btn2:active{background:var(--color-panel,#f4f4f2)}.ds-panel .ds-btn2:focus-visible{outline:3px solid var(--color-line-blue,#0065bd);outline-offset:2px}"
     }
   ],
   "narrative": {
     "northStar": "Línea de Metro",
-    "overview": "Each friend is a metro line running across the day. Where every line runs free at once, a station appears, and that station is the option you confirm. The system refuses the category default of a days-by-people check table: availability is read as a transit diagram, not as a grid of ticks.\n\nThe material is enamel transit signage: a white ground, ink signs, Santiago Metro line colours, bold condensed type for every label and time. Everything is flat. Depth comes from ink panels and hairline rules, never from shadows or gradients. The density is phone-first and compact, one narrow column, because people answer in short bursts between classes or in transit. Light only, by design: signage is white enamel, and there is no dark theme.\n\nState is carried by shape before colour. A free stretch is a solid coloured line, busy time is an ink hatched \"out of service\" segment, and a friend who hasn't answered is a grey dashed track that is never drawn as free. The same three shapes appear wherever availability appears, in the plan diagram and in the busy editor alike.",
+    "overview": "Each friend is a metro line running across the day. Where every line runs free at once, a station appears, and that station is the day the group can meet. A group is persistent; each person keeps one saved availability profile shared by all their groups, and the group view compares every profile live, so a plan is an output proposed from a good day, never the entry point. The system refuses the category default of a days-by-people check table: availability is read as a transit diagram, not as a grid of ticks.\n\nThe material is enamel transit signage: a white ground, ink signs, Santiago Metro line colours, bold condensed type for every label and time. Everything is flat. Depth comes from ink panels and hairline rules, never from shadows or gradients. The density is phone-first and compact, one narrow column, because people check their groups and touch up their profile in short bursts between classes or in transit. Light only, by design: signage is white enamel, and there is no dark theme.\n\nState is carried by shape before colour. A free stretch is a solid coloured line, busy time is an ink hatched \"out of service\" segment, and a friend who hasn't answered is a grey dashed track that is never drawn as free. The same three shapes appear wherever availability appears: the group diagram, the profile editor and the class routine alike. A member who has not set up a profile is unknown, never free.",
     "keyCharacteristics": [
       "White enamel ground, ink signage, one Santiago Metro line colour per person.",
       "Free = solid line, busy = ink hatch, unknown = grey dashes; colour never carries state alone.",
       "The station (the confirmable slot) is marked with dashed guides, an ink time pill and white platforms.",
       "Roboto Condensed at heavy weights with tabular numerals for every time and count.",
       "Flat: no shadows, no gradients; ink fills and hairline rules give structure.",
-      "One narrow phone column with a sticky action footer."
+      "One narrow phone column: sign, then availability (strip, diagram, ranked days), then plans and links, closed by a sticky action footer."
     ],
     "rules": [
       {
@@ -406,6 +445,11 @@
         "section": "typography"
       },
       {
+        "name": "The Availability First Rule",
+        "body": "Nothing is inserted between the sign and the strip except a one-line status (\"Falta el perfil de Caro\") or the action panel asking the viewer to set up their own profile.",
+        "section": "layout"
+      },
+      {
         "name": "The Enamel Rule",
         "body": "Nothing floats. If an element needs separation, give it an ink fill or a hairline, never a shadow.",
         "section": "elevation"
@@ -419,6 +463,9 @@
       "**Do** span the diagram over the useful day 08:00–24:00, the same track as the busy editor.",
       "**Do** collapse beyond 6 people into the ink trunk with the \"8/10\" capsule, keeping at most 3 blocker lanes and a \"Ver a todos\" toggle.",
       "**Do** keep every tap target at least 44px tall and one full-width primary action in a sticky footer.",
+      "**Do** put availability (strip, diagram, ranked days) right under the sign, and plans and links after it, before the footer.",
+      "**Do** draw a plan as a platform capsule (solid ink border confirmed, dashed grey proposed).",
+      "**Do** put destructive actions behind a \"Más opciones\" disclosure as secondary buttons.",
       "**Do** write copy in Spanish (Chile), informal tú, through i18n keys."
     ],
     "donts": [
@@ -426,7 +473,10 @@
       "**Don't** let colour carry state alone, and never draw an unanswered person as free.",
       "**Don't** use line colours as decoration or behind body text where contrast fails.",
       "**Don't** fall back to a days-by-people check table for availability.",
-      "**Don't** add a dark theme; light only is a decision, not a gap."
-    ]
+      "**Don't** add a dark theme; light only is a decision, not a gap.",
+      "**Don't** paint destructive actions in Alarm Red or reuse the red rank ring as a plan marker.",
+      "**Don't** put plans or links between the sign and the availability."
+    ],
+    "knownGaps": "Not built yet, so not part of the system: the 30-minute \"Ajustar\" sheet for fine-tuning a segment; real authentication (the app runs in a local mode); each person's own timezone (Chile is assumed for profiles). No dark theme, by decision."
   }
 }

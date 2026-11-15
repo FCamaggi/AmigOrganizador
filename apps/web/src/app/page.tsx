@@ -128,7 +128,7 @@ async function HomeContent() {
                 <span
                   aria-hidden="true"
                   className="size-[1.375rem] flex-none rounded-full border-[5px] bg-white"
-                  style={{ borderColor: lineColor(index).value }}
+                  style={{ borderColor: "var(--ink)" }}
                 />
                 <span className="min-w-0 flex-1">
                   <span className="block truncate font-extrabold text-[1.0625rem]">

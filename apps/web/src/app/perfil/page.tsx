@@ -134,7 +134,7 @@ async function ProfileScreen({
                   <form action={removeCalendarAction.bind(null, calendar.id)}>
                     <button
                       type="submit"
-                      className="min-h-11 px-1 font-bold text-danger text-sm underline"
+                      className={`${buttonClasses.secondary} px-2 text-sm`}
                     >
                       {t("profileEdit.import.remove")}
                     </button>
