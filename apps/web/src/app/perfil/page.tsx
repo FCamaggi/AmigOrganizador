@@ -94,56 +94,58 @@ async function ProfileScreen({
         lineColor={lineColor(0).value}
         next={next}
         save={saveProfileAction}
-      />
-
-      <section aria-labelledby="import-title" className="mt-6 mb-6">
-        <h2
-          id="import-title"
-          className="font-extrabold text-xs uppercase tracking-[0.06em]"
-        >
-          {t("profileEdit.import.title")}
-        </h2>
-        <p className="mt-0.5 text-mute text-sm">
-          {t("profileEdit.import.hint")}
-        </p>
-        {profile.importedCalendars.length > 0 ? (
-          <ul className="mt-3 border-rule border-t">
-            {profile.importedCalendars.map((calendar) => (
-              <li
-                key={calendar.id}
-                className="flex items-center gap-2 border-rule border-b py-2"
-              >
-                <span className="min-w-0 flex-1">
-                  <span className="block font-extrabold">{calendar.name}</span>
-                  <span className="block text-mute text-xs">
-                    {t("profileEdit.import.synced", {
-                      count: calendar.busy.length,
-                      time: syncedLabel(calendar.syncedAt, timeZone),
-                    })}
+      >
+        <section aria-labelledby="import-title" className="mt-6">
+          <h2
+            id="import-title"
+            className="font-extrabold text-xs uppercase tracking-[0.06em]"
+          >
+            {t("profileEdit.import.title")}
+          </h2>
+          <p className="mt-0.5 text-mute text-sm">
+            {t("profileEdit.import.hint")}
+          </p>
+          {profile.importedCalendars.length > 0 ? (
+            <ul className="mt-3 border-rule border-t">
+              {profile.importedCalendars.map((calendar) => (
+                <li
+                  key={calendar.id}
+                  className="flex items-center gap-2 border-rule border-b py-2"
+                >
+                  <span className="min-w-0 flex-1">
+                    <span className="block font-extrabold">
+                      {calendar.name}
+                    </span>
+                    <span className="block text-mute text-xs">
+                      {t("profileEdit.import.synced", {
+                        count: calendar.busy.length,
+                        time: syncedLabel(calendar.syncedAt, timeZone),
+                      })}
+                    </span>
                   </span>
-                </span>
-                <form action={resyncCalendarAction.bind(null, calendar.id)}>
-                  <button
-                    type="submit"
-                    className={`${buttonClasses.secondary} px-2 text-sm`}
-                  >
-                    {t("profileEdit.import.resync")}
-                  </button>
-                </form>
-                <form action={removeCalendarAction.bind(null, calendar.id)}>
-                  <button
-                    type="submit"
-                    className="min-h-11 px-1 font-bold text-danger text-sm underline"
-                  >
-                    {t("profileEdit.import.remove")}
-                  </button>
-                </form>
-              </li>
-            ))}
-          </ul>
-        ) : null}
-        <ImportForm />
-      </section>
+                  <form action={resyncCalendarAction.bind(null, calendar.id)}>
+                    <button
+                      type="submit"
+                      className={`${buttonClasses.secondary} px-2 text-sm`}
+                    >
+                      {t("profileEdit.import.resync")}
+                    </button>
+                  </form>
+                  <form action={removeCalendarAction.bind(null, calendar.id)}>
+                    <button
+                      type="submit"
+                      className="min-h-11 px-1 font-bold text-danger text-sm underline"
+                    >
+                      {t("profileEdit.import.remove")}
+                    </button>
+                  </form>
+                </li>
+              ))}
+            </ul>
+          ) : null}
+          <ImportForm />
+        </section>
+      </ProfileEditor>
     </>
   );
 }

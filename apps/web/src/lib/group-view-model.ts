@@ -108,10 +108,13 @@ export function groupOptions(
   group: Group,
   profiles: readonly Profile[],
   outlook: GroupOutlook,
+  /** Dates that already hold a confirmed plan are not suggested again. */
+  plannedDates: ReadonlySet<string> = new Set(),
 ): OptionView[] {
   // One option per date: a group asks "which day", not "which window".
-  const perDay = outlook.windows.filter(
-    (w, i) => outlook.windows.findIndex((x) => x.date === w.date) === i,
+  const open = outlook.windows.filter((w) => !plannedDates.has(w.date));
+  const perDay = open.filter(
+    (w, i) => open.findIndex((x) => x.date === w.date) === i,
   );
   const shown = perDay.slice(0, MAX_OPTIONS);
   return shown.map((window, index) => {

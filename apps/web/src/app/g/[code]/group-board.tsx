@@ -19,6 +19,8 @@ interface GroupBoardProps {
   readonly strip: readonly StripDay[];
   readonly inviteUrl: string;
   readonly shareText: string;
+  /** Rendered after the ranked days and before the sticky footer. */
+  readonly children?: React.ReactNode;
   readonly propose: (
     state: ProposeState,
     formData: FormData,
@@ -238,6 +240,7 @@ function ProposeForm({
 }
 
 export function GroupBoard({
+  children,
   alone,
   options,
   strip,
@@ -256,19 +259,22 @@ export function GroupBoard({
 
   if (alone) {
     return (
-      <section
-        aria-labelledby="alone-title"
-        className="mt-5 rounded-sign border-2 border-ink px-3 py-4"
-      >
-        <h2 id="alone-title" className="font-extrabold text-lg">
-          {t("group.alone.title")}
-        </h2>
-        <p className="mt-1 text-mute text-sm">{t("group.alone.body")}</p>
-        <div className="mt-3 flex gap-2">
-          <WhatsAppLink label={t("group.share")} text={shareText} />
-          <ShareButton url={inviteUrl} text={shareText} />
-        </div>
-      </section>
+      <>
+        <section
+          aria-labelledby="alone-title"
+          className="mt-5 rounded-sign border-2 border-ink px-3 py-4"
+        >
+          <h2 id="alone-title" className="font-extrabold text-lg">
+            {t("group.alone.title")}
+          </h2>
+          <p className="mt-1 text-mute text-sm">{t("group.alone.body")}</p>
+          <div className="mt-3 flex gap-2">
+            <WhatsAppLink label={t("group.share")} text={shareText} />
+            <ShareButton url={inviteUrl} text={shareText} />
+          </div>
+        </section>
+        {children}
+      </>
     );
   }
 
@@ -322,6 +328,8 @@ export function GroupBoard({
           </div>
         )}
       </section>
+
+      {children}
 
       <footer
         hidden={proposing}

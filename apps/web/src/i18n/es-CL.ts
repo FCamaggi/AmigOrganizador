@@ -206,7 +206,7 @@ export const esCL = {
   "profile.cta.title": "Arma tu perfil",
   "profile.cta.body":
     "Así tus grupos saben cuándo puedes. Toma un par de minutos.",
-  "profile.cta.edit": "Tu perfil",
+  "profile.cta.edit": "Cambia tu rutina o tus días ocupados",
   "profile.cta.ready": "Tu perfil está listo",
 
   "groupNew.title": "Nuevo grupo",
@@ -250,6 +250,7 @@ export const esCL = {
   "group.feed": "Suscribirme al calendario del grupo",
   "group.feed.hint": "Los planes confirmados aparecen solos en tu calendario.",
   "group.leave": "Salir del grupo",
+  "group.more": "Más opciones del grupo",
 
   "propose.title": "Proponer un plan",
   "propose.field.title": "¿Qué hacemos?",
@@ -268,8 +269,9 @@ export const esCL = {
   "plans.confirmed": "Confirmado",
   "plans.confirm": "Confirmar",
   "plans.cancel": "Cancelar plan",
-  "plans.google": "Agregar a Google Calendar",
-  "plans.ics": "Descargar para otro calendario (.ics)",
+  "plans.more": "Más opciones",
+  "plans.google": "Google Calendar",
+  "plans.ics": "Archivo .ics",
 
   "profileEdit.title": "Tu perfil",
   "profileEdit.intro":

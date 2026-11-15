@@ -166,18 +166,107 @@ async function GroupScreen({
   const viewerId = session?.accountId ?? "";
   const { from, to } = outlookRange(group.timezone, Date.now());
   const outlook = groupOutlook({ group, profiles: memberProfiles, from, to });
-  const options = groupOptions(group, memberProfiles, outlook);
-  const strip = groupStrip(group, outlook, options);
-  const plans = groupPlanViews(
-    group,
-    await groupPlans().listForGroup(group.id),
-    viewerId,
-    origin,
+  const allPlans = await groupPlans().listForGroup(group.id);
+  const plannedDates = new Set(
+    allPlans.filter((p) => p.status === "confirmed").map((p) => p.date),
   );
+  const options = groupOptions(group, memberProfiles, outlook, plannedDates);
+  const strip = groupStrip(group, outlook, options);
+  const plans = groupPlanViews(group, allPlans, viewerId, origin);
   const missing = group.members
     .filter((m) => !withProfile.has(m.accountId))
     .map((m) => m.displayName);
   const feedUrl = `webcal://${inviteUrl.replace(/^https?:\/\//, "")}/calendario.ics`;
+  const legend = "font-extrabold text-xs uppercase tracking-[0.06em]";
+
+  const plansSection =
+    plans.length > 0 ? (
+      <section aria-labelledby="plans-title" className="mt-5">
+        <h2 id="plans-title" className={legend}>
+          {t("plans.title")}
+        </h2>
+        <ul className="mt-1 border-rule border-t">
+          {plans.map((plan) => (
+            <li key={plan.id} className="border-rule border-b py-3">
+              <div className="flex items-start gap-2.5">
+                <span
+                  aria-hidden="true"
+                  className={`mt-0.5 size-[1.375rem] flex-none rounded-full border-[5px] bg-white ${
+                    plan.status === "confirmed"
+                      ? "border-line-red"
+                      : "border-rule-strong border-dashed"
+                  }`}
+                />
+                <div className="min-w-0 flex-1">
+                  <p className="font-extrabold text-[1.0625rem] leading-tight">
+                    {plan.title}{" "}
+                    <span className="font-medium text-mute">{plan.when}</span>
+                  </p>
+                  <p className="text-mute text-sm">
+                    {plan.status === "confirmed"
+                      ? t("plans.confirmed")
+                      : t("plans.proposed", { name: plan.proposedBy })}
+                  </p>
+                </div>
+              </div>
+              <div className="mt-2 flex gap-2 pl-8">
+                {plan.status === "proposed" && plan.canDecide ? (
+                  <form
+                    action={confirmPlanAction.bind(
+                      null,
+                      group.inviteCode,
+                      plan.id,
+                    )}
+                    className="flex flex-1"
+                  >
+                    <button type="submit" className={buttonClasses.secondary}>
+                      {t("plans.confirm")}
+                    </button>
+                  </form>
+                ) : null}
+                {plan.googleUrl ? (
+                  <a
+                    href={plan.googleUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={buttonClasses.secondary}
+                  >
+                    {t("plans.google")}
+                  </a>
+                ) : null}
+                {plan.icsPath ? (
+                  <a
+                    href={plan.icsPath}
+                    download
+                    className={buttonClasses.secondary}
+                  >
+                    {t("plans.ics")}
+                  </a>
+                ) : null}
+              </div>
+              {plan.canDecide ? (
+                <details className="mt-1 pl-8 text-sm">
+                  <summary className="flex min-h-11 cursor-pointer items-center font-bold text-mute">
+                    {t("plans.more")}
+                  </summary>
+                  <form
+                    action={cancelPlanAction.bind(
+                      null,
+                      group.inviteCode,
+                      plan.id,
+                    )}
+                  >
+                    <button type="submit" className={buttonClasses.secondary}>
+                      {t("plans.cancel")}
+                    </button>
+                  </form>
+                </details>
+              ) : null}
+            </li>
+          ))}
+        </ul>
+      </section>
+    ) : null;
 
   return (
     <>
@@ -195,7 +284,7 @@ async function GroupScreen({
           </p>
           <Link
             href={`/perfil?next=${encodeURIComponent(`/g/${group.inviteCode}`)}`}
-            className={`${buttonClasses.primary} mt-2.5`}
+            className={`${buttonClasses.secondary} mt-2.5 w-full`}
           >
             {t("group.noProfile.cta")}
           </Link>
@@ -207,93 +296,6 @@ async function GroupScreen({
         </p>
       ) : null}
 
-      {plans.length > 0 ? (
-        <section aria-labelledby="plans-title" className="mt-4">
-          <h2
-            id="plans-title"
-            className="font-extrabold text-xs uppercase tracking-[0.06em]"
-          >
-            {t("plans.title")}
-          </h2>
-          <ul className="mt-1.5 space-y-2">
-            {plans.map((plan) => (
-              <li
-                key={plan.id}
-                className={`rounded-[1.25rem] px-4 py-3 ${
-                  plan.status === "confirmed"
-                    ? "border-[3px] border-ink"
-                    : "border-2 border-rule-strong border-dashed"
-                }`}
-              >
-                <p className="font-extrabold text-lg leading-tight">
-                  {plan.title}
-                </p>
-                <p className="font-bold">{plan.when}</p>
-                <p className="text-mute text-sm">
-                  {plan.status === "confirmed"
-                    ? t("plans.confirmed")
-                    : t("plans.proposed", { name: plan.proposedBy })}
-                </p>
-                <div className="mt-2.5 flex flex-col gap-2">
-                  {plan.status === "proposed" && plan.canDecide ? (
-                    <form
-                      action={confirmPlanAction.bind(
-                        null,
-                        group.inviteCode,
-                        plan.id,
-                      )}
-                      className="flex-1"
-                    >
-                      <button
-                        type="submit"
-                        className={`${buttonClasses.primary} h-11 text-base`}
-                      >
-                        {t("plans.confirm")}
-                      </button>
-                    </form>
-                  ) : null}
-                  {plan.googleUrl ? (
-                    <a
-                      href={plan.googleUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className={buttonClasses.secondary}
-                    >
-                      {t("plans.google")}
-                    </a>
-                  ) : null}
-                  {plan.icsPath ? (
-                    <a
-                      href={plan.icsPath}
-                      download
-                      className={buttonClasses.secondary}
-                    >
-                      {t("plans.ics")}
-                    </a>
-                  ) : null}
-                  {plan.canDecide ? (
-                    <form
-                      action={cancelPlanAction.bind(
-                        null,
-                        group.inviteCode,
-                        plan.id,
-                      )}
-                    >
-                      <button
-                        type="submit"
-                        className="min-h-11 px-2 font-bold text-danger text-sm underline"
-                      >
-                        {t("plans.cancel")}
-                      </button>
-                    </form>
-                  ) : null}
-                </div>
-              </li>
-            ))}
-          </ul>
-        </section>
-      ) : null}
-
       <GroupBoard
         alone={group.members.length < 2}
         options={options}
@@ -301,25 +303,28 @@ async function GroupScreen({
         inviteUrl={inviteUrl}
         shareText={t("group.shareText", { name: group.name, url: inviteUrl })}
         propose={proposePlanAction.bind(null, group.inviteCode)}
-      />
-
-      <section className="mt-6 mb-4 space-y-1 text-sm">
-        <a
-          href={feedUrl}
-          className="flex min-h-11 items-center font-bold text-line-blue underline"
-        >
-          {t("group.feed")}
-        </a>
-        <p className="text-mute">{t("group.feed.hint")}</p>
-        <form action={leaveGroupAction.bind(null, group.inviteCode)}>
-          <button
-            type="submit"
-            className="min-h-11 font-bold text-danger underline"
+      >
+        {plansSection}
+        <section className="mt-6 space-y-1 text-sm">
+          <a
+            href={feedUrl}
+            className="flex min-h-11 items-center font-bold text-line-blue underline"
           >
-            {t("group.leave")}
-          </button>
-        </form>
-      </section>
+            {t("group.feed")}
+          </a>
+          <p className="text-mute">{t("group.feed.hint")}</p>
+          <details className="mt-2">
+            <summary className="flex min-h-11 cursor-pointer items-center font-bold text-mute">
+              {t("group.more")}
+            </summary>
+            <form action={leaveGroupAction.bind(null, group.inviteCode)}>
+              <button type="submit" className={buttonClasses.secondary}>
+                {t("group.leave")}
+              </button>
+            </form>
+          </details>
+        </section>
+      </GroupBoard>
     </>
   );
 }

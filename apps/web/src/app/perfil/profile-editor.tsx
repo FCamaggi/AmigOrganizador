@@ -159,6 +159,8 @@ interface ProfileEditorProps {
   readonly lineColor: string;
   readonly next: string | null;
   readonly save: (input: ProfileInput) => Promise<{ ok: boolean }>;
+  /** Rendered after the days and before the sticky save button. */
+  readonly children?: React.ReactNode;
 }
 
 export function ProfileEditor({
@@ -169,6 +171,7 @@ export function ProfileEditor({
   lineColor,
   next,
   save,
+  children,
 }: ProfileEditorProps) {
   const router = useRouter();
   const [routines, setRoutines] = useState(() =>
@@ -351,41 +354,71 @@ export function ProfileEditor({
         {routines.classes.on ? (
           <div className="mt-3">
             <p className="text-mute text-sm">{t("answer.classes.hint")}</p>
-            <div className="mt-2 grid grid-cols-[2.5rem_repeat(3,1fr)] gap-1">
-              {CLASS_WEEKDAYS.map((weekday) => (
-                <div key={weekday} className="contents">
-                  <span className="self-center font-bold text-sm">
-                    {t(`weekday.short.${weekday}` as MessageKey)}
-                  </span>
-                  {SEGMENTS.map((seg) => {
-                    const marks = routines.classes.marks[weekday] ?? [];
-                    const on = marks.includes(seg.key);
-                    return (
-                      <Chip
-                        key={seg.key}
-                        selected={on}
-                        onClick={() =>
-                          update({
-                            ...routines,
-                            classes: {
-                              on: true,
-                              marks: {
-                                ...routines.classes.marks,
-                                [weekday]: on
-                                  ? marks.filter((k) => k !== seg.key)
-                                  : [...marks, seg.key],
-                              },
-                            },
-                          })
-                        }
-                      >
-                        {t(`answer.segment.${seg.key}` as MessageKey)}
-                      </Chip>
-                    );
-                  })}
-                </div>
-              ))}
-            </div>
+            <ul className="mt-2 border-rule border-t">
+              {CLASS_WEEKDAYS.map((weekday) => {
+                const marks = routines.classes.marks[weekday] ?? [];
+                const label = t(`weekday.short.${weekday}` as MessageKey);
+                return (
+                  <li
+                    key={weekday}
+                    className="flex items-center border-rule border-b py-1"
+                  >
+                    <span className="w-[4.25rem] flex-none font-extrabold text-sm">
+                      {label}
+                    </span>
+                    <span className="relative h-11 flex-1">
+                      <span
+                        aria-hidden="true"
+                        className="absolute inset-x-0 top-1/2 h-px bg-rule-strong"
+                      />
+                      {SEGMENTS.map((seg, index) => {
+                        const on = marks.includes(seg.key);
+                        const style = {
+                          left: `${pct(seg.start)}%`,
+                          width: `${pct(seg.end) - pct(seg.start)}%`,
+                        };
+                        return (
+                          <span key={seg.key}>
+                            {on ? (
+                              <span
+                                aria-hidden="true"
+                                className="hatch-busy absolute top-1/2 -mt-2 h-4 rounded-[3px]"
+                                style={style}
+                              />
+                            ) : null}
+                            <button
+                              type="button"
+                              aria-pressed={on}
+                              aria-label={`${label}, ${t(`answer.segment.${seg.key}` as MessageKey)}`}
+                              onClick={() =>
+                                update({
+                                  ...routines,
+                                  classes: {
+                                    on: true,
+                                    marks: {
+                                      ...routines.classes.marks,
+                                      [weekday]: on
+                                        ? marks.filter((k) => k !== seg.key)
+                                        : [...marks, seg.key],
+                                    },
+                                  },
+                                })
+                              }
+                              className={`absolute inset-y-0 active:bg-ink/[0.06] ${
+                                index > 0
+                                  ? "border-rule border-l border-dashed"
+                                  : ""
+                              }`}
+                              style={style}
+                            />
+                          </span>
+                        );
+                      })}
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
           </div>
         ) : null}
       </section>
@@ -488,6 +521,8 @@ export function ProfileEditor({
           })}
         </ul>
       </section>
+
+      {children}
 
       <div className="sticky bottom-0 z-10 -mx-4 mt-4 border-rule border-t bg-white px-4 pt-2.5 pb-[max(1.125rem,env(safe-area-inset-bottom))]">
         <p className="mb-2 text-center font-bold text-sm" aria-live="polite">
