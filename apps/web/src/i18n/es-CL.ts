@@ -233,6 +233,30 @@ export const esCL = {
     "Únete y arma tu perfil una vez: el grupo compara la disponibilidad de todos y muestra qué días pueden juntarse.",
   "group.invite.join": "Unirme al grupo",
   "og.invite": "Te invitaron a este grupo",
+  "privacy.link": "Privacidad",
+  "privacy.title": "Política de privacidad",
+  "privacy.updated": "Actualizada el 15 de noviembre de 2026.",
+  "privacy.intro":
+    "AmigOrganizador ayuda a grupos de amigos a encontrar cuándo juntarse. Esta página explica qué datos guardamos, para qué y cómo borrarlos.",
+  "privacy.collect.title": "Qué guardamos",
+  "privacy.collect.account":
+    "Tu cuenta: tu nombre y tu correo, que vienen de Google o del link que te mandamos por correo. Nunca pedimos ni guardamos contraseñas.",
+  "privacy.collect.profile":
+    "Tu perfil de disponibilidad: las rutinas y los días ocupados que anotas. Lo ven los grupos a los que perteneces.",
+  "privacy.collect.calendar":
+    "Si importas un calendario por link ICS: solo cuándo estás ocupado. Nunca guardamos títulos, descripciones ni lugares de tus eventos. El link se guarda cifrado y solo se usa para volver a leer tu calendario.",
+  "privacy.collect.groups":
+    "Tus grupos y planes: el nombre del grupo, quién es miembro y los planes que se proponen o confirman.",
+  "privacy.use.title": "Para qué los usamos",
+  "privacy.use.body":
+    "Solo para mostrarle a tu grupo qué días les sirven a todos y para armar las invitaciones de calendario. No vendemos tus datos, no mostramos publicidad y no los compartimos con terceros para marketing.",
+  "privacy.share.title": "Quién más los procesa",
+  "privacy.share.body":
+    "Usamos Supabase (base de datos y cuentas) y Vercel (el sitio). Si entras con Google, Google te identifica y nos entrega tu nombre y correo. Ninguno de ellos usa tus datos para otra cosa por encargo nuestro.",
+  "privacy.delete.title": "Borrar tus datos",
+  "privacy.delete.body":
+    "Puedes salir de cualquier grupo desde el grupo mismo. Para borrar tu cuenta y todo tu perfil, escríbenos y lo hacemos en un plazo de 30 días.",
+  "privacy.contact": "Contacto: {email}",
   "group.invite.signIn": "Unirme",
   "group.noProfile.title": "Falta tu perfil",
   "group.noProfile.body": "Mientras no lo armes, apareces como sin responder.",

@@ -48,6 +48,12 @@ async function HomeContent() {
           <Link href="/grupos/nuevo" className={buttonClasses.primary}>
             {t("groups.create")}
           </Link>
+          <Link
+            href="/privacidad"
+            className="mt-3 flex min-h-11 items-center justify-center font-bold text-mute text-sm underline"
+          >
+            {t("privacy.link")}
+          </Link>
         </div>
       </div>
     );
