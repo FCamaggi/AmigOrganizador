@@ -143,9 +143,16 @@ export const esCL = {
   "confirmed.shareText":
     "Quedó: {title}, {day} {time}. Agrégalo a tu calendario: {url}",
 
-  "signin.title": "Entra para responder",
+  "signin.title": "Entra a AmigOrganizador",
   "signin.body":
-    "Tu respuesta queda en tu cuenta, así la puedes cambiar desde cualquier teléfono.",
+    "Tu perfil y tus grupos quedan en tu cuenta, así los ves desde cualquier teléfono.",
+  "signin.name": "Tu nombre (como te conocen tus amigos)",
+  "signin.sent.title": "Revisa tu correo",
+  "signin.sent.body":
+    "Te mandamos un link a {email}. Ábrelo en este teléfono y entras al tiro.",
+  "signin.invalid": "Revisa el correo (y que el nombre tenga hasta 60 letras).",
+  "signin.failed": "No pudimos mandar el link. Intenta de nuevo en un rato.",
+  "signin.callbackError": "Ese link ya no sirve. Pide uno nuevo.",
   "signin.google": "Continuar con Google",
   "signin.email": "Tu correo",
   "signin.email.placeholder": "nombre@correo.cl",

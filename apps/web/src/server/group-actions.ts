@@ -24,6 +24,7 @@ import {
 import { refresh } from "next/cache";
 import { redirect } from "next/navigation";
 import { DEFAULT_TIMEZONE, TIMEZONES } from "@/lib/plan-options";
+import { supabaseConfig } from "./auth/config";
 import { newId } from "./ids";
 import { calendarSources, groupPlans, groups, profiles } from "./repository";
 import { getSession, startSession } from "./session";
@@ -58,6 +59,8 @@ export async function createGroupAction(
   formData: FormData,
 ): Promise<CreateGroupState> {
   const existing = await getSession();
+  if (!existing && supabaseConfig())
+    redirect(`/entrar?next=${encodeURIComponent("/grupos/nuevo")}`);
   const ownerName = existing?.displayName ?? text(formData, "name");
   if (ownerName.length === 0 || ownerName.length > MAX_NAME) {
     return { error: "INVALID_NAME" };
