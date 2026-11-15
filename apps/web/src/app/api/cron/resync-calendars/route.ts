@@ -25,6 +25,12 @@ export async function GET(request: Request) {
       sources.delete(accountId, calendarId),
     fetchCalendar: fetchImportedCalendar,
     now: Date.now,
+    // The error class only: messages may quote the link.
+    onFailure: (error) =>
+      console.warn(
+        "calendar resync failed:",
+        error instanceof Error ? error.name : "unknown error",
+      ),
   });
   console.info("calendar resync", report);
   return Response.json(report, { headers: { "Cache-Control": "no-store" } });

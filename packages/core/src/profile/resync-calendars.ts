@@ -18,6 +18,8 @@ export interface ResyncCalendarsInput {
     url: string;
   }) => Promise<ImportedCalendar>;
   readonly now: () => number;
+  /** Told about each failure; must not log the source (its URL is a secret). */
+  readonly onFailure?: (error: unknown) => void;
   /** Accounts synced at the same time; one account's sources run one by one. */
   readonly concurrency?: number;
 }
@@ -59,8 +61,8 @@ async function resyncOne(
 ): Promise<keyof ResyncReport> {
   try {
     return await resyncSource(input, source);
-  } catch {
-    // The error may quote the URL (a secret): count it, never report it.
+  } catch (error) {
+    input.onFailure?.(error);
     return "failed";
   }
 }

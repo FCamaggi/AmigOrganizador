@@ -133,6 +133,7 @@ describe("resyncCalendars", () => {
       profileWith("acc_ana", calendar("cal_1", "Trabajo")),
       profileWith("acc_beto", calendar("cal_2", "U")),
     );
+    const failures: string[] = [];
 
     const report = await resyncCalendars({
       sources: [source("acc_ana", "cal_1"), source("acc_beto", "cal_2")],
@@ -143,9 +144,11 @@ describe("resyncCalendars", () => {
         return fresh(input);
       },
       now: () => NOW,
+      onFailure: (error) => failures.push((error as Error).message),
     });
 
     expect(report).toEqual({ synced: 1, failed: 1, orphaned: 0 });
+    expect(failures).toEqual(["timeout"]);
     expect(
       (await store.findByAccount("acc_ana"))?.importedCalendars[0]?.busy,
     ).toEqual(OLD_BUSY);

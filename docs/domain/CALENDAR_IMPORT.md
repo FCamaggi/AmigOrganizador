@@ -66,9 +66,13 @@ the route answers 401 to everyone). The route runs core `resyncCalendars`
 - A source whose calendar is no longer in the profile is deleted, not read.
 - A calendar that can't be read keeps its previous busy time.
 - The profile is read again after the fetch and only that calendar's busy
-  time and `syncedAt` change: edits saved meanwhile survive, and a calendar
-  removed meanwhile is not brought back.
-- One account's calendars run one after another (no lost update on the same
-  profile); up to 4 accounts run at the same time.
+  time and `syncedAt` change, so edits saved during the fetch survive and a
+  calendar removed during it is not brought back. An edit landing between
+  that read and the save can still be overwritten (saves are plain upserts,
+  no version check); the window is one database round trip.
+- One account's calendars run one after another, so the cron never
+  overwrites itself; up to 4 accounts run at the same time.
+- Failures are logged by error class only, never the message (it may quote
+  the link).
 - The answer and the log carry counts only (`synced`, `failed`, `orphaned`),
   never links or accounts.

@@ -9,9 +9,10 @@ export async function track(event: ProductEvent): Promise<void> {
   try {
     await productEvents().record(event);
   } catch (error) {
+    // Never the message: drizzle's quotes the query params (the ids).
     console.error(
       `product event ${event.kind} not recorded:`,
-      error instanceof Error ? error.message : "unknown error",
+      error instanceof Error ? error.name : "unknown error",
     );
   }
 }

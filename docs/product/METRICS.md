@@ -15,7 +15,10 @@ titles or calendar content (see the privacy page, `/privacidad`).
 `setup_seconds` runs from the first edit in the profile editor to the save
 that creates the profile. It is null when the profile was created by an ICS
 import, or when nothing was edited, or when the value is outside 0 to 86 400
-seconds (a tab left open is not a setup session). Rules live in
+seconds (a tab left open is not a setup session). Someone who imports a
+calendar before their first editor save has no setup time, which leans the
+median toward people who don't import. Two first saves at the same moment
+(two tabs) can record the event twice, hence `count(DISTINCT account_id)`. Rules live in
 `core/src/metrics/product-event.ts`; recording never blocks what the person
 was doing.
 
@@ -33,7 +36,7 @@ SELECT
      FROM app.product_events
     WHERE kind = 'profile_created' AND setup_seconds IS NOT NULL)
     AS median_setup_seconds,
-  (SELECT count(*)
+  (SELECT count(DISTINCT account_id)
      FROM app.product_events
     WHERE kind = 'profile_created') AS profiles_created;
 ```
