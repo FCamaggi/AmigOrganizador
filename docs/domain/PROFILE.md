@@ -15,7 +15,8 @@ their groups. All functions are pure and return a new profile; they throw
 - **Exceptions**: template time freed on a date (a day off, holidays). An
   exception never frees one-off or imported busy time.
 - **Timezone**: the IANA zone the person writes their templates and one-off
-  days in (`setTimezone`, error `INVALID_TIMEZONE`). Profiles saved before it
+  days in (`setTimezone`, error `INVALID_TIMEZONE`; stored in its canonical
+  spelling; setting the same zone changes nothing). Profiles saved before it
   existed have none and read as `America/Santiago`
   (`DEFAULT_PROFILE_TIMEZONE`, through `profileTimezone`). An ICS import reads
   floating times and all-day events in this zone.
@@ -46,7 +47,11 @@ one-off busy + imported busy (converted from UTC and split at local midnight).
 Templates and one-off days are wall time in the person's zone: read as is
 when it is the group's zone (the same result as before zones existed), else
 converted through UTC to the group's zone, so "work 9 to 18" in Madrid is
-05:00 to 14:00 for a Santiago group in November. Having a
+05:00 to 14:00 for a Santiago group in November. Known gap: busy time that
+ends inside the group's repeated hour (clocks falling back) loses the first
+occurrence of that hour, because local minutes can't name a repeated hour;
+imported calendars have the same gap. One night hour a year, never extra
+busy time. Having a
 profile covers the whole range, so time not busy is free. The day before
 `from` is included without coverage, only with busy time that runs past
 midnight into `from`. A group member **without** a profile has no entry at

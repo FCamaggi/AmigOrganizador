@@ -315,6 +315,34 @@ describe("profile timezone", () => {
     );
   });
 
+  it("stores the canonical spelling of the zone", () => {
+    const profile = setTimezone(empty(), {
+      timezone: "america/santiago",
+      now: NOW,
+    });
+    expect(profile.timezone).toBe("America/Santiago");
+  });
+
+  it("leaves the profile untouched when the zone doesn't change", () => {
+    const profile = inMadrid();
+    expect(setTimezone(profile, { timezone: MADRID, now: NOW + 5 })).toBe(
+      profile,
+    );
+  });
+
+  it("reads zones more than a day apart", () => {
+    // Pago Pago is UTC-11, Kiritimati UTC+14: 25 hours apart.
+    const profile = setTemplates(
+      setTimezone(empty(), { timezone: "Pacific/Pago_Pago", now: NOW }),
+      { templates: [workweek({ start: h(23), end: h(24) })], now: NOW },
+    );
+    // Pago Pago Wednesday 23:00-24:00 is Kiritimati Friday 00:00-01:00;
+    // Thursday's is Saturday.
+    expect(
+      availabilityFor(profile, FRI, FRI, "Pacific/Kiritimati")[FRI]?.busy,
+    ).toEqual([{ start: 0, end: h(1) }]);
+  });
+
   it("reads the same as before when the person and the group share a zone", () => {
     const base = setTemplates(empty(), { templates: [workweek()], now: NOW });
     const explicit = setTimezone(base, { timezone: TZ, now: NOW });

@@ -165,14 +165,16 @@ export function profileTimezone(profile: Profile): string {
   return profile.timezone ?? DEFAULT_PROFILE_TIMEZONE;
 }
 
-function isTimeZone(value: string): boolean {
+/** The canonical IANA name ("america/santiago" -> "America/Santiago"), or null. */
+function canonicalTimeZone(value: string): string | null {
   // Only IANA names with a region ("America/Santiago"), plus UTC.
-  if (value !== "UTC" && !value.includes("/")) return false;
+  if (value !== "UTC" && !value.includes("/")) return null;
   try {
-    new Intl.DateTimeFormat("en-US", { timeZone: value });
-    return true;
+    return new Intl.DateTimeFormat("en-US", {
+      timeZone: value,
+    }).resolvedOptions().timeZone;
   } catch {
-    return false;
+    return null;
   }
 }
 
@@ -181,10 +183,12 @@ export function setTimezone(
   profile: Profile,
   input: { timezone: string; now: number },
 ): Profile {
-  if (!isTimeZone(input.timezone)) {
+  const timezone = canonicalTimeZone(input.timezone);
+  if (!timezone) {
     throw new ProfileError("INVALID_TIMEZONE", "unknown time zone");
   }
-  return { ...profile, timezone: input.timezone, updatedAt: input.now };
+  if (profile.timezone === timezone) return profile;
+  return { ...profile, timezone, updatedAt: input.now };
 }
 
 export function createProfile(input: {
@@ -321,8 +325,9 @@ export function availabilityFor(
   if (personZone === timeZone) {
     wall = wallBusy(profile, from, to);
   } else {
-    // Zones are less than a day apart: one extra day on each side.
-    const moved = wallBusy(profile, addDays(from, -1), addDays(to, 1));
+    // Zones are up to 26 hours apart (Pacific/Kiritimati to Etc/GMT+12):
+    // two extra days on each side cover every pair.
+    const moved = wallBusy(profile, addDays(from, -2), addDays(to, 2));
     spans = [
       ...importedSpans,
       ...Object.entries(moved).flatMap(([date, intervals]) =>

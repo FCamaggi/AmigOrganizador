@@ -313,7 +313,7 @@ export const esCL = {
   "profileEdit.routines": "Rutinas (opcional)",
   "profileEdit.timezone": "Tu zona horaria",
   "profileEdit.timezone.hint":
-    "Tus rutinas y días se anotan en esta hora. Cada grupo los ve en su propia zona.",
+    "Tus rutinas y días se anotan en esta hora. Cada grupo los ve en su propia zona. Si la cambias, tus calendarios importados se ajustan al tocar Actualizar o al día siguiente.",
   "profileEdit.days.title": "Próximas 2 semanas",
   "profileEdit.days.hint":
     "Toca un tramo para marcarlo ocupado o liberarlo solo ese día.",
