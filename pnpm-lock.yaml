@@ -29,6 +29,9 @@ importers:
       '@amigo/core':
         specifier: workspace:*
         version: link:../../packages/core
+      '@amigo/db':
+        specifier: workspace:*
+        version: link:../../packages/db
       '@supabase/ssr':
         specifier: 0.12.7
         version: 0.12.7(@supabase/supabase-js@2.119.0)
