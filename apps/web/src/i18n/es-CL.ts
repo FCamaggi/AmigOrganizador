@@ -66,9 +66,9 @@ export const esCL = {
   "diagram.title": "{day} · quién está libre",
   "diagram.station": "Estación común · {time}",
   "diagram.legend":
-    "Línea de color: libre · rayado: ocupado · punteada: sin responder",
+    "Andén blanco: llega a la estación · rayado: ocupado · punteada: sin responder",
   "diagram.legend.trunk":
-    "Línea gruesa: cuántos están libres · abajo, quienes no pueden o no responden",
+    "Línea gruesa: los libres juntos · abajo, quienes no pueden o no responden",
   "diagram.trunkOf": "{free} de {total} personas",
   "diagram.more": "+{count} más",
   "diagram.showAll": "Ver a todos",
@@ -124,6 +124,7 @@ export const esCL = {
 
   "confirmed.title": "Plan confirmado",
   "confirmed.when": "{day} · {time}",
+  "confirmed.diagram": "Quién llega a la estación",
   "confirmed.who.free": "Van:",
   "confirmed.who.busy": "No pueden:",
   "confirmed.who.unknown": "Sin responder:",

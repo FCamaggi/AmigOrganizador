@@ -17,3 +17,14 @@ export const MAX_SEPARATE_LINES = 6;
 export function lineColor(index: number) {
   return LINE_COLORS[index % LINE_COLORS.length] ?? LINE_COLORS[0];
 }
+
+/**
+ * The diagram shows the whole useful day, the same 08:00–24:00 track as the
+ * busy editor, widened only if the slot falls outside it.
+ */
+export function diagramSpan(slot: { start: number; end: number }) {
+  return {
+    start: Math.min(8 * 60, Math.floor(slot.start / 60) * 60),
+    end: Math.min(24 * 60, Math.max(24 * 60, Math.ceil(slot.end / 60) * 60)),
+  };
+}

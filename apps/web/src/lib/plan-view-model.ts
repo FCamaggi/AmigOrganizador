@@ -8,6 +8,7 @@ import {
 import type { DiagramLine } from "@/components/line-diagram";
 import { type MessageKey, t } from "@/i18n/t";
 import { formatDay } from "./format";
+import { diagramSpan } from "./lines";
 
 export type PersonState = "free" | "busy" | "unknown";
 
@@ -39,13 +40,6 @@ const SHOWN_REASONS: readonly WindowReason["code"][] = [
   "GOOD_WEEKDAY",
 ];
 
-/** The diagram shows the slot with a few hours of context around it. */
-function spanFor(slot: { start: number; end: number }) {
-  const start = Math.max(0, Math.floor((slot.start - 120) / 60) * 60);
-  const end = Math.min(24 * 60, Math.ceil((slot.end + 60) / 60) * 60);
-  return { start, end };
-}
-
 export function optionViews(plan: Plan): OptionView[] {
   const names = new Map(
     plan.participants.map((p) => [p.accountId, p.displayName]),
@@ -55,7 +49,7 @@ export function optionViews(plan: Plan): OptionView[] {
   return windows.map((window, index) => {
     const slotStart = slotFromOption(window, plan.durationMinutes).start;
     const slot = { start: slotStart, end: slotStart + plan.durationMinutes };
-    const span = spanFor(slot);
+    const span = diagramSpan(slot);
     const next = windows[index + 1];
     const tiedWithNext =
       next !== undefined &&

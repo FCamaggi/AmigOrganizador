@@ -17,6 +17,7 @@ import {
   formatShortDate,
   formatSpan,
 } from "@/lib/format";
+import { diagramSpan } from "@/lib/lines";
 import { optionViews } from "@/lib/plan-view-model";
 import { buttonClasses } from "@/lib/ui";
 import { confirmAction, joinPlanAction } from "@/server/actions";
@@ -140,10 +141,7 @@ async function PlanScreen({
     const invite = inviteFor(plan, planUrl);
     const day = formatDay(slot.date);
     const time = formatSpan(slot.start, slot.end);
-    const span = {
-      start: Math.max(0, Math.floor((slot.start - 120) / 60) * 60),
-      end: Math.min(1440, Math.ceil((slot.end + 60) / 60) * 60),
-    };
+    const span = diagramSpan(slot);
     const lines = dayLines(plan, slot.date, span).map((line, index) => ({
       ...line,
       colorIndex: index,
@@ -181,6 +179,7 @@ async function PlanScreen({
         <div className="mt-3">
           <LineDiagram
             dayLabel={day}
+            heading={t("confirmed.diagram")}
             span={span}
             station={{ start: slot.start, end: slot.end }}
             lines={lines}
