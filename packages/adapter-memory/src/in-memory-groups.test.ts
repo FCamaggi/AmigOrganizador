@@ -1,0 +1,158 @@
+import {
+  createGroup,
+  createProfile,
+  type Group,
+  joinGroup,
+  parseLocalDate,
+  proposeGroupPlan,
+} from "@amigo/core";
+import { describe, expect, it } from "vitest";
+import {
+  InMemoryCalendarSourceRepository,
+  InMemoryGroupPlanRepository,
+  InMemoryGroupRepository,
+  InMemoryProfileRepository,
+  newInviteCode,
+} from "./in-memory-groups";
+
+const NOW = Date.UTC(2026, 10, 15, 12);
+
+const group = (id: string, ownerId: string, inviteCode = `inv_${id}`): Group =>
+  createGroup({
+    id,
+    inviteCode,
+    name: `Grupo ${id}`,
+    ownerId,
+    ownerName: "Ana",
+    timezone: "America/Santiago",
+    now: NOW,
+  });
+
+describe("InMemoryGroupRepository", () => {
+  it("finds a group by id and by invite code", async () => {
+    const repo = new InMemoryGroupRepository();
+    await repo.save(group("g1", "acc_ana", "secret"));
+    expect((await repo.findById("g1"))?.name).toBe("Grupo g1");
+    expect((await repo.findByInviteCode("secret"))?.id).toBe("g1");
+    expect(await repo.findByInviteCode("nope")).toBeNull();
+  });
+
+  it("lists the account's groups, most recently joined first", async () => {
+    const repo = new InMemoryGroupRepository();
+    await repo.save(group("old", "acc_ana"));
+    await repo.save(
+      joinGroup(group("joined", "acc_beto"), {
+        accountId: "acc_ana",
+        displayName: "Ana",
+        now: NOW + 1000,
+      }),
+    );
+    await repo.save(group("foreign", "acc_caro"));
+    expect((await repo.listForAccount("acc_ana")).map((g) => g.id)).toEqual([
+      "joined",
+      "old",
+    ]);
+  });
+
+  it("finds a group by its new invite code after the code changes", async () => {
+    const repo = new InMemoryGroupRepository();
+    await repo.save(group("g1", "acc_ana", "first"));
+    await repo.save(group("g1", "acc_ana", "second"));
+    expect(await repo.findByInviteCode("first")).toBeNull();
+    expect((await repo.findByInviteCode("second"))?.id).toBe("g1");
+  });
+
+  it("deletes a group", async () => {
+    const repo = new InMemoryGroupRepository([group("g1", "acc_ana")]);
+    await repo.delete("g1");
+    expect(await repo.findById("g1")).toBeNull();
+  });
+
+  it("is not affected by mutating returned objects", async () => {
+    const repo = new InMemoryGroupRepository([group("g1", "acc_ana")]);
+    const found = await repo.findById("g1");
+    (found as { name: string }).name = "changed";
+    expect((await repo.findById("g1"))?.name).toBe("Grupo g1");
+  });
+});
+
+describe("InMemoryProfileRepository", () => {
+  it("stores one profile per account and returns several, skipping missing ones", async () => {
+    const repo = new InMemoryProfileRepository();
+    await repo.save(createProfile({ accountId: "acc_ana", now: NOW }));
+    await repo.save(createProfile({ accountId: "acc_beto", now: NOW }));
+    expect((await repo.findByAccount("acc_ana"))?.accountId).toBe("acc_ana");
+    expect(await repo.findByAccount("acc_x")).toBeNull();
+    expect(
+      (await repo.findByAccounts(["acc_beto", "acc_x", "acc_ana"])).map(
+        (p) => p.accountId,
+      ),
+    ).toEqual(["acc_beto", "acc_ana"]);
+  });
+});
+
+describe("InMemoryGroupPlanRepository", () => {
+  it("lists a group's plans by date, then start time", async () => {
+    const g = group("g1", "acc_ana");
+    const plan = (id: string, date: string, start: number) =>
+      proposeGroupPlan(g, {
+        id,
+        accountId: "acc_ana",
+        title: id,
+        date,
+        start,
+        durationMinutes: 60,
+        now: NOW,
+      });
+    const repo = new InMemoryGroupPlanRepository();
+    await repo.save(plan("late", "2026-12-20", 1200));
+    await repo.save(plan("early", "2026-12-19", 1200));
+    await repo.save(plan("morning", "2026-12-20", 600));
+    await repo.save(
+      proposeGroupPlan(group("g2", "acc_ana"), {
+        id: "other",
+        accountId: "acc_ana",
+        title: "x",
+        date: parseLocalDate("2026-12-01"),
+        start: 600,
+        durationMinutes: 60,
+        now: NOW,
+      }),
+    );
+    expect((await repo.listForGroup("g1")).map((p) => p.id)).toEqual([
+      "early",
+      "morning",
+      "late",
+    ]);
+    expect((await repo.findById("other"))?.groupId).toBe("g2");
+  });
+});
+
+describe("InMemoryCalendarSourceRepository", () => {
+  it("keeps one source per account and calendar id", async () => {
+    const repo = new InMemoryCalendarSourceRepository();
+    const source = {
+      accountId: "acc_ana",
+      calendarId: "work",
+      url: "https://a.test/1.ics",
+      createdAt: NOW,
+    };
+    await repo.save(source);
+    await repo.save({ ...source, url: "https://a.test/2.ics" });
+    await repo.save({ ...source, accountId: "acc_beto" });
+    expect(await repo.listForAccount("acc_ana")).toEqual([
+      { ...source, url: "https://a.test/2.ics" },
+    ]);
+    await repo.delete("acc_ana", "work");
+    expect(await repo.listForAccount("acc_ana")).toEqual([]);
+    expect(await repo.listForAccount("acc_beto")).toHaveLength(1);
+  });
+});
+
+describe("newInviteCode", () => {
+  it("is URL-safe, carries 128 bits and does not repeat", () => {
+    const codes = new Set(Array.from({ length: 1000 }, newInviteCode));
+    expect(codes.size).toBe(1000);
+    for (const code of codes) expect(code).toMatch(/^[A-Za-z0-9_-]{22}$/);
+  });
+});

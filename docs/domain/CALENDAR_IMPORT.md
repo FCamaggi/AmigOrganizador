@@ -49,5 +49,8 @@ The server downloads a URL the person typed, so it guards against SSRF:
   `TOO_LARGE`, `TIMEOUT`, `TOO_MANY_REDIRECTS`, `NETWORK`.
 
 The link is often private (Google's "secret address"): never log it or put it
-in error messages. Where the link is stored for re-syncs is decided with the
-storage adapters (T6 / T10).
+in error messages. It is stored apart from the profile, as a
+`CalendarSource { accountId, calendarId, url }` behind the
+`CalendarSourceRepository` port (`core/src/profile/calendar-source-repository.ts`):
+profiles are read by every group a person belongs to, sources only to re-sync.
+The Supabase adapter (T10) should encrypt `url` at rest.

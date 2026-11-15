@@ -103,6 +103,10 @@ export {
   type LineState,
   slotFromOption,
 } from "./plan/plan-view";
+export type {
+  CalendarSource,
+  CalendarSourceRepository,
+} from "./profile/calendar-source-repository";
 export {
   availabilityFor,
   createProfile,
