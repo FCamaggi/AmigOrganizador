@@ -114,6 +114,11 @@ function assertTemplate(template: BusyTemplate): void {
   }
 }
 
+/** Throws `RangeError` when any template is malformed. */
+export function validateTemplates(templates: readonly BusyTemplate[]): void {
+  templates.forEach(assertTemplate);
+}
+
 const daysBetween = (from: LocalDate, to: LocalDate) =>
   Math.round((Date.parse(to) - Date.parse(from)) / 86_400_000);
 

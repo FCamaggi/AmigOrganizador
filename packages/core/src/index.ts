@@ -5,6 +5,7 @@ export {
   expandBusyTemplates,
   type ShiftKind,
   shiftCycle,
+  validateTemplates,
   type WeeklyBlock,
   workweek,
 } from "./availability/busy-templates";
@@ -80,4 +81,17 @@ export {
   type LineState,
   slotFromOption,
 } from "./plan/plan-view";
+export {
+  availabilityFor,
+  createProfile,
+  type ImportedCalendar,
+  type Profile,
+  ProfileError,
+  type ProfileErrorCode,
+  removeImportedCalendar,
+  setDay,
+  setImportedCalendar,
+  setTemplates,
+} from "./profile/profile";
+export type { ProfileRepository } from "./profile/profile-repository";
 export { todayIn, zonedTimeToUtc } from "./time/zoned";

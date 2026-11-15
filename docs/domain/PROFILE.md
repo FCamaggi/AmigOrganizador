@@ -1,0 +1,41 @@
+# Profile (domain rules)
+
+Implementation: `packages/core/src/profile/profile.ts`; storage port:
+`packages/core/src/profile/profile-repository.ts`. Model: ADR 0004.
+
+Each person keeps one profile: a calendar of their busy time, shared by all
+their groups. All functions are pure and return a new profile; they throw
+`ProfileError` with a stable `code`.
+
+## What a profile holds
+
+- **Templates** (optional helpers): `workweek()`, weekly `classes`,
+  `shiftCycle()` (e.g. "4º turno"). See `busy-templates.ts`.
+- **One-off busy days**: busy time on a local date (a dentist, an exam).
+- **Exceptions**: template time freed on a date (a day off, holidays). An
+  exception never frees one-off or imported busy time.
+- **Imported calendars**: busy time per local date read from another calendar
+  (ICS URL in this phase). Only busy intervals are kept, never event titles.
+  A re-sync replaces the calendar with the same id.
+
+## Actions
+
+| Action | Rules | Error codes |
+|--------|-------|-------------|
+| `createProfile` | Starts empty (nothing busy). | — |
+| `setTemplates` | Replaces all templates; each must be valid. | `INVALID_TEMPLATE` |
+| `setDay` | Replaces one date's one-off busy time and exceptions; a date with nothing left is removed. | `INVALID_DATE`, `INVALID_TIME` |
+| `setImportedCalendar` | Adds or replaces (same id) an imported calendar. | `INVALID_DATE`, `INVALID_TIME` |
+| `removeImportedCalendar` | Removes an imported calendar by id. | — |
+
+Intervals are minutes from local midnight, non-empty, within 0–2880 (an
+interval past 1440 runs into the next day).
+
+## Reading a profile
+
+`availabilityFor(profile, from, to)` returns what the engine needs per date:
+busy = (templates − exceptions) + one-off busy + imported busy. Having a
+profile covers the whole range, so time not busy is free. The day before
+`from` is included without coverage, only with busy time that runs past
+midnight into `from`. A group member **without** a profile has no entry at
+all: unknown, never free.
