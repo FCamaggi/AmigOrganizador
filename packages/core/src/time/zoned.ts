@@ -40,10 +40,13 @@ function wallClockAsUtc(utcMs: number, timeZone: string): number {
 const offsetAt = (utcMs: number, timeZone: string) =>
   wallClockAsUtc(utcMs, timeZone) - utcMs;
 
+const DAY_MS = 86_400_000;
+
 /**
  * The UTC instant of `minutes` after local midnight of `date` in `timeZone`.
- * Minutes may pass 1440 (the next day). In a DST gap the result moves
- * forward with the clock change.
+ * Minutes may pass 1440 (the next day). A time repeated when clocks fall
+ * back resolves to its first occurrence; a time skipped when clocks spring
+ * forward moves forward with the clock change.
  */
 export function zonedTimeToUtc(
   date: LocalDate,
@@ -52,8 +55,14 @@ export function zonedTimeToUtc(
 ): number {
   const [year = 0, month = 1, day = 1] = date.split("-").map(Number);
   const wallClock = Date.UTC(year, month - 1, day) + minutes * 60_000;
-  const firstGuess = wallClock - offsetAt(wallClock, timeZone);
-  return wallClock - offsetAt(firstGuess, timeZone);
+  const before = offsetAt(wallClock - DAY_MS, timeZone);
+  const after = offsetAt(wallClock + DAY_MS, timeZone);
+  const matches = [...new Set([before, after])]
+    .map((offset) => wallClock - offset)
+    .filter((instant) => wallClockAsUtc(instant, timeZone) === wallClock);
+  if (matches.length > 0) return Math.min(...matches);
+  // In a spring-forward gap: use the offset in force before the jump.
+  return wallClock - before;
 }
 
 /** Today's local date in `timeZone` at the instant `now`. */

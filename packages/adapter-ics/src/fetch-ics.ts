@@ -87,6 +87,14 @@ for (const [network, prefix] of [
   ["fe80::", 10],
   ["ff00::", 8],
   ["2001:db8::", 32],
+  // Ways to reach IPv4 through IPv6: NAT64, IPv4-compatible, 6to4, Teredo.
+  ["64:ff9b::", 96],
+  ["64:ff9b:1::", 48],
+  ["::", 96],
+  ["2002::", 16],
+  ["2001::", 32],
+  // Discard-only.
+  ["100::", 64],
 ] as const) {
   blocked.addSubnet(network, prefix, "ipv6");
 }
@@ -149,6 +157,8 @@ export type Transport = (
   status: number;
   location: string | null;
   body: AsyncIterable<Uint8Array>;
+  /** Frees the connection when the body is not read (redirects). */
+  discard?: () => void;
 }>;
 
 const httpsTransport: Transport = (url, { lookup, signal }) =>
@@ -170,6 +180,7 @@ const httpsTransport: Transport = (url, { lookup, signal }) =>
           status: res.statusCode ?? 0,
           location: typeof location === "string" ? location : null,
           body: res,
+          discard: () => res.resume(),
         });
       },
     );
@@ -207,7 +218,17 @@ export async function fetchIcs(
         if (redirects >= MAX_REDIRECTS) {
           throw new IcsFetchError("TOO_MANY_REDIRECTS", "too many redirects");
         }
-        url = normalizeIcsUrl(new URL(response.location, url).toString());
+        response.discard?.();
+        let target: URL;
+        try {
+          target = new URL(response.location, url);
+        } catch {
+          throw new IcsFetchError(
+            "INVALID_URL",
+            "the calendar redirected to an invalid link",
+          );
+        }
+        url = normalizeIcsUrl(target.toString());
         continue;
       }
       if (response.status < 200 || response.status >= 300) {

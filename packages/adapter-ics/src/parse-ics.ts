@@ -107,22 +107,28 @@ function readCalendar(ics: string): IcalComponent {
   return root;
 }
 
+const uidOf = (component: IcalComponent) =>
+  String(component.getFirstPropertyValue("uid") ?? "");
+
 /**
  * Busy spans from an iCalendar text, expanded and clipped to the window.
  * Only start and end instants leave this function: titles, descriptions and
  * locations are never read into the result (product rule: free/busy only).
+ *
+ * VTIMEZONE blocks are resolved inside the parsed tree and never registered
+ * in ical.js's process-wide timezone service, so one person's calendar can't
+ * change how another's is read.
  */
 export function parseIcsBusy(ics: string, window: ParseWindow): UtcSpan[] {
   const root = readCalendar(ics);
-  for (const vtimezone of root.getAllSubcomponents("vtimezone")) {
-    ICAL.TimezoneService.register(vtimezone);
-  }
+  const vevents = root
+    .getAllSubcomponents("vevent")
+    .filter((vevent) => vevent.hasProperty("dtstart"));
 
-  const vevents = root.getAllSubcomponents("vevent");
   const exceptions = new Map<string, IcalComponent[]>();
   const masters: IcalComponent[] = [];
   for (const vevent of vevents) {
-    const uid = String(vevent.getFirstPropertyValue("uid") ?? "");
+    const uid = uidOf(vevent);
     if (vevent.hasProperty("recurrence-id") && uid) {
       exceptions.set(uid, [...(exceptions.get(uid) ?? []), vevent]);
     } else {
@@ -138,46 +144,96 @@ export function parseIcsBusy(ics: string, window: ParseWindow): UtcSpan[] {
     };
     if (clipped.end > clipped.start) spans.push(clipped);
   };
+  /** A single event or an override, read with its own TZID. */
+  const addComponent = (
+    component: IcalComponent,
+    fallbackTzid: string | null,
+  ) => {
+    if (!blocksTime(component)) return;
+    const event = new ICAL.Event(component, {
+      strictExceptions: true,
+      exceptions: [],
+    });
+    const tzid = startTzid(component) ?? fallbackTzid;
+    add(
+      toUtcMs(event.startDate, tzid, window.timeZone),
+      toUtcMs(event.endDate, tzid, window.timeZone),
+    );
+  };
 
   const masterUids = new Set<string>();
   for (const component of masters) {
-    const uid = String(component.getFirstPropertyValue("uid") ?? "");
+    const uid = uidOf(component);
     masterUids.add(uid);
-    const event: IcalEvent = new ICAL.Event(component);
-    for (const exception of exceptions.get(uid) ?? [])
-      event.relateException(exception);
+    const overrides = exceptions.get(uid) ?? [];
+    // Explicit, same-UID exceptions only: by default ical.js relates every
+    // RECURRENCE-ID in the calendar, whatever its UID.
+    const event: IcalEvent = new ICAL.Event(component, {
+      strictExceptions: true,
+      exceptions: overrides,
+    });
     const tzid = startTzid(component);
     const utc = (time: IcalTime) => toUtcMs(time, tzid, window.timeZone);
 
     if (!event.isRecurring()) {
-      if (blocksTime(component)) add(utc(event.startDate), utc(event.endDate));
+      addComponent(component, null);
       continue;
     }
-    if (!blocksTime(component)) continue;
+
+    // ical.js compares a floating or unresolved-TZID start with a UTC UNTIL
+    // as if the start were UTC. Loosen UNTIL by a day and apply it here, on
+    // the real instants.
+    let untilMs = Number.POSITIVE_INFINITY;
+    const start = event.startDate;
+    const rule = component.getFirstPropertyValue("rrule");
+    if (
+      rule instanceof ICAL.Recur &&
+      rule.until &&
+      !start.isDate &&
+      start.zone === ICAL.Timezone.localTimezone &&
+      rule.until.zone === ICAL.Timezone.utcTimezone
+    ) {
+      untilMs = rule.until.toUnixTime() * 1000;
+      const loose = rule.until.clone();
+      loose.adjust(1, 0, 0, 0);
+      rule.until = loose;
+    }
+
+    const masterBlocks = blocksTime(component);
     const iterator = event.iterator();
     for (let count = 0; count < MAX_OCCURRENCES; count++) {
       const next = iterator.next();
       if (!next) break;
+      // Stop on the rule's own tick, not on a moved occurrence's new date.
+      const tick = utc(next);
+      if (tick >= window.to || tick > untilMs) break;
       const details = event.getOccurrenceDetails(next);
-      const start = utc(details.startDate);
-      if (start >= window.to) break;
-      if (!blocksTime(details.item.component)) continue;
-      add(start, utc(details.endDate));
+      if (details.item !== event) {
+        addComponent(details.item.component, tzid);
+      } else if (masterBlocks) {
+        add(utc(details.startDate), utc(details.endDate));
+      }
+    }
+
+    // Overrides whose original slot is past the window but moved into it.
+    for (const override of overrides) {
+      const recurrenceId = override.getFirstProperty("recurrence-id");
+      const original = recurrenceId?.getFirstValue();
+      if (!(original instanceof ICAL.Time)) continue;
+      const originalTzid = recurrenceId?.getParameter("tzid");
+      const originalMs = toUtcMs(
+        original,
+        typeof originalTzid === "string" ? originalTzid : tzid,
+        window.timeZone,
+      );
+      if (originalMs >= window.to) addComponent(override, tzid);
     }
   }
 
   // A moved occurrence whose series is not in the file still blocks time.
   for (const [uid, orphans] of exceptions) {
     if (masterUids.has(uid)) continue;
-    for (const component of orphans) {
-      if (!blocksTime(component)) continue;
-      const event = new ICAL.Event(component);
-      const tzid = startTzid(component);
-      add(
-        toUtcMs(event.startDate, tzid, window.timeZone),
-        toUtcMs(event.endDate, tzid, window.timeZone),
-      );
-    }
+    for (const component of orphans) addComponent(component, null);
   }
 
   return mergeSpans(spans);

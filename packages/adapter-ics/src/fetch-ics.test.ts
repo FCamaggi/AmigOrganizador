@@ -49,6 +49,11 @@ describe("isBlockedAddress", () => {
     "fe80::1",
     "fd12:3456::1",
     "::ffff:127.0.0.1",
+    "::ffff:7f00:1",
+    "64:ff9b::7f00:1",
+    "2002:7f00:1::1",
+    "2001:0:4136:e378::1",
+    "100::1",
   ])("blocks %s", (address) => {
     expect(isBlockedAddress(address)).toBe(true);
   });
@@ -147,6 +152,16 @@ describe("fetchIcs", () => {
         status: 301,
         location: "http://example.com/a.ics",
       },
+    });
+    await expectFetchError(
+      fetchIcs("https://example.com/a.ics", {}, transport),
+      "INVALID_URL",
+    );
+  });
+
+  it("reports a malformed redirect target as an invalid URL", async () => {
+    const { transport } = fakeTransport({
+      "https://example.com/a.ics": { status: 302, location: "https://[::1" },
     });
     await expectFetchError(
       fetchIcs("https://example.com/a.ics", {}, transport),
