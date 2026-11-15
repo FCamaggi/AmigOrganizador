@@ -343,7 +343,7 @@ export function LineDiagram({
       <p className="mt-1.5 pl-6 font-extrabold text-xs">
         {t("diagram.station", { time: formatSpan(station.start, station.end) })}
       </p>
-      <p className="mt-0.5 pl-6 text-[0.6875rem] text-mute">
+      <p className="mt-0.5 text-pretty pl-6 text-[0.6875rem] text-mute">
         {collapsed ? t("diagram.legend.trunk") : t("diagram.legend")}
       </p>
     </figure>

@@ -39,3 +39,6 @@ coverage/
 # Local agent tooling
 .atl/
 .turbo/
+
+# Impeccable review captures (regenerated per review)
+apps/web/.impeccable/review/

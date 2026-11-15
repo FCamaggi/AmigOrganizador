@@ -1,0 +1,432 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-14T00:00:00Z",
+  "title": "Design System: AmigOrganizador",
+  "extensions": {
+    "colorMeta": {
+      "ground": {
+        "role": "neutral",
+        "displayName": "Enamel White",
+        "canonical": "oklch(100.0% 0.000 89.9)",
+        "tonalRamp": [
+          "#0b0b0b",
+          "#242424",
+          "#404040",
+          "#5d5d5d",
+          "#7d7d7d",
+          "#9e9e9e",
+          "#c4c4c4",
+          "#eeeeee"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Signage Ink",
+        "canonical": "oklch(23.0% 0.004 106.7)",
+        "tonalRamp": [
+          "#0b0b09",
+          "#242422",
+          "#40403e",
+          "#5e5e5b",
+          "#7d7d7b",
+          "#9e9e9c",
+          "#c4c4c1",
+          "#efefec"
+        ]
+      },
+      "mute": {
+        "role": "neutral",
+        "displayName": "Platform Grey",
+        "canonical": "oklch(44.9% 0.005 106.6)",
+        "tonalRamp": [
+          "#0b0b09",
+          "#242422",
+          "#40403d",
+          "#5e5e5b",
+          "#7d7d7a",
+          "#9f9f9b",
+          "#c4c4c1",
+          "#efefeb"
+        ]
+      },
+      "rule": {
+        "role": "neutral",
+        "displayName": "Hairline",
+        "canonical": "oklch(91.8% 0.004 106.5)",
+        "tonalRamp": [
+          "#0b0b09",
+          "#242422",
+          "#40403d",
+          "#5e5e5b",
+          "#7d7d7b",
+          "#9e9e9c",
+          "#c4c4c1",
+          "#efefec"
+        ]
+      },
+      "rule-strong": {
+        "role": "neutral",
+        "displayName": "Strong Hairline",
+        "canonical": "oklch(79.7% 0.006 106.5)",
+        "tonalRamp": [
+          "#0b0b09",
+          "#242421",
+          "#40403d",
+          "#5e5e5a",
+          "#7d7d7a",
+          "#9f9f9b",
+          "#c4c4c0",
+          "#efefeb"
+        ]
+      },
+      "panel": {
+        "role": "neutral",
+        "displayName": "Panel Grey",
+        "canonical": "oklch(96.7% 0.003 106.4)",
+        "tonalRamp": [
+          "#0b0b0a",
+          "#242423",
+          "#40403e",
+          "#5e5e5c",
+          "#7d7d7b",
+          "#9e9e9d",
+          "#c4c4c2",
+          "#eeeeec"
+        ]
+      },
+      "sign-sub": {
+        "role": "neutral",
+        "displayName": "Sign Subtext",
+        "canonical": "oklch(87.5% 0.004 106.5)",
+        "tonalRamp": [
+          "#0b0b09",
+          "#242422",
+          "#40403d",
+          "#5e5e5b",
+          "#7d7d7b",
+          "#9e9e9c",
+          "#c4c4c1",
+          "#efefec"
+        ]
+      },
+      "line-red": {
+        "role": "secondary",
+        "displayName": "Línea 1 Red",
+        "canonical": "oklch(58.5% 0.221 29.2)",
+        "tonalRamp": [
+          "#1e0100",
+          "#4b0101",
+          "#7b0805",
+          "#af130c",
+          "#e3281d",
+          "#fd6756",
+          "#fcada0",
+          "#fee9e6"
+        ]
+      },
+      "line-blue": {
+        "role": "primary",
+        "displayName": "Línea 2 Blue",
+        "canonical": "oklch(50.9% 0.159 253.4)",
+        "tonalRamp": [
+          "#000b1e",
+          "#00244a",
+          "#023f79",
+          "#075dad",
+          "#297ed8",
+          "#4fa1fe",
+          "#9cc8fd",
+          "#e4f0fe"
+        ]
+      },
+      "line-yellow": {
+        "role": "secondary",
+        "displayName": "Línea 4 Yellow",
+        "canonical": "oklch(84.6% 0.172 85.3)",
+        "tonalRamp": [
+          "#110a00",
+          "#302200",
+          "#523c02",
+          "#765907",
+          "#9c7719",
+          "#c49723",
+          "#f2bb2b",
+          "#ffedc6"
+        ]
+      },
+      "line-green": {
+        "role": "secondary",
+        "displayName": "Línea 5 Green",
+        "canonical": "oklch(63.5% 0.170 151.2)",
+        "tonalRamp": [
+          "#001003",
+          "#012d12",
+          "#074d24",
+          "#117038",
+          "#079649",
+          "#31bb65",
+          "#61e38a",
+          "#c8ffd4"
+        ]
+      },
+      "line-purple": {
+        "role": "secondary",
+        "displayName": "Línea 6 Purple",
+        "canonical": "oklch(47.8% 0.170 326.1)",
+        "tonalRamp": [
+          "#18001a",
+          "#3d0540",
+          "#69026e",
+          "#8b308f",
+          "#af52b2",
+          "#d374d6",
+          "#fc9aff",
+          "#fee5fe"
+        ]
+      },
+      "danger": {
+        "role": "error",
+        "displayName": "Alarm Red",
+        "canonical": "oklch(48.9% 0.190 29.3)",
+        "tonalRamp": [
+          "#1e0000",
+          "#4b0000",
+          "#7c0502",
+          "#b00e07",
+          "#d74031",
+          "#ff6553",
+          "#fdac9f",
+          "#fee9e5"
+        ]
+      },
+      "line-blue-pressed": {
+        "role": "primary",
+        "displayName": "Pressed Blue",
+        "canonical": "#00539c",
+        "tonalRamp": [
+          "#000b1e",
+          "#00244a",
+          "#023f79",
+          "#075dad",
+          "#297ed8",
+          "#4fa1fe",
+          "#9cc8fd",
+          "#e4f0fe"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Plan title inside the ink sign."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Option day on ranked rows."
+      },
+      "numeral": {
+        "displayName": "Numeral",
+        "purpose": "The free/total count on option rows."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Running text and inputs."
+      },
+      "body-small": {
+        "displayName": "Body small",
+        "purpose": "Window notes, hints, empty-state bodies in Platform Grey."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Uppercase tracked section headings and the diagram caption."
+      },
+      "caption": {
+        "displayName": "Caption",
+        "purpose": "Axis ticks, legend, reason chips, badge, station pills, avatar initials."
+      },
+      "button": {
+        "displayName": "Button",
+        "purpose": "Primary button text."
+      }
+    },
+    "shadows": [],
+    "patterns": [
+      {
+        "name": "hatch-busy",
+        "value": "background-color:#1d1d1b; background-image:repeating-linear-gradient(-45deg, transparent 0 4px, rgb(255 255 255 / 0.28) 4px 6px)",
+        "purpose": "Out-of-service hatch for busy time, in the diagram and the busy editor."
+      },
+      {
+        "name": "track-unknown",
+        "value": "repeating-linear-gradient(90deg, #555552 0 5px, transparent 5px 10px)",
+        "purpose": "Grey dashed track for people who haven't answered."
+      },
+      {
+        "name": "yellow-outline",
+        "value": "inset 0 0 0 1px #1d1d1b",
+        "purpose": "Ink outline on yellow line segments (fails 3:1 on white). An outline, not elevation."
+      }
+    ],
+    "focus": {
+      "value": "outline: 3px solid #0065bd; outline-offset: 2px; border-radius: 4px",
+      "purpose": "Global :focus-visible ring."
+    },
+    "motion": [
+      {
+        "name": "ease-station",
+        "value": "cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "Station and line segments slide to a newly selected option."
+      },
+      {
+        "name": "duration-station",
+        "value": "220ms",
+        "purpose": "left/width transition of station and lines; only under prefers-reduced-motion: no-preference."
+      }
+    ],
+    "breakpoints": [],
+    "layout": {
+      "maxWidth": "28rem",
+      "gutter": "16px",
+      "minTarget": "44px",
+      "track": "08:00–24:00",
+      "maxSeparateLines": 6,
+      "maxBlockerLanes": 3,
+      "trunkThickness": "3px–10px by free share"
+    }
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The single full-width action in the sticky footer; the label names the outcome.",
+      "html": "<button class=\"ds-btn-primary\">Confirmar Sáb 21 nov, 19:00</button>",
+      "css": ".ds-btn-primary{font-family:var(--font-sign, 'Roboto Condensed','Arial Narrow',sans-serif);display:flex;align-items:center;justify-content:center;width:100%;height:3.125rem;padding:0 16px;border:none;border-radius:6px;background:var(--color-line-blue,#0065bd);color:#fff;font-weight:800;font-size:1.0625rem;cursor:pointer}.ds-btn-primary:active{background:#00539c}.ds-btn-primary:focus-visible{outline:3px solid var(--color-line-blue,#0065bd);outline-offset:2px;}.ds-btn-primary:disabled{background:var(--color-rule-strong,#bdbdb9);color:var(--color-ink,#1d1d1b)}"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "White ink-bordered buttons that share the row under the primary action.",
+      "html": "<div class=\"ds-row\"><button class=\"ds-btn-secondary\">Avisar a los que faltan</button><button class=\"ds-btn-secondary\">Compartir link</button></div>",
+      "css": ".ds-row{display:flex;gap:8px}.ds-btn-secondary{font-family:var(--font-sign, 'Roboto Condensed','Arial Narrow',sans-serif);flex:1;display:flex;align-items:center;justify-content:center;min-height:2.75rem;padding:0 12px;border:1.5px solid var(--color-ink,#1d1d1b);border-radius:6px;background:#fff;color:var(--color-ink,#1d1d1b);font-weight:700;font-size:0.9375rem;cursor:pointer}.ds-btn-secondary:active{background:var(--color-panel,#f4f4f2)}.ds-btn-secondary:focus-visible{outline:3px solid var(--color-line-blue,#0065bd);outline-offset:2px;}"
+    },
+    {
+      "name": "Routine Chips",
+      "kind": "chip",
+      "refersTo": "chip",
+      "description": "Toggle chips; selected inverts to ink. Used for routine profiles, range, duration.",
+      "html": "<div class=\"ds-chips\"><button class=\"ds-chip\" aria-pressed=\"true\">Nada fijo</button><button class=\"ds-chip\" aria-pressed=\"false\">Trabajo L-V</button><button class=\"ds-chip\" aria-pressed=\"false\">Turnos</button><button class=\"ds-chip\" aria-pressed=\"false\">Clases</button></div>",
+      "css": ".ds-chips{display:flex;flex-wrap:wrap;gap:6px}.ds-chip{font-family:var(--font-sign, 'Roboto Condensed','Arial Narrow',sans-serif);min-height:2.75rem;padding:0 12px;border:1.5px solid var(--color-rule-strong,#bdbdb9);border-radius:6px;background:#fff;color:var(--color-ink,#1d1d1b);font-weight:700;font-size:0.9375rem;cursor:pointer}.ds-chip[aria-pressed=true]{background:var(--color-ink,#1d1d1b);border-color:var(--color-ink,#1d1d1b);color:#fff}.ds-chip:hover{border-color:var(--color-ink,#1d1d1b)}.ds-chip:focus-visible{outline:3px solid var(--color-line-blue,#0065bd);outline-offset:2px;}"
+    },
+    {
+      "name": "Text Input",
+      "kind": "input",
+      "refersTo": "input-text",
+      "description": "48px field with a 1.5px ink border and an uppercase label above.",
+      "html": "<label class=\"ds-field\"><span class=\"ds-label\">¿Qué hacemos?</span><input class=\"ds-input\" placeholder=\"Asado en lo de Javi\"></label>",
+      "css": ".ds-field{display:block;font-family:var(--font-sign, 'Roboto Condensed','Arial Narrow',sans-serif);}.ds-label{display:block;font-weight:800;font-size:0.75rem;letter-spacing:0.06em;text-transform:uppercase;color:var(--color-ink,#1d1d1b)}.ds-input{font-family:var(--font-sign, 'Roboto Condensed','Arial Narrow',sans-serif);display:block;width:100%;margin-top:6px;min-height:3rem;padding:0 12px;border:1.5px solid var(--color-ink,#1d1d1b);border-radius:6px;background:#fff;color:var(--color-ink,#1d1d1b);font-weight:700;font-size:1.125rem}.ds-input::placeholder{color:var(--color-mute,#555552);font-weight:400}.ds-input:focus-visible{outline:3px solid var(--color-line-blue,#0065bd);outline-offset:2px;}"
+    },
+    {
+      "name": "Top Bar",
+      "kind": "nav",
+      "refersTo": "top-bar",
+      "description": "Blue back link with a drawn chevron, a short ink context line on the right.",
+      "html": "<nav class=\"ds-topbar\"><a class=\"ds-back\" href=\"#\"><svg viewBox=\"0 0 16 16\" width=\"16\" height=\"16\" aria-hidden=\"true\"><path d=\"M10 3 5 8l5 5\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg>Planes</a><span class=\"ds-aside\">Organiza Ana</span></nav>",
+      "css": ".ds-topbar{font-family:var(--font-sign, 'Roboto Condensed','Arial Narrow',sans-serif);display:flex;align-items:center;justify-content:space-between;font-weight:700;font-size:0.875rem}.ds-back{display:flex;align-items:center;gap:2px;min-height:2.75rem;padding:0 8px;margin-left:-8px;color:var(--color-line-blue,#0065bd);text-decoration:none}.ds-back:hover{text-decoration:underline;text-underline-offset:3px}.ds-back:focus-visible{outline:3px solid var(--color-line-blue,#0065bd);outline-offset:2px;}.ds-aside{color:var(--color-ink,#1d1d1b)}"
+    },
+    {
+      "name": "Plan Sign",
+      "kind": "card",
+      "refersTo": "plan-sign",
+      "description": "The ink enamel sign at the top of every plan screen with a line-colour badge.",
+      "html": "<header class=\"ds-sign\"><span class=\"ds-badge\">C</span><div><h1 class=\"ds-sign-title\">Cumpleaños de Javi</h1><p class=\"ds-sign-meta\">15 nov al 28 nov · 3 h · 10 personas</p></div></header>",
+      "css": ".ds-sign{font-family:var(--font-sign, 'Roboto Condensed','Arial Narrow',sans-serif);display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:6px;background:var(--color-ink,#1d1d1b);color:#fff}.ds-badge{display:grid;place-items:center;flex:none;width:32px;height:32px;border-radius:9999px;background:var(--color-line-red,#e1251b);font-weight:800}.ds-sign-title{margin:0;font-weight:800;font-size:1.25rem;line-height:1.25;letter-spacing:0.01em}.ds-sign-meta{margin:1px 0 0;font-size:0.75rem;color:var(--color-sign-sub,#d6d6d3)}"
+    },
+    {
+      "name": "Line Diagram",
+      "kind": "custom",
+      "refersTo": "station-platform",
+      "description": "Each person a line: solid free, ink hatch busy, grey dashed unknown; the station with guides, time pill and platforms.",
+      "html": "<figure class=\"ds-diagram\"><figcaption class=\"ds-cap\">Sáb 21 nov · quién está libre</figcaption><div class=\"ds-tracks\"><span class=\"ds-guide\" style=\"left:68.75%;width:18.75%\"><span class=\"ds-pill\">19:00–22:00</span></span><div class=\"ds-lane\"><b>A</b><span class=\"ds-track\"><span class=\"ds-free\" style=\"left:0;width:100%;background:var(--color-line-red,#e1251b)\"></span><span class=\"ds-plat\" style=\"left:68.75%;width:18.75%\"></span></span></div><div class=\"ds-lane\"><b>B</b><span class=\"ds-track\"><span class=\"ds-busy\" style=\"left:0;width:50%\"></span><span class=\"ds-free\" style=\"left:50%;width:50%;background:var(--color-line-blue,#0065bd)\"></span><span class=\"ds-plat\" style=\"left:68.75%;width:18.75%\"></span></span></div><div class=\"ds-lane\"><b>C</b><span class=\"ds-track\"><span class=\"ds-free\" style=\"left:30%;width:70%;background:var(--color-line-yellow,#ffc20e);box-shadow:inset 0 0 0 1px var(--color-ink,#1d1d1b)\"></span><span class=\"ds-plat\" style=\"left:68.75%;width:18.75%\"></span></span></div><div class=\"ds-lane\"><b>D</b><span class=\"ds-track\"><span class=\"ds-unknown\" style=\"left:0;width:100%\"></span></span></div></div><p class=\"ds-station\">Estación común · 19:00–22:00</p></figure>",
+      "css": ".ds-diagram{font-family:var(--font-sign, 'Roboto Condensed','Arial Narrow',sans-serif);margin:0;padding:10px 12px 8px;border:1px solid var(--color-rule,#e4e4e1);border-radius:6px;color:var(--color-ink,#1d1d1b);font-variant-numeric:tabular-nums}.ds-cap{font-weight:800;font-size:0.75rem;letter-spacing:0.06em;text-transform:uppercase}.ds-tracks{position:relative;padding-top:24px}.ds-guide{position:absolute;top:0;bottom:-2px;margin-left:24px;border-left:1px dashed rgb(29 29 27/.4);border-right:1px dashed rgb(29 29 27/.4);transition:left 220ms cubic-bezier(0.16,1,0.3,1),width 220ms cubic-bezier(0.16,1,0.3,1)}.ds-pill{position:absolute;top:0;left:50%;transform:translateX(-50%);white-space:nowrap;padding:0 8px;border-radius:9999px;background:var(--color-ink,#1d1d1b);color:#fff;font-weight:800;font-size:0.6875rem;line-height:1.125rem}.ds-lane{display:flex;align-items:center;height:20px;margin-top:4px}.ds-lane b{width:24px;flex:none;font-weight:800;font-size:0.8125rem}.ds-track{position:relative;flex:1;height:20px;background:linear-gradient(var(--color-rule,#e4e4e1),var(--color-rule,#e4e4e1)) center/100% 1px no-repeat}.ds-free{position:absolute;top:7px;height:6px;border-radius:9999px}.ds-busy{position:absolute;top:6px;height:8px;border-radius:2px;background-color:var(--color-ink,#1d1d1b);background-image:repeating-linear-gradient(-45deg,transparent 0 4px,rgb(255 255 255/.28) 4px 6px)}.ds-unknown{position:absolute;top:9px;height:2px;background-image:repeating-linear-gradient(90deg,var(--color-mute,#555552) 0 5px,transparent 5px 10px)}.ds-plat{position:absolute;top:50%;height:14px;transform:translateY(-50%);box-sizing:border-box;border:2px solid var(--color-ink,#1d1d1b);border-radius:9999px;background:#fff}.ds-station{margin:6px 0 0 24px;font-weight:800;font-size:0.75rem}"
+    },
+    {
+      "name": "Option Row",
+      "kind": "custom",
+      "refersTo": "option-row-selected",
+      "description": "Ranked option: rank ring, day and span, reason chips, state avatars, count and the Mejor badge.",
+      "html": "<label class=\"ds-opt\"><span class=\"ds-ring\"></span><span><span class=\"ds-day\">Sáb 21 nov <span class=\"ds-span\">19:00–22:00</span></span><span class=\"ds-reasons\"><span class=\"ds-reason\">Buen día</span><span class=\"ds-reason\">Más pronto</span></span><span class=\"ds-avs\"><span class=\"ds-av ds-av-free\">A</span><span class=\"ds-av ds-av-unknown\">C</span><span class=\"ds-av ds-av-busy\">D</span></span></span><span class=\"ds-count\"><b>8/10</b><small>pueden</small><span class=\"ds-best\">Mejor</span></span></label>",
+      "css": ".ds-opt{font-family:var(--font-sign, 'Roboto Condensed','Arial Narrow',sans-serif);display:grid;grid-template-columns:1.75rem 1fr auto;gap:0 10px;padding:12px 4px 12px 0;border-bottom:1px solid var(--color-rule,#e4e4e1);background:var(--color-panel,#f4f4f2);color:var(--color-ink,#1d1d1b);cursor:pointer;font-variant-numeric:tabular-nums}.ds-ring{width:22px;height:22px;box-sizing:border-box;margin:2px 0 0 2px;border:5px solid var(--color-line-red,#e1251b);border-radius:9999px;background:#fff}.ds-day{display:block;font-weight:800;font-size:1.0625rem;line-height:1.25}.ds-span{font-weight:500;font-size:0.9375rem;color:var(--color-mute,#555552)}.ds-reasons{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}.ds-reason{padding:1px 6px;border:1px solid var(--color-rule-strong,#bdbdb9);border-radius:3px;font-weight:700;font-size:0.6875rem}.ds-avs{display:flex;gap:3px;margin-top:6px}.ds-av{position:relative;display:grid;place-items:center;width:24px;height:24px;box-sizing:border-box;overflow:hidden;border:1.5px solid var(--color-ink,#1d1d1b);border-radius:9999px;font-weight:800;font-size:0.6875rem}.ds-av-free{background:var(--color-ink,#1d1d1b);color:#fff}.ds-av-unknown{border-style:dashed;border-color:var(--color-mute,#555552);color:var(--color-mute,#555552)}.ds-av-busy::after{content:'';position:absolute;left:-2px;right:-2px;top:50%;height:1.5px;background:var(--color-ink,#1d1d1b);transform:rotate(-45deg)}.ds-count{text-align:right}.ds-count b{display:block;font-weight:800;font-size:1.25rem;line-height:1}.ds-count small{display:block;font-weight:500;font-size:0.6875rem;color:var(--color-mute,#555552)}.ds-best{display:inline-block;margin-top:8px;padding:2px 6px;border-radius:3px;background:var(--color-line-red,#e1251b);color:#fff;font-weight:800;font-size:0.6875rem}"
+    },
+    {
+      "name": "Busy Editor Day",
+      "kind": "custom",
+      "refersTo": "busy-editor-day",
+      "description": "A day is the person's own line; busy time lays the ink hatch over it; three 44px tap segments.",
+      "html": "<div class=\"ds-day-row\"><span class=\"ds-day-label\">Lun 17</span><span class=\"ds-day-track\"><span class=\"ds-own\"></span><span class=\"ds-hatch\" style=\"left:6.25%;width:62.5%\"></span><button class=\"ds-seg\" style=\"left:0;width:31.25%\" aria-label=\"Mañana\"></button><button class=\"ds-seg ds-seg-div\" style=\"left:31.25%;width:37.5%\" aria-label=\"Tarde\"></button><button class=\"ds-seg ds-seg-div\" style=\"left:68.75%;width:31.25%\" aria-label=\"Noche\"></button></span></div>",
+      "css": ".ds-day-row{font-family:var(--font-sign, 'Roboto Condensed','Arial Narrow',sans-serif);display:flex;align-items:center;padding:4px 0;border-bottom:1px solid var(--color-rule,#e4e4e1);color:var(--color-ink,#1d1d1b)}.ds-day-label{width:4.25rem;flex:none;font-weight:800;font-size:0.9375rem}.ds-day-track{position:relative;flex:1;height:2.75rem}.ds-own{position:absolute;left:0;right:0;top:50%;margin-top:-3px;height:6px;border-radius:9999px;background:var(--color-line-green,#00a651)}.ds-hatch{position:absolute;top:50%;margin-top:-8px;height:16px;border-radius:3px;background-color:var(--color-ink,#1d1d1b);background-image:repeating-linear-gradient(-45deg,transparent 0 4px,rgb(255 255 255/.28) 4px 6px)}.ds-seg{position:absolute;top:0;bottom:0;border:0;background:transparent;cursor:pointer}.ds-seg-div{border-left:1px dashed var(--color-rule,#e4e4e1)}.ds-seg:active{background:rgb(29 29 27/.06)}.ds-seg:focus-visible{outline:3px solid var(--color-line-blue,#0065bd);outline-offset:2px;}"
+    }
+  ],
+  "narrative": {
+    "northStar": "Línea de Metro",
+    "overview": "Each friend is a metro line running across the day. Where every line runs free at once, a station appears, and that station is the option you confirm. The system refuses the category default of a days-by-people check table: availability is read as a transit diagram, not as a grid of ticks.\n\nThe material is enamel transit signage: a white ground, ink signs, Santiago Metro line colours, bold condensed type for every label and time. Everything is flat. Depth comes from ink panels and hairline rules, never from shadows or gradients. The density is phone-first and compact, one narrow column, because people answer in short bursts between classes or in transit. Light only, by design: signage is white enamel, and there is no dark theme.\n\nState is carried by shape before colour. A free stretch is a solid coloured line, busy time is an ink hatched \"out of service\" segment, and a friend who hasn't answered is a grey dashed track that is never drawn as free. The same three shapes appear wherever availability appears, in the plan diagram and in the busy editor alike.",
+    "keyCharacteristics": [
+      "White enamel ground, ink signage, one Santiago Metro line colour per person.",
+      "Free = solid line, busy = ink hatch, unknown = grey dashes; colour never carries state alone.",
+      "The station (the confirmable slot) is marked with dashed guides, an ink time pill and white platforms.",
+      "Roboto Condensed at heavy weights with tabular numerals for every time and count.",
+      "Flat: no shadows, no gradients; ink fills and hairline rules give structure.",
+      "One narrow phone column with a sticky action footer."
+    ],
+    "rules": [
+      {
+        "name": "The Line Belongs to a Person Rule",
+        "body": "Line colours are assigned one per person in join order: red, blue, yellow, green, purple, ink, then the cycle repeats. A line colour is never used as decoration or as a state signal; blue doubles as the action colour and red as the rank-one marker, both always paired with a shape or a word.",
+        "section": "colors"
+      },
+      {
+        "name": "The Yellow Outline Rule",
+        "body": "Yellow is always drawn with a 1px ink inset outline, because it fails 3:1 against white.",
+        "section": "colors"
+      },
+      {
+        "name": "The Shape Before Colour Rule",
+        "body": "Free, busy and unknown must stay distinguishable in greyscale: solid line, ink hatch, grey dashes. Unknown is never drawn as free.",
+        "section": "colors"
+      },
+      {
+        "name": "The Signage Weight Rule",
+        "body": "Labels, times and counts are set at 700–800; 400 is reserved for running text and captions that explain.",
+        "section": "typography"
+      },
+      {
+        "name": "The Tabular Time Rule",
+        "body": "Every time and count uses tabular numerals.",
+        "section": "typography"
+      },
+      {
+        "name": "The Enamel Rule",
+        "body": "Nothing floats. If an element needs separation, give it an ink fill or a hairline, never a shadow.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "**Do** assign line colours by join order (red, blue, yellow, green, purple, ink) and keep a person's colour stable across screens.",
+      "**Do** outline yellow with a 1px ink inset wherever it is drawn as a line.",
+      "**Do** draw free as a solid line, busy as the ink hatch and unknown as the grey dashed track, in every view that shows availability.",
+      "**Do** mark the station as the confirmable slot with dashed guides, the ink time pill and a platform on every line free through it.",
+      "**Do** span the diagram over the useful day 08:00–24:00, the same track as the busy editor.",
+      "**Do** collapse beyond 6 people into the ink trunk with the \"8/10\" capsule, keeping at most 3 blocker lanes and a \"Ver a todos\" toggle.",
+      "**Do** keep every tap target at least 44px tall and one full-width primary action in a sticky footer.",
+      "**Do** write copy in Spanish (Chile), informal tú, through i18n keys."
+    ],
+    "donts": [
+      "**Don't** use shadows or gradients for depth; the world is flat enamel.",
+      "**Don't** let colour carry state alone, and never draw an unanswered person as free.",
+      "**Don't** use line colours as decoration or behind body text where contrast fails.",
+      "**Don't** fall back to a days-by-people check table for availability.",
+      "**Don't** add a dark theme; light only is a decision, not a gap."
+    ]
+  }
+}
