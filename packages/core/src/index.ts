@@ -42,6 +42,19 @@ export {
   type CalendarInvite,
 } from "./calendar/invite";
 export {
+  createGroup,
+  type Group,
+  GroupError,
+  type GroupErrorCode,
+  type GroupMember,
+  type GroupRole,
+  joinGroup,
+  leaveGroup,
+  type NewGroup,
+  updateGroup,
+} from "./group/group";
+export type { GroupRepository } from "./group/group-repository";
+export {
   answerPlan,
   type ConfirmedSlot,
   cancelPlan,

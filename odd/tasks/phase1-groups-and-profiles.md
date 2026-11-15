@@ -20,7 +20,7 @@ Assumptions (agent, to confirm): the group view looks 4 weeks ahead; "mark free 
 
 ## Tasks
 
-- [ ] T1 (S1, S7) inline: core `Group` domain (create, join, leave, rename) + `GroupRepository` port. Test-first.
+- [x] T1 (S1, S7) inline: core `Group` domain (create, join, leave, update) + `GroupRepository` port. RED (19 failing on stub) then GREEN (134 core tests). Rules in `docs/domain/GROUP.md`.
 - [ ] T2 (S2) inline: core availability `Profile` (templates, one-off busy days, exceptions, imported busy) expanded over a date range + `ProfileRepository` port. Reuses `expandBusyTemplates` / `buildAnswerDays`.
 - [ ] T3 (S3) inline: core group outlook: members' profiles -> ranked windows and day lines over the next weeks; no profile = unknown.
 - [ ] T4 (S4, S5) inline: core group plan (propose, confirm, cancel) + multi-event ICS feed builder.
@@ -36,3 +36,4 @@ Assumptions (agent, to confirm): the group view looks 4 weeks ahead; "mark free 
 - L1 (2026-11-15): owner: "Viendo lo que realizaste me di cuenta que te fuiste completamente a la idea de hacer algo tipo when to meet, no es lo que hablamos, la base de lo que teniamos eran grupos de personas que al comparar su disponibilidad pudieran saber que dias pueden verse, no entiendo cuando se cambio tanto la idea para ser algo tan basico como decir que quiero hacer algo y que todos pongan los dias que pueden, o entendi mal? la idea era esa, en que lo convertiste ahora? que pasa con lo que dije de los perfiles, la verdad no se que pasó"
 - L2 (2026-11-15): agent found the cause: the plan-first framing came from the agent's Phase 0 VISION/ROADMAP and was never confirmed (Phase 1 Specs said so). Owner confirmed the model: "sí, ese es el modelo, sobre los perfiles de estudiante, enfermera, etc, efectivamente son ayudas, no es necesario que se elijan, pero si, la idea es que lo usen como calendario de sus trabajos, clases, dias ocupados, y asi el resto del grupo en su totalidad puede saber si pueden juntarse o no, la idea de todo esto era hacer lo mas facil posible para las personas el mostrar esa disponibilidad y configurarla, importando y exportando de otros calendarios, etc."
 - L3 (2026-11-15): ADR 0004 written; VISION, ROADMAP, PRODUCT.md and CLAUDE.md aligned. Plan below awaits the owner's approval before T1. Engram mirror pending (Engram fails with "getwd").
+- L4 (2026-11-15): owner approved the plan: "sí, dale con el punto 1". T1 done. Decisions (agent, reversible): only the owner renames or changes the timezone; when the owner leaves, the longest-standing member becomes owner; the invite code is separate from the group id so it can be rotated.
