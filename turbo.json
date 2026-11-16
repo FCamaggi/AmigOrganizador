@@ -3,6 +3,7 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
+      "env": ["CONTACT_EMAIL"],
       "outputs": [".next/**", "!.next/cache/**", "dist/**"]
     },
     "typecheck": {
