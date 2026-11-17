@@ -70,3 +70,7 @@ Rules in `packages/core/src/profile/person.ts` (ADR 0004 amendment).
 - The default schedule cannot be removed; removing another one sends the
   groups that read it back to the default.
 - Duplicating a schedule copies every busy rule under a new id and name.
+- A routine (busy template) may carry a label the person gives it
+  ("Trabajo", "Hospital"), 1 to 40 characters. Weekly routines repeat by
+  weekday with any minute; cycles repeat every N days, each day with its own
+  hours, regardless of the weekday.

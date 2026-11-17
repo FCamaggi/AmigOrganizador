@@ -4,6 +4,7 @@ import {
   buildAnswerDays,
   expandBusyTemplates,
   shiftCycle,
+  validateTemplates,
   workweek,
 } from "./busy-templates";
 import { parseLocalDate } from "./local-date";
@@ -193,5 +194,38 @@ describe("buildAnswerDays", () => {
         free: { "2026-11-13": [{ start: h(20), end: h(26) }] },
       }),
     ).toThrow(RangeError);
+  });
+});
+
+describe("routine labels (profile-editor-v2 S6)", () => {
+  const FRIDAY = parseLocalDate("2026-11-20");
+
+  it("keeps a label the person gives a routine, without changing the busy time", () => {
+    const labelled = workweek({ label: "Trabajo" });
+    expect(labelled.label).toBe("Trabajo");
+    expect(expandBusyTemplates([labelled], FRIDAY, FRIDAY)).toEqual(
+      expandBusyTemplates([workweek()], FRIDAY, FRIDAY),
+    );
+    const shifts = shiftCycle({
+      anchor: FRIDAY,
+      pattern: ["day", "off"],
+      day: { start: 7 * 60 + 30, end: 19 * 60 + 30 },
+      label: "Hospital",
+    });
+    expect(shifts.label).toBe("Hospital");
+    expect(expandBusyTemplates([shifts], FRIDAY, FRIDAY)).toEqual({
+      [FRIDAY]: [{ start: 450, end: 1170 }],
+    });
+  });
+
+  it("refuses an empty or too long label", () => {
+    for (const label of ["  ", "x".repeat(41)]) {
+      expect(() => validateTemplates([{ ...workweek(), label }])).toThrow(
+        RangeError,
+      );
+    }
+    expect(() =>
+      validateTemplates([workweek({ label: "Clases U" })]),
+    ).not.toThrow();
   });
 });

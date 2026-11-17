@@ -21,7 +21,7 @@ export type ShiftKind = "day" | "night" | "off";
  * work week, weekly classes, or a rotating shift cycle. `kind` lets the UI
  * label it; the expansion only depends on the data.
  */
-export type BusyTemplate =
+export type BusyTemplate = (
   | { readonly kind: "workweek"; readonly blocks: readonly WeeklyBlock[] }
   | { readonly kind: "classes"; readonly blocks: readonly WeeklyBlock[] }
   | {
@@ -30,7 +30,13 @@ export type BusyTemplate =
       readonly anchor: LocalDate;
       /** Busy intervals for each day of the cycle, repeated forever. */
       readonly cycle: readonly (readonly Interval[])[];
-    };
+    }
+) & {
+  /** The person's name for it ("Trabajo", "Hospital"); 1 to 40 characters. */
+  readonly label?: string;
+};
+
+const MAX_LABEL_LENGTH = 40;
 
 const MONDAY_TO_FRIDAY = [1, 2, 3, 4, 5] as const;
 
@@ -40,16 +46,19 @@ export function workweek(
     readonly weekdays?: readonly number[];
     readonly start?: number;
     readonly end?: number;
+    readonly label?: string;
   } = {},
 ): BusyTemplate {
   const {
     weekdays = MONDAY_TO_FRIDAY,
     start = 9 * 60,
     end = 18 * 60,
+    label,
   } = options;
   return {
     kind: "workweek",
     blocks: weekdays.map((weekday) => ({ weekday, start, end })),
+    ...(label === undefined ? {} : { label }),
   };
 }
 
@@ -63,6 +72,7 @@ export function shiftCycle(options: {
   readonly pattern: readonly ShiftKind[];
   readonly day?: Interval;
   readonly night?: Interval;
+  readonly label?: string;
 }): BusyTemplate {
   const {
     day = { start: 8 * 60, end: 20 * 60 },
@@ -77,6 +87,7 @@ export function shiftCycle(options: {
     kind: "shifts",
     anchor: options.anchor,
     cycle: options.pattern.map((kind) => hours[kind]),
+    ...(options.label === undefined ? {} : { label: options.label }),
   };
 }
 
@@ -95,6 +106,14 @@ function assertInterval(interval: Interval): void {
 }
 
 function assertTemplate(template: BusyTemplate): void {
+  if (template.label !== undefined) {
+    const label = template.label.trim();
+    if (label.length === 0 || label.length > MAX_LABEL_LENGTH) {
+      throw new RangeError(
+        `a routine label must be 1 to ${MAX_LABEL_LENGTH} characters`,
+      );
+    }
+  }
   if (template.kind === "shifts") {
     if (template.cycle.length === 0) {
       throw new RangeError("a shift cycle needs at least one day");
