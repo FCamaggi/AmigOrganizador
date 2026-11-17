@@ -64,7 +64,8 @@ beforeAll(async () => {
   client = new PGlite();
   db = drizzle(client, { schema });
   await migrate(db, { migrationsFolder: MIGRATIONS_FOLDER });
-});
+  // PGlite boots a WASM Postgres: past 10s when turbo runs every suite at once.
+}, 60_000);
 
 afterAll(async () => {
   await client.close();
