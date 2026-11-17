@@ -1,4 +1,4 @@
-import type { Group, GroupPlan, Profile } from "@amigo/core";
+import type { Group, GroupPlan, Person, Profile } from "@amigo/core";
 import { sql } from "drizzle-orm";
 import {
   bigint,
@@ -31,9 +31,22 @@ export const groups = appSchema.table(
   ],
 );
 
-export const profiles = appSchema.table("profiles", {
+/** Schedules: several per account (ADR 0004 amendment), keyed by id. */
+export const profiles = appSchema.table(
+  "profiles",
+  {
+    accountId: text("account_id").notNull(),
+    /** `scheduleId(data)`; rows saved before schedules are `default`. */
+    scheduleId: text("schedule_id").notNull().default("default"),
+    data: jsonb("data").$type<Profile>().notNull(),
+  },
+  (table) => [primaryKey({ columns: [table.accountId, table.scheduleId] })],
+);
+
+/** The person behind an account: name and which schedule each group reads. */
+export const people = appSchema.table("people", {
   accountId: text("account_id").primaryKey(),
-  data: jsonb("data").$type<Profile>().notNull(),
+  data: jsonb("data").$type<Person>().notNull(),
 });
 
 export const groupPlans = appSchema.table(

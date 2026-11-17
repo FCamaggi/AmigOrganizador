@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { CalendarSource } from "./calendar-source-repository";
+import { DEFAULT_SCHEDULE_ID, duplicateSchedule, scheduleId } from "./person";
 import {
   createProfile,
   type ImportedCalendar,
@@ -27,23 +28,33 @@ const NEW_BUSY = [
 ];
 
 class FakeProfiles implements ProfileRepository {
+  /** Keyed by `accountId/scheduleId`. */
   readonly map = new Map<string, Profile>();
   saves = 0;
 
+  /** Test helper: the account's default schedule. */
   async findByAccount(accountId: string): Promise<Profile | null> {
-    const profile = this.map.get(accountId);
+    const profile = this.map.get(`${accountId}/${DEFAULT_SCHEDULE_ID}`);
     return profile ? clone(profile) : null;
   }
 
-  async findByAccounts(ids: readonly string[]): Promise<Profile[]> {
-    return ids.flatMap((id) =>
-      this.map.has(id) ? [clone(this.map.get(id) as Profile)] : [],
-    );
+  async listForAccount(accountId: string): Promise<Profile[]> {
+    return this.listForAccounts([accountId]);
+  }
+
+  async listForAccounts(ids: readonly string[]): Promise<Profile[]> {
+    return [...this.map.values()]
+      .filter((p) => ids.includes(p.accountId))
+      .map(clone);
   }
 
   async save(profile: Profile): Promise<void> {
     this.saves++;
-    this.map.set(profile.accountId, clone(profile));
+    this.map.set(`${profile.accountId}/${scheduleId(profile)}`, clone(profile));
+  }
+
+  async delete(accountId: string, id: string): Promise<void> {
+    this.map.delete(`${accountId}/${id}`);
   }
 }
 
@@ -78,7 +89,7 @@ function profileWith(
 
 function setup(...profiles: Profile[]) {
   const store = new FakeProfiles();
-  for (const p of profiles) store.map.set(p.accountId, p);
+  for (const p of profiles) store.map.set(`${p.accountId}/${scheduleId(p)}`, p);
   const deleted: string[] = [];
   return {
     store,
@@ -210,9 +221,9 @@ describe("resyncCalendars", () => {
       profiles: store,
       deleteSource,
       fetchCalendar: async (input) => {
-        const current = store.map.get("acc_ana") as Profile;
+        const current = store.map.get("acc_ana/default") as Profile;
         store.map.set(
-          "acc_ana",
+          "acc_ana/default",
           removeImportedCalendar(current, { id: "cal_1", now: NOW }),
         );
         return fresh(input);
@@ -236,8 +247,8 @@ describe("resyncCalendars", () => {
       profiles: store,
       deleteSource,
       fetchCalendar: async (input) => {
-        const current = store.map.get("acc_ana") as Profile;
-        store.map.set("acc_ana", {
+        const current = store.map.get("acc_ana/default") as Profile;
+        store.map.set("acc_ana/default", {
           ...current,
           busyDays: { "2026-11-22": [{ start: 600, end: 720 }] },
         });
@@ -316,12 +327,13 @@ describe("resyncCalendars", () => {
       profileWith("acc_beto", calendar("cal_2", "U")),
     );
     const flaky: ProfileRepository = {
-      findByAccount: async (id) => {
+      listForAccount: async (id) => {
         if (id === "acc_ana") throw new Error("connection reset");
-        return store.findByAccount(id);
+        return store.listForAccount(id);
       },
-      findByAccounts: (ids) => store.findByAccounts(ids),
+      listForAccounts: (ids) => store.listForAccounts(ids),
       save: (p) => store.save(p),
+      delete: (accountId, id) => store.delete(accountId, id),
     };
 
     const report = await resyncCalendars({
@@ -369,5 +381,67 @@ describe("resyncCalendars", () => {
         now: () => NOW,
       }),
     ).toEqual({ synced: 0, failed: 0, orphaned: 0 });
+  });
+});
+
+describe("resyncCalendars with several schedules", () => {
+  it("refreshes every schedule that carries the calendar, and leaves the rest", async () => {
+    const normal = profileWith("acc_ana", calendar("cal_1", "Trabajo"));
+    const copy = duplicateSchedule(normal, {
+      id: "sch_vac",
+      name: "Vacaciones",
+      now: IMPORTED_AT,
+    });
+    const other = duplicateSchedule(profileWith("acc_ana"), {
+      id: "sch_empty",
+      name: "Sin calendario",
+      now: IMPORTED_AT,
+    });
+    const { store, deleteSource, deleted } = setup(normal, copy, other);
+
+    const report = await resyncCalendars({
+      sources: [source("acc_ana", "cal_1")],
+      profiles: store,
+      deleteSource,
+      fetchCalendar: fresh,
+      now: () => NOW,
+    });
+
+    expect(report).toEqual({ synced: 1, failed: 0, orphaned: 0 });
+    expect(deleted).toEqual([]);
+    const byId = new Map(
+      (await store.listForAccount("acc_ana")).map((p) => [scheduleId(p), p]),
+    );
+    for (const id of [DEFAULT_SCHEDULE_ID, "sch_vac"]) {
+      expect(byId.get(id)?.importedCalendars).toEqual([
+        { id: "cal_1", name: "Trabajo", busy: NEW_BUSY, syncedAt: NOW },
+      ]);
+    }
+    expect(byId.get("sch_vac")?.name).toBe("Vacaciones");
+    expect(byId.get("sch_empty")).toEqual(other);
+    expect(store.saves).toBe(2);
+  });
+
+  it("is orphaned only when no schedule carries the calendar", async () => {
+    const empty = duplicateSchedule(profileWith("acc_ana"), {
+      id: "sch_vac",
+      name: "Vacaciones",
+      now: IMPORTED_AT,
+    });
+    const { store, deleteSource, deleted } = setup(
+      profileWith("acc_ana"),
+      empty,
+    );
+
+    const report = await resyncCalendars({
+      sources: [source("acc_ana", "cal_1")],
+      profiles: store,
+      deleteSource,
+      fetchCalendar: fresh,
+      now: () => NOW,
+    });
+
+    expect(report).toEqual({ synced: 0, failed: 0, orphaned: 1 });
+    expect(deleted).toEqual(["acc_ana/cal_1"]);
   });
 });

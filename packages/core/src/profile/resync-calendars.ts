@@ -1,6 +1,7 @@
 import type { CalendarSource } from "./calendar-source-repository";
 import {
   type ImportedCalendar,
+  type Profile,
   profileTimezone,
   setImportedCalendar,
 } from "./profile";
@@ -77,33 +78,48 @@ async function resyncSource(
   input: ResyncCalendarsInput,
   source: CalendarSource,
 ): Promise<keyof ResyncReport> {
-  const before = await input.profiles.findByAccount(source.accountId);
-  const known = before?.importedCalendars.find(
-    (c) => c.id === source.calendarId,
+  const carrying = (schedules: readonly Profile[]) =>
+    schedules.flatMap((schedule) => {
+      const calendar = schedule.importedCalendars.find(
+        (c) => c.id === source.calendarId,
+      );
+      return calendar ? [{ schedule, calendar }] : [];
+    });
+  // A duplicated schedule keeps the calendar id, so one link can feed several.
+  const [first] = carrying(
+    await input.profiles.listForAccount(source.accountId),
   );
-  if (!before || !known) {
+  if (!first) {
     await input.deleteSource(source.accountId, source.calendarId);
     return "orphaned";
   }
   const calendar = await input.fetchCalendar({
-    id: known.id,
-    name: known.name,
+    id: first.calendar.id,
+    name: first.calendar.name,
     url: source.url,
-    timeZone: profileTimezone(before),
+    timeZone: profileTimezone(first.schedule),
   });
   // Read again: the person may have edited or removed it meanwhile.
-  const current = await input.profiles.findByAccount(source.accountId);
-  const still = current?.importedCalendars.find((c) => c.id === known.id);
-  if (!current || !still) {
+  const current = carrying(
+    await input.profiles.listForAccount(source.accountId),
+  );
+  if (current.length === 0) {
     await input.deleteSource(source.accountId, source.calendarId);
     return "orphaned";
   }
   const now = input.now();
-  await input.profiles.save(
-    setImportedCalendar(current, {
-      calendar: { ...calendar, id: still.id, name: still.name, syncedAt: now },
-      now,
-    }),
-  );
+  for (const { schedule, calendar: still } of current) {
+    await input.profiles.save(
+      setImportedCalendar(schedule, {
+        calendar: {
+          ...calendar,
+          id: still.id,
+          name: still.name,
+          syncedAt: now,
+        },
+        now,
+      }),
+    );
+  }
   return "synced";
 }

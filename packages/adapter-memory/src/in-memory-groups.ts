@@ -1,14 +1,17 @@
-import type {
-  CalendarSource,
-  CalendarSourceRepository,
-  Group,
-  GroupPlan,
-  GroupPlanRepository,
-  GroupRepository,
-  ProductEvent,
-  ProductEventRepository,
-  Profile,
-  ProfileRepository,
+import {
+  type CalendarSource,
+  type CalendarSourceRepository,
+  type Group,
+  type GroupPlan,
+  type GroupPlanRepository,
+  type GroupRepository,
+  type Person,
+  type PersonRepository,
+  type ProductEvent,
+  type ProductEventRepository,
+  type Profile,
+  type ProfileRepository,
+  scheduleId,
 } from "@amigo/core";
 
 /**
@@ -56,28 +59,63 @@ export class InMemoryGroupRepository implements GroupRepository {
 }
 
 export class InMemoryProfileRepository implements ProfileRepository {
+  /** Keyed by `accountId/scheduleId`; insertion order is creation order. */
   readonly #profiles = new Map<string, Profile>();
 
   constructor(seed: readonly Profile[] = []) {
-    for (const profile of seed) {
-      this.#profiles.set(profile.accountId, structuredClone(profile));
-    }
+    for (const profile of seed) this.#set(profile);
   }
 
-  async findByAccount(accountId: string): Promise<Profile | null> {
-    const profile = this.#profiles.get(accountId);
-    return profile ? structuredClone(profile) : null;
+  #set(profile: Profile): void {
+    this.#profiles.set(
+      `${profile.accountId}/${scheduleId(profile)}`,
+      structuredClone(profile),
+    );
   }
 
-  async findByAccounts(accountIds: readonly string[]): Promise<Profile[]> {
-    return accountIds.flatMap((id) => {
-      const profile = this.#profiles.get(id);
-      return profile ? [structuredClone(profile)] : [];
-    });
+  async listForAccount(accountId: string): Promise<Profile[]> {
+    return this.listForAccounts([accountId]);
+  }
+
+  async listForAccounts(accountIds: readonly string[]): Promise<Profile[]> {
+    return [...this.#profiles.values()]
+      .filter((profile) => accountIds.includes(profile.accountId))
+      .sort((a, b) => a.createdAt - b.createdAt)
+      .map((profile) => structuredClone(profile));
   }
 
   async save(profile: Profile): Promise<void> {
-    this.#profiles.set(profile.accountId, structuredClone(profile));
+    this.#set(profile);
+  }
+
+  async delete(accountId: string, id: string): Promise<void> {
+    this.#profiles.delete(`${accountId}/${id}`);
+  }
+}
+
+export class InMemoryPersonRepository implements PersonRepository {
+  readonly #people = new Map<string, Person>();
+
+  constructor(seed: readonly Person[] = []) {
+    for (const person of seed) {
+      this.#people.set(person.accountId, structuredClone(person));
+    }
+  }
+
+  async findByAccount(accountId: string): Promise<Person | null> {
+    const person = this.#people.get(accountId);
+    return person ? structuredClone(person) : null;
+  }
+
+  async findByAccounts(accountIds: readonly string[]): Promise<Person[]> {
+    return accountIds.flatMap((id) => {
+      const person = this.#people.get(id);
+      return person ? [structuredClone(person)] : [];
+    });
+  }
+
+  async save(person: Person): Promise<void> {
+    this.#people.set(person.accountId, structuredClone(person));
   }
 }
 

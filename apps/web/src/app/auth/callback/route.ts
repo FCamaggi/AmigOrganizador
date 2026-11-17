@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
       const needsProfile =
         next === "/" &&
         data.user &&
-        !(await profiles().findByAccount(data.user.id));
+        (await profiles().listForAccount(data.user.id)).length === 0;
       return NextResponse.redirect(
         new URL(needsProfile ? "/perfil" : next, origin),
       );

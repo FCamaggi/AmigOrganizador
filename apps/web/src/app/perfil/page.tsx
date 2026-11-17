@@ -20,7 +20,7 @@ import {
   resyncCalendarAction,
   saveProfileAction,
 } from "@/server/group-actions";
-import { profiles } from "@/server/repository";
+import { myDefaultSchedule } from "@/server/repository";
 import { getSession } from "@/server/session";
 import { ImportForm } from "./import-form";
 import { ProfileEditor } from "./profile-editor";
@@ -65,7 +65,7 @@ async function ProfileScreen({
     );
   const now = Date.now();
   const profile =
-    (await profiles().findByAccount(session.accountId)) ??
+    (await myDefaultSchedule(session.accountId)) ??
     createProfile({ accountId: session.accountId, now });
   const timeZone = profileTimezone(profile);
   const today = todayIn(timeZone, now);

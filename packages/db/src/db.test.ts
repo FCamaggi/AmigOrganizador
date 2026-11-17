@@ -4,12 +4,17 @@ import { fileURLToPath } from "node:url";
 import {
   confirmGroupPlan,
   createGroup,
+  createPerson,
   createProfile,
+  createSchedule,
   type Group,
   joinGroup,
   parseLocalDate,
   profileTimezone,
   proposeGroupPlan,
+  renamePerson,
+  renameSchedule,
+  scheduleId,
   setDay,
   setImportedCalendar,
   setTemplates,
@@ -29,6 +34,7 @@ import {
   PostgresCalendarSourceRepository,
   PostgresGroupPlanRepository,
   PostgresGroupRepository,
+  PostgresPersonRepository,
   PostgresProductEventRepository,
   PostgresProfileRepository,
   productEvents,
@@ -73,7 +79,7 @@ afterAll(async () => {
 
 beforeEach(async () => {
   await db.execute(
-    sql`TRUNCATE TABLE app.groups, app.profiles, app.group_plans, app.calendar_sources, app.product_events`,
+    sql`TRUNCATE TABLE app.groups, app.profiles, app.people, app.group_plans, app.calendar_sources, app.product_events`,
   );
 });
 
@@ -89,6 +95,7 @@ describe("migrations and RLS", () => {
       { tablename: "calendar_sources", rowsecurity: true },
       { tablename: "group_plans", rowsecurity: true },
       { tablename: "groups", rowsecurity: true },
+      { tablename: "people", rowsecurity: true },
       { tablename: "product_events", rowsecurity: true },
       { tablename: "profiles", rowsecurity: true },
     ]);
@@ -158,8 +165,8 @@ describe("PostgresProfileRepository timezone", () => {
       }),
     );
     await repo.save(createProfile({ accountId: "acc_beto", now: NOW }));
-    const ana = await repo.findByAccount("acc_ana");
-    const beto = await repo.findByAccount("acc_beto");
+    const [ana] = await repo.listForAccount("acc_ana");
+    const [beto] = await repo.listForAccount("acc_beto");
     expect(ana?.timezone).toBe("Europe/Madrid");
     expect(beto && profileTimezone(beto)).toBe("America/Santiago");
   });
@@ -194,7 +201,82 @@ describe("PostgresProfileRepository", () => {
     const beto = createProfile({ accountId: "acc_beto", now: NOW });
     await repo.save(beto);
 
-    expect(await repo.findByAccount("acc_ana")).toEqual(ana);
+    expect(await repo.listForAccount("acc_ana")).toEqual([ana]);
+    expect(await repo.listForAccount("acc_x")).toEqual([]);
+    expect(
+      (await repo.listForAccounts(["acc_beto", "acc_x", "acc_ana"]))
+        .map((p) => p.accountId)
+        .sort(),
+    ).toEqual(["acc_ana", "acc_beto"]);
+    expect(await repo.listForAccounts([])).toEqual([]);
+  });
+
+  it("keeps several schedules per account, oldest first, and deletes one", async () => {
+    const repo = new PostgresProfileRepository(db);
+    const vacation = createSchedule({
+      accountId: "acc_ana",
+      id: "sch_vac",
+      name: "Vacaciones",
+      now: NOW + 10,
+    });
+    await repo.save(vacation);
+    await repo.save(createProfile({ accountId: "acc_ana", now: NOW }));
+    await repo.save(
+      renameSchedule(vacation, { name: "Verano", now: NOW + 20 }),
+    );
+
+    expect(
+      (await repo.listForAccount("acc_ana")).map((p) => [
+        scheduleId(p),
+        p.name,
+      ]),
+    ).toEqual([
+      ["default", undefined],
+      ["sch_vac", "Verano"],
+    ]);
+    await repo.delete("acc_ana", "sch_vac");
+    expect((await repo.listForAccount("acc_ana")).map(scheduleId)).toEqual([
+      "default",
+    ]);
+  });
+
+  it("reads a row saved before schedules as the default schedule, and replaces it", async () => {
+    const legacy = createProfile({ accountId: "acc_ana", now: NOW });
+    // The shape migration 0003 finds in production: no schedule column given.
+    await db.execute(
+      sql`INSERT INTO app.profiles (account_id, data) VALUES ('acc_ana', ${JSON.stringify(legacy)}::jsonb)`,
+    );
+    const repo = new PostgresProfileRepository(db);
+    expect(await repo.listForAccount("acc_ana")).toEqual([legacy]);
+
+    const edited = setTimezone(legacy, {
+      timezone: "Europe/Madrid",
+      now: NOW + 1,
+    });
+    await repo.save(edited);
+    expect(await repo.listForAccount("acc_ana")).toEqual([edited]);
+  });
+});
+
+describe("PostgresPersonRepository", () => {
+  it("round-trips a person, replaces on save, and skips missing accounts", async () => {
+    const repo = new PostgresPersonRepository(db);
+    const ana = createPerson({
+      accountId: "acc_ana",
+      displayName: "Ana",
+      now: NOW,
+    });
+    await repo.save(ana);
+    const renamed = renamePerson(ana, {
+      displayName: "Ana María",
+      now: NOW + 1,
+    });
+    await repo.save(renamed);
+    await repo.save(
+      createPerson({ accountId: "acc_beto", displayName: "Beto", now: NOW }),
+    );
+
+    expect(await repo.findByAccount("acc_ana")).toEqual(renamed);
     expect(await repo.findByAccount("acc_x")).toBeNull();
     expect(
       (await repo.findByAccounts(["acc_beto", "acc_x", "acc_ana"])).map(

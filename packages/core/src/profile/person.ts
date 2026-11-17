@@ -203,6 +203,15 @@ export function scheduleForGroup(
   );
 }
 
+/** The schedule the person edits first and groups read by default. */
+export function defaultSchedule(
+  person: Person | null,
+  schedules: readonly Profile[],
+): Profile | null {
+  const id = person?.defaultScheduleId ?? DEFAULT_SCHEDULE_ID;
+  return schedules.find((schedule) => scheduleId(schedule) === id) ?? null;
+}
+
 /**
  * One schedule per member for the group outlook, from every member's people
  * records and schedules. Members without a schedule are left out (unknown).

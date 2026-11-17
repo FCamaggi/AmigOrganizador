@@ -32,7 +32,13 @@ import { authMode } from "./auth/config";
 import { fetchImportedCalendar } from "./calendar-sync";
 import { newId } from "./ids";
 import { track } from "./product-events";
-import { calendarSources, groupPlans, groups, profiles } from "./repository";
+import {
+  calendarSources,
+  groupPlans,
+  groups,
+  myDefaultSchedule,
+  profiles,
+} from "./repository";
 import { getSession, startSession } from "./session";
 
 const MAX_NAME = 60;
@@ -119,7 +125,7 @@ export async function joinGroupAction(code: string): Promise<void> {
       now: Date.now(),
     }),
   );
-  const profile = await profiles().findByAccount(session.accountId);
+  const profile = await myDefaultSchedule(session.accountId);
   redirect(
     profile ? `/g/${code}` : `/perfil?next=${encodeURIComponent(`/g/${code}`)}`,
   );
@@ -224,7 +230,7 @@ export async function cancelPlanAction(
 
 /** The stored profile, or a new empty one (`created` says which). */
 async function myProfile(accountId: string) {
-  const stored = await profiles().findByAccount(accountId);
+  const stored = await myDefaultSchedule(accountId);
   return {
     profile: stored ?? createProfile({ accountId, now: Date.now() }),
     created: stored === null,
@@ -348,7 +354,7 @@ export async function resyncCalendarAction(calendarId: string): Promise<void> {
   const source = (
     await calendarSources().listForAccount(session.accountId)
   ).find((s) => s.calendarId === calendarId);
-  const profile = await profiles().findByAccount(session.accountId);
+  const profile = await myDefaultSchedule(session.accountId);
   const calendar = profile?.importedCalendars.find((c) => c.id === calendarId);
   if (source && calendar) {
     await syncCalendar(
@@ -363,7 +369,7 @@ export async function resyncCalendarAction(calendarId: string): Promise<void> {
 
 export async function removeCalendarAction(calendarId: string): Promise<void> {
   const session = await requireSession("/perfil");
-  const profile = await profiles().findByAccount(session.accountId);
+  const profile = await myDefaultSchedule(session.accountId);
   if (profile) {
     await profiles().save(
       removeImportedCalendar(profile, { id: calendarId, now: Date.now() }),

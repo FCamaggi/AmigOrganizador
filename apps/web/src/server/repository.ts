@@ -2,21 +2,28 @@ import {
   InMemoryCalendarSourceRepository,
   InMemoryGroupPlanRepository,
   InMemoryGroupRepository,
+  InMemoryPersonRepository,
   InMemoryProductEventRepository,
   InMemoryProfileRepository,
 } from "@amigo/adapter-memory";
-import type {
-  CalendarSourceRepository,
-  GroupPlanRepository,
-  GroupRepository,
-  ProductEventRepository,
-  ProfileRepository,
+import {
+  type CalendarSourceRepository,
+  defaultSchedule,
+  type Group,
+  type GroupPlanRepository,
+  type GroupRepository,
+  groupSchedules,
+  type PersonRepository,
+  type ProductEventRepository,
+  type Profile,
+  type ProfileRepository,
 } from "@amigo/core";
 import {
   createDb,
   PostgresCalendarSourceRepository,
   PostgresGroupPlanRepository,
   PostgresGroupRepository,
+  PostgresPersonRepository,
   PostgresProductEventRepository,
   PostgresProfileRepository,
 } from "@amigo/db";
@@ -25,6 +32,7 @@ import { demoGroups } from "./demo-groups";
 interface Stores {
   readonly groups: GroupRepository;
   readonly profiles: ProfileRepository;
+  readonly people: PersonRepository;
   readonly groupPlans: GroupPlanRepository;
   readonly calendarSources: CalendarSourceRepository;
   readonly productEvents: ProductEventRepository;
@@ -45,6 +53,7 @@ function postgresStores(url: string): Stores {
   return {
     groups: new PostgresGroupRepository(db),
     profiles: new PostgresProfileRepository(db),
+    people: new PostgresPersonRepository(db),
     groupPlans: new PostgresGroupPlanRepository(db),
     calendarSources: new PostgresCalendarSourceRepository(db, key),
     productEvents: new PostgresProductEventRepository(db),
@@ -67,6 +76,7 @@ function memoryStores(): Stores {
   return {
     groups: new InMemoryGroupRepository(demo.groups),
     profiles: new InMemoryProfileRepository(demo.profiles),
+    people: new InMemoryPersonRepository(),
     groupPlans: new InMemoryGroupPlanRepository(demo.plans),
     calendarSources: new InMemoryCalendarSourceRepository(),
     productEvents: new InMemoryProductEventRepository(),
@@ -83,6 +93,28 @@ function stores(): Stores {
 
 export const groups = () => stores().groups;
 export const profiles = () => stores().profiles;
+export const people = () => stores().people;
 export const groupPlans = () => stores().groupPlans;
 export const calendarSources = () => stores().calendarSources;
 export const productEvents = () => stores().productEvents;
+
+/** The schedule the person edits on /perfil: their default one, if any. */
+export async function myDefaultSchedule(
+  accountId: string,
+): Promise<Profile | null> {
+  const [person, schedules] = await Promise.all([
+    people().findByAccount(accountId),
+    profiles().listForAccount(accountId),
+  ]);
+  return defaultSchedule(person, schedules);
+}
+
+/** One schedule per member, the one each reads for this group (unknown = left out). */
+export async function memberSchedules(group: Group): Promise<Profile[]> {
+  const ids = group.members.map((m) => m.accountId);
+  const [members, schedules] = await Promise.all([
+    people().findByAccounts(ids),
+    profiles().listForAccounts(ids),
+  ]);
+  return groupSchedules(group, members, schedules);
+}

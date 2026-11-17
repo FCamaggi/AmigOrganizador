@@ -4,7 +4,7 @@ import { ImageResponse } from "next/og";
 import { connection } from "next/server";
 import { t } from "@/i18n/t";
 import { initialOf } from "@/lib/format";
-import { groups, profiles } from "@/server/repository";
+import { groups, memberSchedules } from "@/server/repository";
 
 export const alt = t("app.tagline");
 export const size = { width: 1200, height: 630 };
@@ -41,10 +41,7 @@ export default async function Image({
     readFile(join(fontsDir, "RobotoCondensed-500.ttf")),
     readFile(join(fontsDir, "RobotoCondensed-800.ttf")),
   ]);
-  const withProfile = group
-    ? (await profiles().findByAccounts(group.members.map((m) => m.accountId)))
-        .length
-    : 0;
+  const withProfile = group ? (await memberSchedules(group)).length : 0;
   const preview = group
     ? {
         title: group.name,

@@ -4,7 +4,11 @@ import { t } from "@/i18n/t";
 import { lineColor } from "@/lib/lines";
 import { buttonClasses, shellClasses } from "@/lib/ui";
 import { signOut } from "@/server/actions";
-import { groups, profiles } from "@/server/repository";
+import {
+  groups,
+  memberSchedules,
+  myDefaultSchedule,
+} from "@/server/repository";
 import { getSession } from "@/server/session";
 
 export default function Home() {
@@ -61,14 +65,10 @@ async function HomeContent() {
 
   const [mine, profile] = await Promise.all([
     groups().listForAccount(session.accountId),
-    profiles().findByAccount(session.accountId),
+    myDefaultSchedule(session.accountId),
   ]);
   const withProfile = await Promise.all(
-    mine.map(
-      async (group) =>
-        (await profiles().findByAccounts(group.members.map((m) => m.accountId)))
-          .length,
-    ),
+    mine.map(async (group) => (await memberSchedules(group)).length),
   );
   // Desktop: who you are, your profile and the create action on the left;
   // your groups on the right. Below `lg` it stacks with a sticky footer.

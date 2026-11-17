@@ -103,6 +103,7 @@ export {
   createSchedule,
   DEFAULT_SCHEDULE_ID,
   DEFAULT_SCHEDULE_NAME,
+  defaultSchedule,
   duplicateSchedule,
   groupSchedules,
   type Person,
@@ -116,6 +117,7 @@ export {
   scheduleName,
   setDefaultSchedule,
 } from "./profile/person";
+export type { PersonRepository } from "./profile/person-repository";
 export {
   availabilityFor,
   createProfile,

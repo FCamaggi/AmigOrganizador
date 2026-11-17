@@ -6,6 +6,7 @@ import {
   createSchedule,
   DEFAULT_SCHEDULE_ID,
   DEFAULT_SCHEDULE_NAME,
+  defaultSchedule,
   duplicateSchedule,
   groupSchedules,
   PersonError,
@@ -259,5 +260,19 @@ describe("groupSchedules", () => {
 
     // Caro has no schedule: left out, so the outlook reads her as unknown.
     expect(result).toEqual([vacation, betoLegacy]);
+  });
+});
+
+describe("defaultSchedule", () => {
+  it("is the person's default, or the default-id schedule without a person", () => {
+    const moved = setDefaultSchedule(person, {
+      scheduleId: "sch_vac",
+      schedules,
+      now: LATER,
+    });
+    expect(defaultSchedule(person, schedules)).toBe(normal);
+    expect(defaultSchedule(moved, schedules)).toBe(vacation);
+    expect(defaultSchedule(null, schedules)).toBe(normal);
+    expect(defaultSchedule(null, [])).toBeNull();
   });
 });

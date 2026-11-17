@@ -1,14 +1,17 @@
-import type {
-  CalendarSource,
-  CalendarSourceRepository,
-  Group,
-  GroupPlan,
-  GroupPlanRepository,
-  GroupRepository,
-  ProductEvent,
-  ProductEventRepository,
-  Profile,
-  ProfileRepository,
+import {
+  type CalendarSource,
+  type CalendarSourceRepository,
+  type Group,
+  type GroupPlan,
+  type GroupPlanRepository,
+  type GroupRepository,
+  type Person,
+  type PersonRepository,
+  type ProductEvent,
+  type ProductEventRepository,
+  type Profile,
+  type ProfileRepository,
+  scheduleId,
 } from "@amigo/core";
 import { and, asc, eq, inArray, sql } from "drizzle-orm";
 import type { Database } from "./client";
@@ -17,6 +20,7 @@ import {
   calendarSources,
   groupPlans,
   groups,
+  people,
   productEvents,
   profiles,
 } from "./schema";
@@ -93,26 +97,21 @@ export class PostgresProfileRepository implements ProfileRepository {
     this.#db = db;
   }
 
-  async findByAccount(accountId: string): Promise<Profile | null> {
-    const [row] = await this.#db
-      .select()
-      .from(profiles)
-      .where(eq(profiles.accountId, accountId))
-      .limit(1);
-    return row ? structuredClone(row.data) : null;
+  async listForAccount(accountId: string): Promise<Profile[]> {
+    return this.listForAccounts([accountId]);
   }
 
-  async findByAccounts(accountIds: readonly string[]): Promise<Profile[]> {
+  async listForAccounts(accountIds: readonly string[]): Promise<Profile[]> {
     if (accountIds.length === 0) return [];
     const rows = await this.#db
       .select()
       .from(profiles)
-      .where(inArray(profiles.accountId, [...accountIds]));
-    const byAccount = new Map(rows.map((row) => [row.accountId, row.data]));
-    return accountIds.flatMap((id) => {
-      const profile = byAccount.get(id);
-      return profile ? [structuredClone(profile)] : [];
-    });
+      .where(inArray(profiles.accountId, [...accountIds]))
+      .orderBy(
+        sql`(${profiles.data}->>'createdAt')::bigint`,
+        profiles.scheduleId,
+      );
+    return rows.map((row) => structuredClone(row.data));
   }
 
   async save(profile: Profile): Promise<void> {
@@ -121,14 +120,59 @@ export class PostgresProfileRepository implements ProfileRepository {
       .insert(profiles)
       .values({
         accountId: copy.accountId,
+        scheduleId: scheduleId(copy),
         data: copy,
       })
       .onConflictDoUpdate({
-        target: profiles.accountId,
-        set: {
-          data: copy,
-        },
+        target: [profiles.accountId, profiles.scheduleId],
+        set: { data: copy },
       });
+  }
+
+  async delete(accountId: string, id: string): Promise<void> {
+    await this.#db
+      .delete(profiles)
+      .where(
+        and(eq(profiles.accountId, accountId), eq(profiles.scheduleId, id)),
+      );
+  }
+}
+
+export class PostgresPersonRepository implements PersonRepository {
+  readonly #db: Database;
+
+  constructor(db: Database) {
+    this.#db = db;
+  }
+
+  async findByAccount(accountId: string): Promise<Person | null> {
+    const [row] = await this.#db
+      .select()
+      .from(people)
+      .where(eq(people.accountId, accountId))
+      .limit(1);
+    return row ? structuredClone(row.data) : null;
+  }
+
+  async findByAccounts(accountIds: readonly string[]): Promise<Person[]> {
+    if (accountIds.length === 0) return [];
+    const rows = await this.#db
+      .select()
+      .from(people)
+      .where(inArray(people.accountId, [...accountIds]));
+    const byAccount = new Map(rows.map((row) => [row.accountId, row.data]));
+    return accountIds.flatMap((id) => {
+      const person = byAccount.get(id);
+      return person ? [structuredClone(person)] : [];
+    });
+  }
+
+  async save(person: Person): Promise<void> {
+    const copy = structuredClone(person);
+    await this.#db
+      .insert(people)
+      .values({ accountId: copy.accountId, data: copy })
+      .onConflictDoUpdate({ target: people.accountId, set: { data: copy } });
   }
 }
 

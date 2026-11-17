@@ -1,16 +1,20 @@
 import {
   createGroup,
+  createPerson,
   createProfile,
+  createSchedule,
   type Group,
   joinGroup,
   parseLocalDate,
   proposeGroupPlan,
+  scheduleId,
 } from "@amigo/core";
 import { describe, expect, it } from "vitest";
 import {
   InMemoryCalendarSourceRepository,
   InMemoryGroupPlanRepository,
   InMemoryGroupRepository,
+  InMemoryPersonRepository,
   InMemoryProductEventRepository,
   InMemoryProfileRepository,
 } from "./in-memory-groups";
@@ -77,11 +81,61 @@ describe("InMemoryGroupRepository", () => {
 });
 
 describe("InMemoryProfileRepository", () => {
-  it("stores one profile per account and returns several, skipping missing ones", async () => {
+  it("stores several schedules per account, keyed by schedule id", async () => {
     const repo = new InMemoryProfileRepository();
     await repo.save(createProfile({ accountId: "acc_ana", now: NOW }));
+    await repo.save(
+      createSchedule({
+        accountId: "acc_ana",
+        id: "sch_vac",
+        name: "Vacaciones",
+        now: NOW + 1,
+      }),
+    );
     await repo.save(createProfile({ accountId: "acc_beto", now: NOW }));
-    expect((await repo.findByAccount("acc_ana"))?.accountId).toBe("acc_ana");
+    // Saving the same id again replaces it.
+    await repo.save(
+      createSchedule({
+        accountId: "acc_ana",
+        id: "sch_vac",
+        name: "Verano",
+        now: NOW + 1,
+      }),
+    );
+
+    expect(
+      (await repo.listForAccount("acc_ana")).map((p) => [
+        scheduleId(p),
+        p.name,
+      ]),
+    ).toEqual([
+      ["default", undefined],
+      ["sch_vac", "Verano"],
+    ]);
+    expect(await repo.listForAccount("acc_x")).toEqual([]);
+    expect(
+      (await repo.listForAccounts(["acc_beto", "acc_x", "acc_ana"]))
+        .map((p) => p.accountId)
+        .sort(),
+    ).toEqual(["acc_ana", "acc_ana", "acc_beto"]);
+
+    await repo.delete("acc_ana", "sch_vac");
+    expect((await repo.listForAccount("acc_ana")).map(scheduleId)).toEqual([
+      "default",
+    ]);
+  });
+});
+
+describe("InMemoryPersonRepository", () => {
+  it("stores one person per account and returns several, skipping missing ones", async () => {
+    const repo = new InMemoryPersonRepository();
+    await repo.save(
+      createPerson({ accountId: "acc_ana", displayName: "Ana", now: NOW }),
+    );
+    await repo.save(
+      createPerson({ accountId: "acc_beto", displayName: "Beto", now: NOW }),
+    );
+    expect((await repo.findByAccount("acc_ana"))?.displayName).toBe("Ana");
     expect(await repo.findByAccount("acc_x")).toBeNull();
     expect(
       (await repo.findByAccounts(["acc_beto", "acc_x", "acc_ana"])).map(

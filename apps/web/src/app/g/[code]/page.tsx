@@ -20,7 +20,7 @@ import {
   proposePlanAction,
 } from "@/server/group-actions";
 import { requestOrigin } from "@/server/origin";
-import { groupPlans, groups, profiles } from "@/server/repository";
+import { groupPlans, groups, memberSchedules } from "@/server/repository";
 import { getSession } from "@/server/session";
 import { GroupBoard } from "./group-board";
 
@@ -99,9 +99,7 @@ async function GroupScreen({
     );
   }
 
-  const memberProfiles = await profiles().findByAccounts(
-    group.members.map((m) => m.accountId),
-  );
+  const memberProfiles = await memberSchedules(group);
   const withProfile = new Set(memberProfiles.map((p) => p.accountId));
   const isMember = session
     ? group.members.some((m) => m.accountId === session.accountId)
