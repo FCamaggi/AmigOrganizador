@@ -126,6 +126,21 @@ describe("InMemoryProfileRepository", () => {
   });
 });
 
+describe("InMemoryProfileRepository order", () => {
+  it("breaks a createdAt tie by schedule id, like the Postgres adapter", async () => {
+    const repo = new InMemoryProfileRepository();
+    for (const id of ["sch_z", "sch_a"]) {
+      await repo.save(
+        createSchedule({ accountId: "acc_ana", id, name: id, now: NOW }),
+      );
+    }
+    expect((await repo.listForAccount("acc_ana")).map(scheduleId)).toEqual([
+      "sch_a",
+      "sch_z",
+    ]);
+  });
+});
+
 describe("InMemoryPersonRepository", () => {
   it("stores one person per account and returns several, skipping missing ones", async () => {
     const repo = new InMemoryPersonRepository();

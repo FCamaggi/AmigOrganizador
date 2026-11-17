@@ -80,7 +80,11 @@ export class InMemoryProfileRepository implements ProfileRepository {
   async listForAccounts(accountIds: readonly string[]): Promise<Profile[]> {
     return [...this.#profiles.values()]
       .filter((profile) => accountIds.includes(profile.accountId))
-      .sort((a, b) => a.createdAt - b.createdAt)
+      .sort(
+        (a, b) =>
+          a.createdAt - b.createdAt ||
+          scheduleId(a).localeCompare(scheduleId(b)),
+      )
       .map((profile) => structuredClone(profile));
   }
 
