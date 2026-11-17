@@ -58,3 +58,19 @@ and confirmed the model:
 - ADR 0003 still holds (accounts for everyone, one-tap sign-in); the invite
   link of a group takes the place of the plan link as the access control.
 - The north star stays: plans confirmed per week, now coming out of groups.
+
+## Amendment (owner, 2026-11-17): several named schedules
+
+After using the app, the owner asked for "más de una configuracion de horario,
+quizas quieres que ciertos horarios lo vean ciertos grupos solamente" and chose
+"varios perfiles completos con nombre ("Semana normal", "Vacaciones") y cada
+grupo usa uno" (`odd/tasks/profile-editor-v2.md`, L3).
+
+- A person keeps **one or more named schedules**. Each one is a complete
+  profile (routines, one-off days, imported calendars, timezone).
+- One schedule is the **default**. A group reads the schedule the person chose
+  for it, else the default. The default cannot be deleted.
+- The person's **name lives on the account**, not on each group.
+- Unchanged: one schedule per person per group, unknown is never free, and
+  setting up the default schedule must stay under 2 minutes; extra schedules
+  are optional.

@@ -98,6 +98,25 @@ export type {
   CalendarSourceRepository,
 } from "./profile/calendar-source-repository";
 export {
+  chooseScheduleForGroup,
+  createPerson,
+  createSchedule,
+  DEFAULT_SCHEDULE_ID,
+  DEFAULT_SCHEDULE_NAME,
+  duplicateSchedule,
+  groupSchedules,
+  type Person,
+  PersonError,
+  type PersonErrorCode,
+  removeSchedule,
+  renamePerson,
+  renameSchedule,
+  scheduleForGroup,
+  scheduleId,
+  scheduleName,
+  setDefaultSchedule,
+} from "./profile/person";
+export {
   availabilityFor,
   createProfile,
   DEFAULT_PROFILE_TIMEZONE,

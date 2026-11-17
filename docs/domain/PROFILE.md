@@ -56,3 +56,17 @@ profile covers the whole range, so time not busy is free. The day before
 `from` is included without coverage, only with busy time that runs past
 midnight into `from`. A group member **without** a profile has no entry at
 all: unknown, never free.
+
+## Schedules and the person
+
+Rules in `packages/core/src/profile/person.ts` (ADR 0004 amendment).
+
+- A person (`Person`) has a name (1 to 60 characters, trimmed), a default
+  schedule and an optional choice of schedule per group.
+- A schedule is a `Profile` with an `id` and a `name` (1 to 40 characters).
+  Profiles saved before schedules read as id `default`, name "Mi horario".
+- A group reads the schedule chosen for it, else the default; no schedule
+  means unknown. If the chosen schedule is gone, the group reads the default.
+- The default schedule cannot be removed; removing another one sends the
+  groups that read it back to the default.
+- Duplicating a schedule copies every busy rule under a new id and name.

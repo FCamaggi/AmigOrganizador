@@ -48,6 +48,13 @@ export interface ImportedCalendar {
  */
 export interface Profile {
   readonly accountId: string;
+  /**
+   * The schedule's id among the person's schedules (S5 of profile-editor-v2).
+   * Unset on profiles saved before schedules: read it with `scheduleId`.
+   */
+  readonly id?: string;
+  /** The schedule's name ("Semana normal"); read it with `scheduleName`. */
+  readonly name?: string;
   /** Optional helpers: classes, office week, shifts. */
   readonly templates: readonly BusyTemplate[];
   /** One-off busy time per local date. */
