@@ -1,4 +1,12 @@
-import { groupOutlook, outlookRange } from "@amigo/core";
+import {
+  DEFAULT_SCHEDULE_ID,
+  DEFAULT_SCHEDULE_NAME,
+  groupOutlook,
+  outlookRange,
+  scheduleForGroup,
+  scheduleId,
+  scheduleName,
+} from "@amigo/core";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { connection } from "next/server";
@@ -14,13 +22,20 @@ import {
 import { buttonClasses, shellClasses } from "@/lib/ui";
 import {
   cancelPlanAction,
+  chooseGroupScheduleAction,
   confirmPlanAction,
   joinGroupAction,
   leaveGroupAction,
   proposePlanAction,
 } from "@/server/group-actions";
 import { requestOrigin } from "@/server/origin";
-import { groupPlans, groups, memberSchedules } from "@/server/repository";
+import {
+  groupPlans,
+  groups,
+  memberSchedules,
+  people,
+  profiles,
+} from "@/server/repository";
 import { getSession } from "@/server/session";
 import { GroupBoard } from "./group-board";
 
@@ -164,7 +179,27 @@ async function GroupScreen({
   const viewerId = session?.accountId ?? "";
   const { from, to } = outlookRange(group.timezone, Date.now());
   const outlook = groupOutlook({ group, profiles: memberProfiles, from, to });
-  const allPlans = await groupPlans().listForGroup(group.id);
+  const [allPlans, viewerPerson, viewerSchedules] = await Promise.all([
+    groupPlans().listForGroup(group.id),
+    people().findByAccount(viewerId),
+    profiles().listForAccount(viewerId),
+  ]);
+  const chosenSchedule = scheduleForGroup(
+    viewerPerson,
+    viewerSchedules,
+    group.id,
+  );
+  const chosenScheduleId = chosenSchedule
+    ? scheduleId(chosenSchedule)
+    : viewerSchedules[0]
+      ? scheduleId(viewerSchedules[0])
+      : DEFAULT_SCHEDULE_ID;
+  const singleScheduleName = chosenSchedule
+    ? scheduleName(chosenSchedule)
+    : viewerSchedules[0]
+      ? scheduleName(viewerSchedules[0])
+      : DEFAULT_SCHEDULE_NAME;
+  const profileHref = `/perfil?next=${encodeURIComponent(`/g/${group.inviteCode}`)}`;
   const plannedDates = new Set(
     allPlans.filter((p) => p.status === "confirmed").map((p) => p.date),
   );
@@ -317,6 +352,73 @@ async function GroupScreen({
         propose={proposePlanAction.bind(null, group.inviteCode)}
       >
         {plansSection}
+        <section className="mt-5 rounded-sign border border-rule p-3 text-sm">
+          {viewerSchedules.length > 1 ? (
+            <form
+              action={chooseGroupScheduleAction.bind(null, group.inviteCode)}
+              className="space-y-2"
+            >
+              <label
+                htmlFor="group-schedule-select"
+                className="block font-bold"
+              >
+                {t("group.schedule.label")}
+              </label>
+              <div className="flex flex-wrap gap-2">
+                <select
+                  id="group-schedule-select"
+                  name="scheduleId"
+                  key={chosenScheduleId}
+                  defaultValue={chosenScheduleId}
+                  className="min-h-11 min-w-0 flex-1 rounded-sign border-[1.5px] border-rule-strong bg-white px-3 font-bold"
+                >
+                  {viewerSchedules.map((sched) => {
+                    const id = scheduleId(sched);
+                    return (
+                      <option key={id} value={id}>
+                        {scheduleName(sched)}
+                      </option>
+                    );
+                  })}
+                </select>
+                <button
+                  type="submit"
+                  className={`${buttonClasses.secondary} flex-none`}
+                >
+                  {t("group.schedule.save")}
+                </button>
+              </div>
+            </form>
+          ) : (
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <p className="font-bold">
+                {t("group.schedule.single", { name: singleScheduleName })}
+              </p>
+              <Link
+                href={profileHref}
+                className="flex min-h-11 items-center font-bold text-line-blue underline"
+              >
+                {t("group.schedule.createAnother")}
+              </Link>
+            </div>
+          )}
+        </section>
+
+        <ul className="mt-4 flex flex-wrap gap-1.5" aria-label={meta}>
+          {group.members.map((m) => (
+            <li
+              key={m.accountId}
+              className={`rounded-chip border px-2 py-0.5 font-bold text-sm ${
+                withProfile.has(m.accountId)
+                  ? "border-ink"
+                  : "border-rule-strong border-dashed text-mute"
+              }`}
+            >
+              {m.displayName}
+            </li>
+          ))}
+        </ul>
+
         <section className="mt-6 space-y-1 text-sm">
           <a
             href={feedUrl}

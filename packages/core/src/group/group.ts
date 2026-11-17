@@ -160,3 +160,20 @@ export function updateGroup(
         : checkTimezone(input.timezone),
   };
 }
+
+/** Updates a member's display name in the group (S4 of profile-editor-v2). */
+export function renameMember(
+  group: Group,
+  input: { accountId: string; displayName: string },
+): Group {
+  memberOf(group, input.accountId);
+  const displayName = cleanName(input.displayName);
+  return {
+    ...group,
+    members: group.members.map((member) =>
+      member.accountId === input.accountId
+        ? { ...member, displayName }
+        : member,
+    ),
+  };
+}

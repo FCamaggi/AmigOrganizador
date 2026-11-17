@@ -8,7 +8,11 @@ import { type ImportState, importCalendarAction } from "@/server/group-actions";
 const legend = "font-extrabold text-xs uppercase tracking-[0.06em]";
 
 /** Adds a calendar by its ICS link (S4). The link is never shown back. */
-export function ImportForm() {
+export function ImportForm({
+  scheduleId = "default",
+}: {
+  readonly scheduleId?: string;
+}) {
   const [state, action, pending] = useActionState<ImportState, FormData>(
     importCalendarAction,
     {
@@ -17,6 +21,7 @@ export function ImportForm() {
   );
   return (
     <form action={action} className="mt-3 space-y-2.5">
+      <input type="hidden" name="scheduleId" value={scheduleId} />
       <div>
         <label htmlFor="import-name" className={legend}>
           {t("profileEdit.import.name")}

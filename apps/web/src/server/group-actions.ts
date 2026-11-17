@@ -4,9 +4,14 @@ import { IcsError, IcsFetchError } from "@amigo/adapter-ics";
 import {
   type BusyTemplate,
   cancelGroupPlan,
+  chooseScheduleForGroup,
   confirmGroupPlan,
   createGroup,
-  createProfile,
+  createPerson,
+  createSchedule,
+  DEFAULT_SCHEDULE_ID,
+  DEFAULT_SCHEDULE_NAME,
+  duplicateSchedule,
   GroupError,
   type GroupErrorCode,
   GroupPlanError,
@@ -14,21 +19,34 @@ import {
   type Interval,
   joinGroup,
   leaveGroup,
+  type Person,
+  PersonError,
+  type PersonErrorCode,
+  type Profile,
   ProfileError,
   planEvent,
   profileCreatedEvent,
   profileTimezone,
   proposeGroupPlan,
   removeImportedCalendar,
+  removeSchedule,
+  renameMember,
+  renamePerson,
+  renameSchedule,
+  resyncCalendars,
+  scheduleId,
+  scheduleName,
   setDay,
+  setDefaultSchedule,
   setImportedCalendar,
   setTemplates,
   setTimezone,
 } from "@amigo/core";
 import { refresh } from "next/cache";
 import { redirect } from "next/navigation";
+import { t } from "@/i18n/t";
 import { DEFAULT_TIMEZONE, TIMEZONES } from "@/lib/plan-options";
-import { authMode } from "./auth/config";
+import { authMode, safeNext } from "./auth/config";
 import { fetchImportedCalendar } from "./calendar-sync";
 import { newId } from "./ids";
 import { track } from "./product-events";
@@ -37,9 +55,10 @@ import {
   groupPlans,
   groups,
   myDefaultSchedule,
+  people,
   profiles,
 } from "./repository";
-import { getSession, startSession } from "./session";
+import { getSession, type Session, startSession } from "./session";
 
 const MAX_NAME = 60;
 const MAX_CALENDAR_NAME = 40;
@@ -96,6 +115,7 @@ export async function createGroupAction(
   if (name.length === 0 || name.length > MAX_NAME)
     return { error: "INVALID_NAME", values };
   const session = existing ?? (await startSession(ownerName));
+  const storedPerson = await people().findByAccount(session.accountId);
   let group: ReturnType<typeof createGroup>;
   try {
     group = createGroup({
@@ -103,7 +123,7 @@ export async function createGroupAction(
       inviteCode: newId(),
       name,
       ownerId: session.accountId,
-      ownerName: session.displayName,
+      ownerName: storedPerson?.displayName ?? session.displayName,
       timezone,
       now: Date.now(),
     });
@@ -117,11 +137,14 @@ export async function createGroupAction(
 
 export async function joinGroupAction(code: string): Promise<void> {
   const session = await requireSession(`/g/${code}`);
-  const group = await loadGroup(code);
+  const [group, storedPerson] = await Promise.all([
+    loadGroup(code),
+    people().findByAccount(session.accountId),
+  ]);
   await groups().save(
     joinGroup(group, {
       accountId: session.accountId,
-      displayName: session.displayName,
+      displayName: storedPerson?.displayName ?? session.displayName,
       now: Date.now(),
     }),
   );
@@ -228,16 +251,303 @@ export async function cancelPlanAction(
   await decide(code, planId, "cancel");
 }
 
-/** The stored profile, or a new empty one (`created` says which). */
-async function myProfile(accountId: string) {
-  const stored = await myDefaultSchedule(accountId);
+/** Ensures the person and at least the default schedule exist in memory/store. */
+async function ensurePersonState(
+  session: Session,
+  now: number,
+): Promise<{
+  person: Person;
+  schedules: Profile[];
+  hadStoredSchedules: boolean;
+}> {
+  const [storedPerson, storedSchedules] = await Promise.all([
+    people().findByAccount(session.accountId),
+    profiles().listForAccount(session.accountId),
+  ]);
+  const person =
+    storedPerson ??
+    createPerson({
+      accountId: session.accountId,
+      displayName: session.displayName || DEFAULT_SCHEDULE_NAME,
+      now,
+    });
+  if (storedSchedules.length > 0) {
+    return { person, schedules: storedSchedules, hadStoredSchedules: true };
+  }
+  const fallback = createSchedule({
+    accountId: session.accountId,
+    id: DEFAULT_SCHEDULE_ID,
+    name: DEFAULT_SCHEDULE_NAME,
+    now,
+  });
+  return { person, schedules: [fallback], hadStoredSchedules: false };
+}
+
+function profileUrl(scheduleIdValue?: string, rawNext?: string | null): string {
+  const params = new URLSearchParams();
+  if (scheduleIdValue && scheduleIdValue !== DEFAULT_SCHEDULE_ID) {
+    params.set("horario", scheduleIdValue);
+  }
+  const cleanNext =
+    rawNext && safeNext(rawNext) !== "/" ? safeNext(rawNext) : null;
+  if (cleanNext) {
+    params.set("next", cleanNext);
+  }
+  const query = params.toString();
+  return query ? `/perfil?${query}` : "/perfil";
+}
+
+export interface PersonNameState {
+  readonly error: PersonErrorCode | null;
+  readonly saved: boolean;
+}
+
+export async function savePersonNameAction(
+  _prev: PersonNameState,
+  formData: FormData,
+): Promise<PersonNameState> {
+  const session = await requireSession("/perfil");
+  const now = Date.now();
+  const displayName = text(formData, "displayName");
+  const stored = await people().findByAccount(session.accountId);
+  let person: Person;
+  try {
+    const base =
+      stored ??
+      createPerson({
+        accountId: session.accountId,
+        displayName: session.displayName || displayName,
+        now,
+      });
+    person = renamePerson(base, { displayName, now });
+  } catch (error) {
+    if (error instanceof PersonError) {
+      return { error: error.code, saved: false };
+    }
+    throw error;
+  }
+  await people().save(person);
+  if (authMode() === "local") {
+    await startSession(person.displayName);
+  }
+  const memberGroups = await groups().listForAccount(session.accountId);
+  for (const group of memberGroups) {
+    await groups().save(
+      renameMember(group, {
+        accountId: session.accountId,
+        displayName: person.displayName,
+      }),
+    );
+  }
+  refresh();
+  return { error: null, saved: true };
+}
+
+export interface ScheduleActionState {
+  readonly error: PersonErrorCode | null;
+}
+
+export async function createScheduleAction(
+  _prev: ScheduleActionState,
+  formData: FormData,
+): Promise<ScheduleActionState> {
+  const session = await requireSession("/perfil");
+  const now = Date.now();
+  const name = text(formData, "name");
+  const next = text(formData, "next") || null;
+  const { person, schedules, hadStoredSchedules } = await ensurePersonState(
+    session,
+    now,
+  );
+  let created: Profile;
+  try {
+    created = createSchedule({
+      accountId: session.accountId,
+      id: newId(),
+      name,
+      now,
+    });
+  } catch (error) {
+    if (error instanceof PersonError) return { error: error.code };
+    throw error;
+  }
+  if (!hadStoredSchedules && schedules[0]) {
+    await profiles().save(schedules[0]);
+  }
+  await profiles().save(created);
+  await people().save(person);
+  redirect(profileUrl(scheduleId(created), next));
+}
+
+export async function renameScheduleAction(
+  _prev: ScheduleActionState,
+  formData: FormData,
+): Promise<ScheduleActionState> {
+  const session = await requireSession("/perfil");
+  const now = Date.now();
+  const targetId = text(formData, "scheduleId") || DEFAULT_SCHEDULE_ID;
+  const name = text(formData, "name");
+  const { person, schedules } = await ensurePersonState(session, now);
+  const target =
+    schedules.find((s) => scheduleId(s) === targetId) ?? schedules[0];
+  if (!target) return { error: "UNKNOWN_SCHEDULE" };
+  let renamed: Profile;
+  try {
+    renamed = renameSchedule(target, { name, now });
+  } catch (error) {
+    if (error instanceof PersonError) return { error: error.code };
+    throw error;
+  }
+  await profiles().save(renamed);
+  await people().save(person);
+  refresh();
+  return { error: null };
+}
+
+export async function duplicateScheduleAction(
+  sourceScheduleId: string,
+  next: string | null,
+): Promise<void> {
+  const session = await requireSession("/perfil");
+  const now = Date.now();
+  const { person, schedules, hadStoredSchedules } = await ensurePersonState(
+    session,
+    now,
+  );
+  const source =
+    schedules.find((s) => scheduleId(s) === sourceScheduleId) ?? schedules[0];
+  if (!source) return;
+  const copyName = t("profileEdit.schedules.duplicate.copyName", {
+    name: scheduleName(source),
+  }).slice(0, MAX_CALENDAR_NAME);
+  const copy = duplicateSchedule(source, {
+    id: newId(),
+    name: copyName,
+    now: now + 1,
+  });
+  if (!hadStoredSchedules) {
+    await profiles().save(source);
+  }
+  await profiles().save(copy);
+  await people().save(person);
+  redirect(profileUrl(scheduleId(copy), next));
+}
+
+export async function setDefaultScheduleAction(
+  targetScheduleId: string,
+): Promise<void> {
+  const session = await requireSession("/perfil");
+  const now = Date.now();
+  const { person, schedules, hadStoredSchedules } = await ensurePersonState(
+    session,
+    now,
+  );
+  if (!hadStoredSchedules && schedules[0]) {
+    await profiles().save(schedules[0]);
+  }
+  try {
+    const updated = setDefaultSchedule(person, {
+      scheduleId: targetScheduleId,
+      schedules,
+      now,
+    });
+    await people().save(updated);
+  } catch (error) {
+    if (!(error instanceof PersonError)) throw error;
+  }
+  refresh();
+}
+
+export async function removeScheduleAction(
+  _prev: ScheduleActionState,
+  formData: FormData,
+): Promise<ScheduleActionState> {
+  const session = await requireSession("/perfil");
+  const now = Date.now();
+  const targetId = text(formData, "scheduleId") || DEFAULT_SCHEDULE_ID;
+  const next = text(formData, "next") || null;
+  const { person, schedules } = await ensurePersonState(session, now);
+  const target = schedules.find((s) => scheduleId(s) === targetId);
+  let removed: { person: Person; schedules: Profile[] };
+  try {
+    removed = removeSchedule(person, schedules, {
+      scheduleId: targetId,
+      now,
+    });
+  } catch (error) {
+    if (error instanceof PersonError) return { error: error.code };
+    throw error;
+  }
+  await people().save(removed.person);
+  await profiles().delete(session.accountId, targetId);
+  if (target) {
+    for (const cal of target.importedCalendars) {
+      const stillCarried = removed.schedules.some((s) =>
+        s.importedCalendars.some((c) => c.id === cal.id),
+      );
+      if (!stillCarried) {
+        await calendarSources().delete(session.accountId, cal.id);
+      }
+    }
+  }
+  redirect(profileUrl(removed.person.defaultScheduleId, next));
+}
+
+export async function chooseGroupScheduleAction(
+  code: string,
+  formData: FormData,
+): Promise<void> {
+  const session = await requireSession(`/g/${code}`);
+  const group = await loadGroup(code);
+  if (!group.members.some((m) => m.accountId === session.accountId)) {
+    redirect(`/g/${code}`);
+  }
+  const targetId = text(formData, "scheduleId") || DEFAULT_SCHEDULE_ID;
+  const now = Date.now();
+  const { person, schedules } = await ensurePersonState(session, now);
+  try {
+    const updated = chooseScheduleForGroup(person, {
+      groupId: group.id,
+      scheduleId: targetId,
+      schedules,
+      now,
+    });
+    await people().save(updated);
+  } catch (error) {
+    if (!(error instanceof PersonError)) throw error;
+  }
+  refresh();
+}
+
+/** The stored schedule by id, or a new empty one (`created` says if account had none). */
+async function mySchedule(
+  accountId: string,
+  targetScheduleId = DEFAULT_SCHEDULE_ID,
+) {
+  const storedSchedules = await profiles().listForAccount(accountId);
+  const now = Date.now();
+  const found =
+    storedSchedules.find((s) => scheduleId(s) === targetScheduleId) ?? null;
+  if (!found && storedSchedules.length > 0) {
+    // Never create a schedule from an id the browser sent: it may be stale
+    // (a removed schedule) or forged. Only a first save creates the default.
+    throw new PersonError("UNKNOWN_SCHEDULE", "no schedule with that id");
+  }
   return {
-    profile: stored ?? createProfile({ accountId, now: Date.now() }),
-    created: stored === null,
+    profile:
+      found ??
+      createSchedule({
+        accountId,
+        id: DEFAULT_SCHEDULE_ID,
+        name: DEFAULT_SCHEDULE_NAME,
+        now,
+      }),
+    created: storedSchedules.length === 0,
   };
 }
 
 export interface ProfileInput {
+  readonly scheduleId?: string;
   readonly templates: readonly BusyTemplate[];
   /** Only the dates the person changed. */
   readonly days: Readonly<
@@ -257,7 +567,16 @@ export async function saveProfileAction(
 ): Promise<{ ok: boolean }> {
   const session = await requireSession("/perfil");
   const now = Date.now();
-  const { profile: stored, created } = await myProfile(session.accountId);
+  const targetId = input.scheduleId ?? DEFAULT_SCHEDULE_ID;
+  let mine: Awaited<ReturnType<typeof mySchedule>>;
+  try {
+    mine = await mySchedule(session.accountId, targetId);
+  } catch (error) {
+    if (error instanceof PersonError) return { ok: false };
+    throw error;
+  }
+  const { profile: stored, created } = mine;
+  const storedPerson = await people().findByAccount(session.accountId);
   const zone = input.timezone;
   if (
     zone !== undefined &&
@@ -279,6 +598,15 @@ export async function saveProfileAction(
       });
     }
     await profiles().save(profile);
+    if (!storedPerson) {
+      await people().save(
+        createPerson({
+          accountId: session.accountId,
+          displayName: session.displayName || DEFAULT_SCHEDULE_NAME,
+          now,
+        }),
+      );
+    }
   } catch (error) {
     if (error instanceof ProfileError) return { ok: false };
     throw error;
@@ -302,12 +630,16 @@ export interface ImportState {
 
 async function syncCalendar(
   accountId: string,
+  targetScheduleId: string,
   calendarId: string,
   name: string,
   url: string,
 ): Promise<string | null> {
   try {
-    const { profile: base, created } = await myProfile(accountId);
+    const { profile: base, created } = await mySchedule(
+      accountId,
+      targetScheduleId,
+    );
     const calendar = await fetchImportedCalendar({
       id: calendarId,
       name,
@@ -322,6 +654,7 @@ async function syncCalendar(
     if (error instanceof IcsFetchError) return error.code;
     if (error instanceof IcsError) return "NOT_CALENDAR";
     if (error instanceof ProfileError) return "NOT_CALENDAR";
+    if (error instanceof PersonError) return "UNKNOWN_SCHEDULE";
     throw error;
   }
 }
@@ -336,8 +669,15 @@ export async function importCalendarAction(
     return { error: "INVALID_NAME" };
   }
   const url = text(formData, "url");
+  const targetScheduleId = text(formData, "scheduleId") || DEFAULT_SCHEDULE_ID;
   const calendarId = newId();
-  const error = await syncCalendar(session.accountId, calendarId, name, url);
+  const error = await syncCalendar(
+    session.accountId,
+    targetScheduleId,
+    calendarId,
+    name,
+    url,
+  );
   if (error) return { error };
   await calendarSources().save({
     accountId: session.accountId,
@@ -354,27 +694,37 @@ export async function resyncCalendarAction(calendarId: string): Promise<void> {
   const source = (
     await calendarSources().listForAccount(session.accountId)
   ).find((s) => s.calendarId === calendarId);
-  const profile = await myDefaultSchedule(session.accountId);
-  const calendar = profile?.importedCalendars.find((c) => c.id === calendarId);
-  if (source && calendar) {
-    await syncCalendar(
-      session.accountId,
-      calendarId,
-      calendar.name,
-      source.url,
-    );
+  if (source) {
+    await resyncCalendars({
+      sources: [source],
+      profiles: profiles(),
+      deleteSource: (accountId, id) => calendarSources().delete(accountId, id),
+      fetchCalendar: fetchImportedCalendar,
+      now: Date.now,
+    });
   }
   refresh();
 }
 
-export async function removeCalendarAction(calendarId: string): Promise<void> {
+export async function removeCalendarAction(
+  calendarId: string,
+  targetScheduleId = DEFAULT_SCHEDULE_ID,
+): Promise<void> {
   const session = await requireSession("/perfil");
-  const profile = await myDefaultSchedule(session.accountId);
-  if (profile) {
+  const schedules = await profiles().listForAccount(session.accountId);
+  const target = schedules.find((s) => scheduleId(s) === targetScheduleId);
+  if (target) {
     await profiles().save(
-      removeImportedCalendar(profile, { id: calendarId, now: Date.now() }),
+      removeImportedCalendar(target, { id: calendarId, now: Date.now() }),
     );
   }
-  await calendarSources().delete(session.accountId, calendarId);
+  const stillCarried = schedules.some(
+    (s) =>
+      scheduleId(s) !== targetScheduleId &&
+      s.importedCalendars.some((c) => c.id === calendarId),
+  );
+  if (!stillCarried) {
+    await calendarSources().delete(session.accountId, calendarId);
+  }
   refresh();
 }

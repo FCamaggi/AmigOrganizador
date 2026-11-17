@@ -86,19 +86,32 @@ async function resyncSource(
       return calendar ? [{ schedule, calendar }] : [];
     });
   // A duplicated schedule keeps the calendar id, so one link can feed several.
-  const [first] = carrying(
+  const initial = carrying(
     await input.profiles.listForAccount(source.accountId),
   );
-  if (!first) {
+  if (initial.length === 0) {
     await input.deleteSource(source.accountId, source.calendarId);
     return "orphaned";
   }
-  const calendar = await input.fetchCalendar({
-    id: first.calendar.id,
-    name: first.calendar.name,
-    url: source.url,
-    timeZone: profileTimezone(first.schedule),
-  });
+  const byZone = new Map<string, ImportedCalendar>();
+  const readInZone = async (
+    calendar: ImportedCalendar,
+    timeZone: string,
+  ): Promise<ImportedCalendar> => {
+    const cached = byZone.get(timeZone);
+    if (cached) return cached;
+    const fetched = await input.fetchCalendar({
+      id: calendar.id,
+      name: calendar.name,
+      url: source.url,
+      timeZone,
+    });
+    byZone.set(timeZone, fetched);
+    return fetched;
+  };
+  for (const { schedule, calendar } of initial) {
+    await readInZone(calendar, profileTimezone(schedule));
+  }
   // Read again: the person may have edited or removed it meanwhile.
   const current = carrying(
     await input.profiles.listForAccount(source.accountId),
@@ -109,6 +122,7 @@ async function resyncSource(
   }
   const now = input.now();
   for (const { schedule, calendar: still } of current) {
+    const calendar = await readInZone(still, profileTimezone(schedule));
     await input.profiles.save(
       setImportedCalendar(schedule, {
         calendar: {

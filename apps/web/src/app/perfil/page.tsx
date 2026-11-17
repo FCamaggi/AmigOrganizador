@@ -1,8 +1,14 @@
 import {
   addDays,
-  createProfile,
+  createSchedule,
+  DEFAULT_SCHEDULE_ID,
+  DEFAULT_SCHEDULE_NAME,
   dateRange,
+  defaultSchedule,
   profileTimezone,
+  scheduleForGroup,
+  scheduleId,
+  scheduleName,
   todayIn,
   utcToLocal,
 } from "@amigo/core";
@@ -20,9 +26,10 @@ import {
   resyncCalendarAction,
   saveProfileAction,
 } from "@/server/group-actions";
-import { myDefaultSchedule } from "@/server/repository";
+import { groups, people, profiles } from "@/server/repository";
 import { getSession } from "@/server/session";
 import { ImportForm } from "./import-form";
+import { PersonSchedules, type ScheduleSummary } from "./person-schedules";
 import { ProfileEditor } from "./profile-editor";
 
 const EDITOR_DAYS = 14;
@@ -30,6 +37,14 @@ const EDITOR_DAYS = 14;
 function syncedLabel(syncedAt: number, timeZone: string): string {
   const local = utcToLocal(syncedAt, timeZone);
   return `${formatDay(local.date)} ${formatTime(local.minutes)}`;
+}
+
+function scheduleHref(id: string, next: string | null): string {
+  const params = new URLSearchParams();
+  if (id !== DEFAULT_SCHEDULE_ID) params.set("horario", id);
+  if (next) params.set("next", next);
+  const query = params.toString();
+  return query ? `/perfil?${query}` : "/perfil";
 }
 
 export default function ProfilePage({ searchParams }: PageProps<"/perfil">) {
@@ -54,19 +69,68 @@ async function ProfileScreen({
 }: {
   readonly searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const raw = (await searchParams).next;
+  const params = await searchParams;
+  const rawNext = params.next;
+  const rawHorario = params.horario;
   const next =
-    typeof raw === "string" && safeNext(raw) !== "/" ? safeNext(raw) : null;
+    typeof rawNext === "string" && safeNext(rawNext) !== "/"
+      ? safeNext(rawNext)
+      : null;
+  const requestedScheduleId =
+    typeof rawHorario === "string" && rawHorario.trim()
+      ? rawHorario.trim()
+      : null;
+
   await connection();
   const session = await getSession();
   if (!session)
     redirect(
       `/entrar?next=${encodeURIComponent(next ? `/perfil?next=${next}` : "/perfil")}`,
     );
+
   const now = Date.now();
+  const [person, storedSchedules, myGroups] = await Promise.all([
+    people().findByAccount(session.accountId),
+    profiles().listForAccount(session.accountId),
+    groups().listForAccount(session.accountId),
+  ]);
+
+  const fallbackSchedule = createSchedule({
+    accountId: session.accountId,
+    id: DEFAULT_SCHEDULE_ID,
+    name: DEFAULT_SCHEDULE_NAME,
+    now,
+  });
+  const schedules =
+    storedSchedules.length > 0 ? storedSchedules : [fallbackSchedule];
+  const defaultSched =
+    defaultSchedule(person, schedules) ?? schedules[0] ?? fallbackSchedule;
   const profile =
-    (await myDefaultSchedule(session.accountId)) ??
-    createProfile({ accountId: session.accountId, now });
+    (requestedScheduleId
+      ? schedules.find((s) => scheduleId(s) === requestedScheduleId)
+      : undefined) ?? defaultSched;
+
+  const activeId = scheduleId(profile);
+  const activeName = scheduleName(profile);
+  const defaultId = scheduleId(defaultSched);
+
+  const scheduleSummaries: ScheduleSummary[] = schedules.map((item) => {
+    const id = scheduleId(item);
+    const usedBy = myGroups
+      .filter((group) => {
+        const chosen = scheduleForGroup(person, schedules, group.id);
+        return (chosen ? scheduleId(chosen) : defaultId) === id;
+      })
+      .map((group) => group.name);
+    return {
+      id,
+      name: scheduleName(item),
+      isDefault: id === defaultId,
+      groups: usedBy,
+      href: scheduleHref(id, next),
+    };
+  });
+
   const timeZone = profileTimezone(profile);
   const today = todayIn(timeZone, now);
   const days = dateRange(today, addDays(today, EDITOR_DAYS - 1)).map(
@@ -84,7 +148,17 @@ async function ProfileScreen({
       </h1>
       <p className="mt-1 text-mute text-sm">{t("profileEdit.intro")}</p>
 
+      <PersonSchedules
+        displayName={person?.displayName ?? session.displayName}
+        schedules={scheduleSummaries}
+        activeScheduleId={activeId}
+        activeScheduleName={activeName}
+        activeIsDefault={activeId === defaultId}
+        next={next}
+      />
+
       <ProfileEditor
+        key={activeId}
         profile={profile}
         today={today}
         timeZone={timeZone}
@@ -129,7 +203,13 @@ async function ProfileScreen({
                       {t("profileEdit.import.resync")}
                     </button>
                   </form>
-                  <form action={removeCalendarAction.bind(null, calendar.id)}>
+                  <form
+                    action={removeCalendarAction.bind(
+                      null,
+                      calendar.id,
+                      activeId,
+                    )}
+                  >
                     <button
                       type="submit"
                       className={`${buttonClasses.secondary} px-2 text-sm`}
@@ -141,7 +221,7 @@ async function ProfileScreen({
               ))}
             </ul>
           ) : null}
-          <ImportForm />
+          <ImportForm scheduleId={activeId} />
         </section>
       </ProfileEditor>
     </>

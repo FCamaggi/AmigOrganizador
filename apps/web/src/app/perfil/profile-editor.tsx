@@ -1,27 +1,28 @@
 "use client";
 
 import {
-  addDays,
   availabilityFor,
   type BusyTemplate,
+  expandBusyTemplates,
   type Interval,
   type LocalDate,
   mergeIntervals,
   type Profile,
+  scheduleId,
   setDay,
-  shiftCycle,
   subtractIntervals,
-  workweek,
+  type WeeklyBlock,
 } from "@amigo/core";
 import { useRouter } from "next/navigation";
-import { useMemo, useRef, useState, useTransition } from "react";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { type MessageKey, t } from "@/i18n/t";
 import { formatTime } from "@/lib/format";
 import { TIMEZONES } from "@/lib/plan-options";
+import { describeRoutine } from "@/lib/routine-sentence";
 import { buttonClasses, shellClasses } from "@/lib/ui";
 import type { ProfileInput } from "@/server/group-actions";
 
-const h = (hours: number) => hours * 60;
+const h = (hours: number, mins = 0) => hours * 60 + mins;
 const SEGMENTS = [
   { key: "morning", start: h(8), end: h(13) },
   { key: "afternoon", start: h(13), end: h(19) },
@@ -29,91 +30,212 @@ const SEGMENTS = [
 ] as const;
 type SegmentKey = (typeof SEGMENTS)[number]["key"];
 const TRACK = { start: h(8), end: h(24) };
-const CLASS_WEEKDAYS = [1, 2, 3, 4, 5, 6] as const;
-const SHIFT_TODAY = ["day", "night", "off1", "off2"] as const;
-const WORK_STARTS = [h(7), h(8), h(9), h(10)];
-const WORK_ENDS = [h(16), h(17), h(18), h(19), h(20)];
+const WEEKDAYS_MON_FIRST = [1, 2, 3, 4, 5, 6, 0] as const;
+const DEFAULT_WEEKDAYS = [1, 2, 3, 4, 5] as const;
 const legend = "font-extrabold text-xs uppercase tracking-[0.06em]";
 
-interface Routines {
-  readonly workweek: { on: boolean; start: number; end: number };
-  readonly shifts: { on: boolean; todayIndex: number };
-  readonly classes: { on: boolean; marks: Record<number, SegmentKey[]> };
+type DayGranularity = "blocks" | "hours";
+
+interface CycleStep {
+  readonly stepId: string;
+  readonly intervals: readonly Interval[];
 }
+
+interface DayBlockItem {
+  readonly blockId: string;
+  readonly start: number;
+  readonly end: number;
+}
+
+type EditableRoutine =
+  | {
+      readonly uiId: string;
+      readonly kind: "workweek" | "classes";
+      readonly label: string;
+      readonly perDay: boolean;
+      readonly uniformStart: number;
+      readonly uniformEnd: number;
+      readonly weekdays: readonly number[];
+      readonly dayBlocks: Readonly<Record<number, readonly DayBlockItem[]>>;
+    }
+  | {
+      readonly uiId: string;
+      readonly kind: "shifts";
+      readonly label: string;
+      readonly anchor: LocalDate;
+      readonly cycle: readonly CycleStep[];
+    };
 
 const segmentOf = (key: SegmentKey): Interval => {
   const s = SEGMENTS.find((x) => x.key === key) ?? SEGMENTS[0];
   return { start: s.start, end: s.end };
 };
 
-const daysBetween = (a: string, b: string) =>
-  Math.round((Date.parse(b) - Date.parse(a)) / 86_400_000);
-
-/** Reads the profile's templates back into the editor's routine controls. */
-function routinesFrom(
-  templates: readonly BusyTemplate[],
-  today: LocalDate,
-): Routines {
-  const routines: Routines = {
-    workweek: { on: false, start: h(9), end: h(18) },
-    shifts: { on: false, todayIndex: 0 },
-    classes: { on: false, marks: {} },
-  };
-  let result = routines;
-  for (const template of templates) {
-    if (template.kind === "workweek") {
-      const block = template.blocks[0];
-      result = {
-        ...result,
-        workweek: {
-          on: true,
-          start: block?.start ?? h(9),
-          end: block?.end ?? h(18),
-        },
-      };
-    } else if (template.kind === "shifts") {
-      const length = template.cycle.length || 4;
-      const index =
-        ((daysBetween(template.anchor, today) % length) + length) % length;
-      result = { ...result, shifts: { on: true, todayIndex: index } };
-    } else {
-      const marks: Record<number, SegmentKey[]> = {};
-      for (const block of template.blocks) {
-        const seg = SEGMENTS.find(
-          (s) => s.start === block.start && s.end === block.end,
-        );
-        if (seg)
-          marks[block.weekday] = [...(marks[block.weekday] ?? []), seg.key];
-      }
-      result = { ...result, classes: { on: true, marks } };
-    }
-  }
-  return result;
+function defaultLabelFor(kind: BusyTemplate["kind"]): string {
+  return t(`profileEdit.routine.defaultLabel.${kind}` as MessageKey);
 }
 
-function templatesFrom(routines: Routines, today: LocalDate): BusyTemplate[] {
-  const templates: BusyTemplate[] = [];
-  if (routines.workweek.on) {
-    templates.push(
-      workweek({ start: routines.workweek.start, end: routines.workweek.end }),
+function cleanRoutineLabel(value: string, kind: BusyTemplate["kind"]): string {
+  const trimmed = value.trim().slice(0, 40);
+  return trimmed.length > 0 ? trimmed : defaultLabelFor(kind);
+}
+
+/** Converts HH:MM input string to minutes (0..1439), or fallback. */
+function parseTimeInput(value: string, fallback: number): number {
+  const match = /^(\d{2}):(\d{2})/.exec(value);
+  if (!match) return fallback;
+  const hours = Number(match[1]);
+  const mins = Number(match[2]);
+  if (!Number.isFinite(hours) || !Number.isFinite(mins)) return fallback;
+  return Math.max(0, Math.min(1439, hours * 60 + mins));
+}
+
+/** An end at or before the start means it ends the next day (end + 1440, max 2880). */
+function intervalFromClocks(startClock: number, endClock: number): Interval {
+  const start = Math.max(0, Math.min(1439, startClock));
+  const rawEnd = endClock <= start ? endClock + 1440 : endClock;
+  const end = Math.min(2880, Math.max(start + 15, rawEnd));
+  return { start, end };
+}
+
+function editableFromTemplates(
+  templates: readonly BusyTemplate[],
+): EditableRoutine[] {
+  return templates.map((template, index) => {
+    const uiId = `routine_${index}`;
+    const label = template.label ?? defaultLabelFor(template.kind);
+    if (template.kind === "shifts") {
+      const rawCycle =
+        template.cycle.length > 0
+          ? template.cycle
+          : [[{ start: h(8), end: h(20) }]];
+      return {
+        uiId,
+        kind: "shifts",
+        label,
+        anchor: template.anchor,
+        cycle: rawCycle.map((intervals, stepIdx) => ({
+          stepId: `${uiId}_step_${stepIdx}`,
+          intervals,
+        })),
+      };
+    }
+    const dayBlocks: Record<number, DayBlockItem[]> = {};
+    template.blocks.forEach((block, blockIdx) => {
+      dayBlocks[block.weekday] = [
+        ...(dayBlocks[block.weekday] ?? []),
+        {
+          blockId: `${uiId}_b_${block.weekday}_${blockIdx}`,
+          start: block.start,
+          end: block.end,
+        },
+      ];
+    });
+    const weekdays = WEEKDAYS_MON_FIRST.filter(
+      (day) => (dayBlocks[day]?.length ?? 0) > 0,
     );
+    const first = template.blocks[0] ?? {
+      weekday: 1,
+      start: h(9),
+      end: h(18),
+    };
+    const allSameSingle =
+      weekdays.length > 0 &&
+      weekdays.every((day) => {
+        const list = dayBlocks[day] ?? [];
+        return (
+          list.length === 1 &&
+          list[0]?.start === first.start &&
+          list[0]?.end === first.end
+        );
+      });
+    return {
+      uiId,
+      kind: template.kind,
+      label,
+      perDay: !allSameSingle && template.blocks.length > 0,
+      uniformStart: first.start,
+      uniformEnd: first.end,
+      weekdays,
+      dayBlocks,
+    };
+  });
+}
+
+function templateFromEditable(routine: EditableRoutine): BusyTemplate {
+  const label = cleanRoutineLabel(routine.label, routine.kind);
+  if (routine.kind === "shifts") {
+    return {
+      kind: "shifts",
+      label,
+      anchor: routine.anchor,
+      cycle:
+        routine.cycle.length > 0
+          ? routine.cycle.map((step) => step.intervals)
+          : [[{ start: h(8), end: h(20) }]],
+    };
   }
-  if (routines.shifts.on) {
-    templates.push(
-      shiftCycle({
-        anchor: addDays(today, -routines.shifts.todayIndex),
-        pattern: ["day", "night", "off", "off"],
-      }),
-    );
+  const blocks: WeeklyBlock[] = [];
+  if (routine.perDay) {
+    for (const weekday of WEEKDAYS_MON_FIRST) {
+      if (!routine.weekdays.includes(weekday)) continue;
+      const intervals = routine.dayBlocks[weekday] ?? [
+        {
+          blockId: "default",
+          start: routine.uniformStart,
+          end: routine.uniformEnd,
+        },
+      ];
+      for (const interval of intervals) {
+        blocks.push({ weekday, start: interval.start, end: interval.end });
+      }
+    }
+  } else {
+    for (const weekday of WEEKDAYS_MON_FIRST) {
+      if (!routine.weekdays.includes(weekday)) continue;
+      blocks.push({
+        weekday,
+        start: routine.uniformStart,
+        end: routine.uniformEnd,
+      });
+    }
   }
-  if (routines.classes.on) {
-    const blocks = Object.entries(routines.classes.marks).flatMap(
-      ([weekday, keys]) =>
-        keys.map((key) => ({ weekday: Number(weekday), ...segmentOf(key) })),
-    );
-    if (blocks.length > 0) templates.push({ kind: "classes", blocks });
+  return {
+    kind: routine.kind,
+    label,
+    blocks,
+  };
+}
+
+function cyclePreset(
+  preset: "4x4" | "7x7" | "5x2" | "4x3",
+  prefix: string,
+): CycleStep[] {
+  const day12 = [{ start: h(8), end: h(20) }];
+  const night12 = [{ start: h(20), end: h(32) }];
+  const office9 = [{ start: h(9), end: h(18) }];
+  let raw: (readonly Interval[])[];
+  if (preset === "4x4") raw = [day12, night12, [], []];
+  else if (preset === "7x7") {
+    raw = [
+      ...Array.from({ length: 7 }, () => day12),
+      ...Array.from({ length: 7 }, () => []),
+    ];
+  } else if (preset === "5x2") {
+    raw = [
+      ...Array.from({ length: 5 }, () => office9),
+      ...Array.from({ length: 2 }, () => []),
+    ];
+  } else {
+    raw = [
+      ...Array.from({ length: 4 }, () => day12),
+      ...Array.from({ length: 3 }, () => []),
+    ];
   }
-  return templates;
+  return raw.map((intervals, idx) => ({
+    stepId: `${prefix}_${preset}_${idx}`,
+    intervals,
+  }));
 }
 
 const overlap = (intervals: readonly Interval[], seg: Interval) =>
@@ -175,26 +297,60 @@ export function ProfileEditor({
   children,
 }: ProfileEditorProps) {
   const router = useRouter();
-  const [routines, setRoutines] = useState(() =>
-    routinesFrom(profile.templates, today),
+  const [routines, setRoutines] = useState<EditableRoutine[]>(() =>
+    editableFromTemplates(profile.templates),
   );
   const [dayState, setDayState] = useState(profile);
   const [zone, setZone] = useState(timeZone);
   const [changed, setChanged] = useState<Set<string>>(new Set());
   const [status, setStatus] = useState<"idle" | "saved" | "error">("idle");
+  const [granularity, setGranularity] = useState<DayGranularity>("blocks");
   const [pending, startTransition] = useTransition();
+  const nextIdCounter = useRef(profile.templates.length + 1);
   // When the first edit happened (performance.now), to measure setup time.
   const firstEdit = useRef<number | null>(null);
   const markEdited = () => {
     firstEdit.current ??= performance.now();
   };
 
+  const storageKey = `amigo:day-granularity:${profile.accountId}`;
+  useEffect(() => {
+    try {
+      const saved = window.localStorage.getItem(storageKey);
+      if (saved === "blocks" || saved === "hours") {
+        setGranularity(saved);
+      }
+    } catch {
+      // Ignore storage failures in restricted contexts.
+    }
+  }, [storageKey]);
+
+  function selectGranularity(mode: DayGranularity) {
+    setGranularity(mode);
+    try {
+      window.localStorage.setItem(storageKey, mode);
+    } catch {
+      // Ignore storage failures.
+    }
+  }
+
   const templates = useMemo(
-    () => templatesFrom(routines, today),
-    [routines, today],
+    () =>
+      routines
+        .map(templateFromEditable)
+        .filter((tmpl) =>
+          tmpl.kind === "shifts"
+            ? tmpl.cycle.length > 0
+            : tmpl.blocks.length > 0,
+        ),
+    [routines],
   );
   const from = days[0]?.date ?? today;
   const to = days.at(-1)?.date ?? today;
+  const templateBusyByDate = useMemo(
+    () => expandBusyTemplates(templates, from, to),
+    [templates, from, to],
+  );
   const availability = useMemo(
     // Read in the person's own zone: wall times stay as written.
     () =>
@@ -206,13 +362,56 @@ export function ProfileEditor({
       ),
     [dayState, templates, from, to, zone],
   );
-  const noRoutine =
-    !routines.workweek.on && !routines.shifts.on && !routines.classes.on;
 
-  function update(next: Routines) {
+  function updateRoutines(nextList: EditableRoutine[]) {
     markEdited();
-    setRoutines(next);
+    setRoutines(nextList);
     setStatus("idle");
+  }
+
+  function addWeeklyRoutine() {
+    const id = `routine_${nextIdCounter.current++}`;
+    const start = h(9);
+    const end = h(18);
+    const dayBlocks: Record<number, DayBlockItem[]> = {};
+    for (const day of DEFAULT_WEEKDAYS) {
+      dayBlocks[day] = [{ blockId: `${id}_b_${day}_0`, start, end }];
+    }
+    updateRoutines([
+      ...routines,
+      {
+        uiId: id,
+        kind: "workweek",
+        label: defaultLabelFor("workweek"),
+        perDay: false,
+        uniformStart: start,
+        uniformEnd: end,
+        weekdays: [...DEFAULT_WEEKDAYS],
+        dayBlocks,
+      },
+    ]);
+  }
+
+  function addCycleRoutine() {
+    const id = `routine_${nextIdCounter.current++}`;
+    updateRoutines([
+      ...routines,
+      {
+        uiId: id,
+        kind: "shifts",
+        label: defaultLabelFor("shifts"),
+        anchor: today,
+        cycle: cyclePreset("4x4", id),
+      },
+    ]);
+  }
+
+  function replaceRoutine(index: number, updated: EditableRoutine) {
+    updateRoutines(routines.map((r, i) => (i === index ? updated : r)));
+  }
+
+  function removeRoutine(index: number) {
+    updateRoutines(routines.filter((_, i) => i !== index));
   }
 
   function tap(date: LocalDate, key: SegmentKey) {
@@ -237,10 +436,30 @@ export function ProfileEditor({
     setStatus("idle");
   }
 
+  function setDayIntervals(
+    date: LocalDate,
+    nextIntervals: readonly Interval[],
+  ) {
+    markEdited();
+    const templateIntervals = templateBusyByDate[date] ?? [];
+    const merged = mergeIntervals(nextIntervals);
+    setDayState(
+      setDay(dayState, {
+        date,
+        busy: merged,
+        exceptions: subtractIntervals(templateIntervals, merged),
+        now: Date.now(),
+      }),
+    );
+    setChanged((c) => new Set([...c, date]));
+    setStatus("idle");
+  }
+
   function submit() {
     const started = firstEdit.current;
     startTransition(async () => {
       const result = await save({
+        scheduleId: scheduleId(profile),
         setupSeconds:
           started === null ? undefined : (performance.now() - started) / 1000,
         timezone: zone,
@@ -272,185 +491,606 @@ export function ProfileEditor({
       <div className="contents lg:grid lg:grid-cols-2 lg:grid-rows-[auto_1fr] lg:items-start lg:gap-x-10">
         <section
           aria-labelledby="routines-title"
-          className="mt-4 lg:col-start-1 lg:row-start-1"
+          className="mt-5 lg:col-start-1 lg:row-start-1"
         >
           <h2 id="routines-title" className={legend}>
             {t("profileEdit.routines")}
           </h2>
-          <div className="mt-2 flex flex-wrap gap-1.5">
-            <Chip
-              selected={noRoutine}
-              onClick={() =>
-                update({
-                  workweek: { ...routines.workweek, on: false },
-                  shifts: { ...routines.shifts, on: false },
-                  classes: { ...routines.classes, on: false },
-                })
-              }
+
+          {routines.length === 0 ? (
+            <p className="mt-2 rounded-sign border border-rule border-dashed px-3 py-3 text-mute text-sm">
+              {t("profileEdit.routine.empty")}
+            </p>
+          ) : (
+            <div className="mt-2.5 space-y-4">
+              {routines.map((routine, index) => {
+                const previewTemplate = templateFromEditable(routine);
+                return (
+                  <article
+                    key={routine.uiId}
+                    className="rounded-sign border-[1.5px] border-ink bg-white p-3"
+                  >
+                    <div className="flex flex-wrap items-start justify-between gap-2">
+                      <div className="min-w-0 flex-1">
+                        <label
+                          htmlFor={`${routine.uiId}-label`}
+                          className={legend}
+                        >
+                          {t("profileEdit.routine.label")}
+                        </label>
+                        <input
+                          id={`${routine.uiId}-label`}
+                          type="text"
+                          value={routine.label}
+                          maxLength={40}
+                          onChange={(e) =>
+                            replaceRoutine(index, {
+                              ...routine,
+                              label: e.target.value,
+                            })
+                          }
+                          className="mt-1 block min-h-11 w-full rounded-sign border-[1.5px] border-rule-strong bg-white px-2.5 font-extrabold"
+                        />
+                        <p className="mt-1 font-bold text-mute text-xs">
+                          {routine.kind === "shifts"
+                            ? t("profileEdit.routine.type.cycle")
+                            : t("profileEdit.routine.type.weekly")}
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => removeRoutine(index)}
+                        className={`${buttonClasses.secondary} flex-none px-2.5 text-sm`}
+                      >
+                        {t("profileEdit.routine.remove")}
+                      </button>
+                    </div>
+
+                    {routine.kind === "shifts" ? (
+                      <div className="mt-3 space-y-3">
+                        <div>
+                          <span className={legend}>
+                            {t("profileEdit.routine.cycle.presets")}
+                          </span>
+                          <div className="mt-1 flex flex-wrap gap-1.5">
+                            {(["4x4", "7x7", "5x2", "4x3"] as const).map(
+                              (preset) => (
+                                <button
+                                  key={preset}
+                                  type="button"
+                                  onClick={() =>
+                                    replaceRoutine(index, {
+                                      ...routine,
+                                      cycle: cyclePreset(
+                                        preset,
+                                        `${routine.uiId}_${nextIdCounter.current++}`,
+                                      ),
+                                    })
+                                  }
+                                  className="min-h-11 rounded-sign border-[1.5px] border-rule-strong bg-white px-2.5 font-bold text-xs hover:bg-panel"
+                                >
+                                  {t(
+                                    `profileEdit.routine.cycle.preset.${preset}` as MessageKey,
+                                  )}
+                                </button>
+                              ),
+                            )}
+                          </div>
+                        </div>
+
+                        <div>
+                          <label
+                            htmlFor={`${routine.uiId}-anchor`}
+                            className={legend}
+                          >
+                            {t("profileEdit.routine.cycle.anchor")}
+                          </label>
+                          <input
+                            id={`${routine.uiId}-anchor`}
+                            type="date"
+                            value={routine.anchor}
+                            onChange={(e) => {
+                              if (e.target.value) {
+                                replaceRoutine(index, {
+                                  ...routine,
+                                  anchor: e.target.value as LocalDate,
+                                });
+                              }
+                            }}
+                            className="mt-1 block min-h-11 rounded-sign border-[1.5px] border-rule-strong bg-white px-2.5 font-bold"
+                          />
+                        </div>
+
+                        <ul className="divide-y divide-rule border-rule border-y">
+                          {routine.cycle.map((step, stepIndex) => {
+                            const first = step.intervals[0];
+                            const isBusy = first !== undefined;
+                            const dayLabel = t(
+                              "profileEdit.routine.cycle.day",
+                              {
+                                index: stepIndex + 1,
+                              },
+                            );
+                            return (
+                              <li
+                                key={step.stepId}
+                                className="flex flex-wrap items-center gap-2 py-2"
+                              >
+                                <span className="w-16 flex-none font-extrabold text-sm">
+                                  {dayLabel}
+                                </span>
+                                <Chip
+                                  selected={isBusy}
+                                  onClick={() => {
+                                    const nextCycle = routine.cycle.map(
+                                      (entry, idx) =>
+                                        idx === stepIndex
+                                          ? {
+                                              ...entry,
+                                              intervals: isBusy
+                                                ? []
+                                                : [{ start: h(8), end: h(20) }],
+                                            }
+                                          : entry,
+                                    );
+                                    replaceRoutine(index, {
+                                      ...routine,
+                                      cycle: nextCycle,
+                                    });
+                                  }}
+                                >
+                                  {isBusy
+                                    ? t("profileEdit.routine.cycle.busy")
+                                    : t("profileEdit.routine.cycle.free")}
+                                </Chip>
+
+                                {isBusy ? (
+                                  <div className="flex flex-wrap items-center gap-1.5">
+                                    <input
+                                      type="time"
+                                      step="900"
+                                      aria-label={`${dayLabel} ${t("profileEdit.routine.start")}`}
+                                      value={formatTime(first.start)}
+                                      onChange={(e) => {
+                                        const startClock = parseTimeInput(
+                                          e.target.value,
+                                          first.start,
+                                        );
+                                        const endClock = first.end % 1440;
+                                        const nextInterval = intervalFromClocks(
+                                          startClock,
+                                          endClock,
+                                        );
+                                        replaceRoutine(index, {
+                                          ...routine,
+                                          cycle: routine.cycle.map(
+                                            (entry, idx) =>
+                                              idx === stepIndex
+                                                ? {
+                                                    ...entry,
+                                                    intervals: [nextInterval],
+                                                  }
+                                                : entry,
+                                          ),
+                                        });
+                                      }}
+                                      className="min-h-11 rounded-sign border-[1.5px] border-rule-strong bg-white px-2 font-bold text-sm"
+                                    />
+                                    <span aria-hidden="true">–</span>
+                                    <input
+                                      type="time"
+                                      step="900"
+                                      aria-label={`${dayLabel} ${t("profileEdit.routine.end")}`}
+                                      value={formatTime(first.end)}
+                                      onChange={(e) => {
+                                        const endClock = parseTimeInput(
+                                          e.target.value,
+                                          first.end % 1440,
+                                        );
+                                        const nextInterval = intervalFromClocks(
+                                          first.start,
+                                          endClock,
+                                        );
+                                        replaceRoutine(index, {
+                                          ...routine,
+                                          cycle: routine.cycle.map(
+                                            (entry, idx) =>
+                                              idx === stepIndex
+                                                ? {
+                                                    ...entry,
+                                                    intervals: [nextInterval],
+                                                  }
+                                                : entry,
+                                          ),
+                                        });
+                                      }}
+                                      className="min-h-11 rounded-sign border-[1.5px] border-rule-strong bg-white px-2 font-bold text-sm"
+                                    />
+                                    {first.end > 1440 ? (
+                                      <span className="font-bold text-mute text-xs">
+                                        {t("profileEdit.routine.nextDay")}
+                                      </span>
+                                    ) : null}
+                                  </div>
+                                ) : null}
+
+                                {routine.cycle.length > 1 ? (
+                                  <button
+                                    type="button"
+                                    aria-label={`${t("profileEdit.routine.cycle.removeStep")} ${stepIndex + 1}`}
+                                    onClick={() =>
+                                      replaceRoutine(index, {
+                                        ...routine,
+                                        cycle: routine.cycle.filter(
+                                          (_, idx) => idx !== stepIndex,
+                                        ),
+                                      })
+                                    }
+                                    className="ml-auto min-h-11 rounded-sign border border-rule-strong px-2 font-bold text-xs hover:bg-panel"
+                                  >
+                                    {t("profileEdit.routine.cycle.removeStep")}
+                                  </button>
+                                ) : null}
+                              </li>
+                            );
+                          })}
+                        </ul>
+
+                        <button
+                          type="button"
+                          onClick={() =>
+                            replaceRoutine(index, {
+                              ...routine,
+                              cycle: [
+                                ...routine.cycle,
+                                {
+                                  stepId: `${routine.uiId}_step_${nextIdCounter.current++}`,
+                                  intervals: [],
+                                },
+                              ],
+                            })
+                          }
+                          className={`${buttonClasses.secondary} w-full text-sm`}
+                        >
+                          {t("profileEdit.routine.cycle.addStep")}
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="mt-3 space-y-3">
+                        <fieldset>
+                          <legend className={legend}>
+                            {t("profileEdit.routine.weekdays")}
+                          </legend>
+                          <div className="mt-1.5 flex flex-wrap gap-1.5">
+                            {WEEKDAYS_MON_FIRST.map((weekday) => {
+                              const on = routine.weekdays.includes(weekday);
+                              return (
+                                <Chip
+                                  key={weekday}
+                                  selected={on}
+                                  onClick={() => {
+                                    const nextWeekdays = on
+                                      ? routine.weekdays.filter(
+                                          (d) => d !== weekday,
+                                        )
+                                      : [...routine.weekdays, weekday];
+                                    const nextDayBlocks = {
+                                      ...routine.dayBlocks,
+                                    };
+                                    if (
+                                      !on &&
+                                      (!nextDayBlocks[weekday] ||
+                                        nextDayBlocks[weekday].length === 0)
+                                    ) {
+                                      nextDayBlocks[weekday] = [
+                                        {
+                                          blockId: `${routine.uiId}_b_${weekday}_${nextIdCounter.current++}`,
+                                          start: routine.uniformStart,
+                                          end: routine.uniformEnd,
+                                        },
+                                      ];
+                                    }
+                                    replaceRoutine(index, {
+                                      ...routine,
+                                      weekdays: nextWeekdays,
+                                      dayBlocks: nextDayBlocks,
+                                    });
+                                  }}
+                                >
+                                  {t(`weekday.short.${weekday}` as MessageKey)}
+                                </Chip>
+                              );
+                            })}
+                          </div>
+                        </fieldset>
+
+                        {!routine.perDay ? (
+                          <div className="flex flex-wrap items-end gap-3">
+                            <div>
+                              <label
+                                htmlFor={`${routine.uiId}-start`}
+                                className={legend}
+                              >
+                                {t("profileEdit.routine.start")}
+                              </label>
+                              <input
+                                id={`${routine.uiId}-start`}
+                                type="time"
+                                step="900"
+                                value={formatTime(routine.uniformStart)}
+                                onChange={(e) => {
+                                  const startClock = parseTimeInput(
+                                    e.target.value,
+                                    routine.uniformStart,
+                                  );
+                                  const next = intervalFromClocks(
+                                    startClock,
+                                    routine.uniformEnd % 1440,
+                                  );
+                                  replaceRoutine(index, {
+                                    ...routine,
+                                    uniformStart: next.start,
+                                    uniformEnd: next.end,
+                                  });
+                                }}
+                                className="mt-1 block min-h-11 rounded-sign border-[1.5px] border-rule-strong bg-white px-2.5 font-bold"
+                              />
+                            </div>
+                            <div>
+                              <label
+                                htmlFor={`${routine.uiId}-end`}
+                                className={legend}
+                              >
+                                {t("profileEdit.routine.end")}
+                              </label>
+                              <div className="mt-1 flex items-center gap-1.5">
+                                <input
+                                  id={`${routine.uiId}-end`}
+                                  type="time"
+                                  step="900"
+                                  value={formatTime(routine.uniformEnd)}
+                                  onChange={(e) => {
+                                    const endClock = parseTimeInput(
+                                      e.target.value,
+                                      routine.uniformEnd % 1440,
+                                    );
+                                    const next = intervalFromClocks(
+                                      routine.uniformStart,
+                                      endClock,
+                                    );
+                                    replaceRoutine(index, {
+                                      ...routine,
+                                      uniformStart: next.start,
+                                      uniformEnd: next.end,
+                                    });
+                                  }}
+                                  className="min-h-11 rounded-sign border-[1.5px] border-rule-strong bg-white px-2.5 font-bold"
+                                />
+                                {routine.uniformEnd > 1440 ? (
+                                  <span className="font-bold text-mute text-xs">
+                                    {t("profileEdit.routine.nextDay")}
+                                  </span>
+                                ) : null}
+                              </div>
+                            </div>
+                          </div>
+                        ) : (
+                          <ul className="divide-y divide-rule border-rule border-y">
+                            {WEEKDAYS_MON_FIRST.filter((weekday) =>
+                              routine.weekdays.includes(weekday),
+                            ).map((weekday) => {
+                              const blocks = routine.dayBlocks[weekday] ?? [
+                                {
+                                  blockId: `${routine.uiId}_b_${weekday}_0`,
+                                  start: routine.uniformStart,
+                                  end: routine.uniformEnd,
+                                },
+                              ];
+                              const dayLabel = t(
+                                `weekday.short.${weekday}` as MessageKey,
+                              );
+                              return (
+                                <li key={weekday} className="py-2">
+                                  <div className="flex flex-wrap items-center justify-between gap-2">
+                                    <span className="font-extrabold text-sm">
+                                      {dayLabel}
+                                    </span>
+                                    <button
+                                      type="button"
+                                      onClick={() =>
+                                        replaceRoutine(index, {
+                                          ...routine,
+                                          dayBlocks: {
+                                            ...routine.dayBlocks,
+                                            [weekday]: [
+                                              ...blocks,
+                                              {
+                                                blockId: `${routine.uiId}_b_${weekday}_${nextIdCounter.current++}`,
+                                                start: h(14),
+                                                end: h(18),
+                                              },
+                                            ],
+                                          },
+                                        })
+                                      }
+                                      className="min-h-11 rounded-sign border border-rule-strong px-2 font-bold text-xs hover:bg-panel"
+                                    >
+                                      {t("profileEdit.routine.addBlock")}
+                                    </button>
+                                  </div>
+                                  <div className="mt-1.5 space-y-1.5">
+                                    {blocks.map((block, bIdx) => (
+                                      <div
+                                        key={block.blockId}
+                                        className="flex flex-wrap items-center gap-1.5"
+                                      >
+                                        <input
+                                          type="time"
+                                          step="900"
+                                          aria-label={`${dayLabel} ${t("profileEdit.routine.start")} ${bIdx + 1}`}
+                                          value={formatTime(block.start)}
+                                          onChange={(e) => {
+                                            const startClock = parseTimeInput(
+                                              e.target.value,
+                                              block.start,
+                                            );
+                                            const next = intervalFromClocks(
+                                              startClock,
+                                              block.end % 1440,
+                                            );
+                                            replaceRoutine(index, {
+                                              ...routine,
+                                              dayBlocks: {
+                                                ...routine.dayBlocks,
+                                                [weekday]: blocks.map(
+                                                  (item, i) =>
+                                                    i === bIdx
+                                                      ? {
+                                                          ...item,
+                                                          ...next,
+                                                        }
+                                                      : item,
+                                                ),
+                                              },
+                                            });
+                                          }}
+                                          className="min-h-11 rounded-sign border-[1.5px] border-rule-strong bg-white px-2 font-bold text-sm"
+                                        />
+                                        <span aria-hidden="true">–</span>
+                                        <input
+                                          type="time"
+                                          step="900"
+                                          aria-label={`${dayLabel} ${t("profileEdit.routine.end")} ${bIdx + 1}`}
+                                          value={formatTime(block.end)}
+                                          onChange={(e) => {
+                                            const endClock = parseTimeInput(
+                                              e.target.value,
+                                              block.end % 1440,
+                                            );
+                                            const next = intervalFromClocks(
+                                              block.start,
+                                              endClock,
+                                            );
+                                            replaceRoutine(index, {
+                                              ...routine,
+                                              dayBlocks: {
+                                                ...routine.dayBlocks,
+                                                [weekday]: blocks.map(
+                                                  (item, i) =>
+                                                    i === bIdx
+                                                      ? {
+                                                          ...item,
+                                                          ...next,
+                                                        }
+                                                      : item,
+                                                ),
+                                              },
+                                            });
+                                          }}
+                                          className="min-h-11 rounded-sign border-[1.5px] border-rule-strong bg-white px-2 font-bold text-sm"
+                                        />
+                                        {block.end > 1440 ? (
+                                          <span className="font-bold text-mute text-xs">
+                                            {t("profileEdit.routine.nextDay")}
+                                          </span>
+                                        ) : null}
+                                        {blocks.length > 1 ? (
+                                          <button
+                                            type="button"
+                                            onClick={() =>
+                                              replaceRoutine(index, {
+                                                ...routine,
+                                                dayBlocks: {
+                                                  ...routine.dayBlocks,
+                                                  [weekday]: blocks.filter(
+                                                    (_, i) => i !== bIdx,
+                                                  ),
+                                                },
+                                              })
+                                            }
+                                            className="min-h-11 rounded-sign border border-rule-strong px-2 font-bold text-xs hover:bg-panel"
+                                          >
+                                            {t(
+                                              "profileEdit.routine.removeBlock",
+                                            )}
+                                          </button>
+                                        ) : null}
+                                      </div>
+                                    ))}
+                                  </div>
+                                </li>
+                              );
+                            })}
+                          </ul>
+                        )}
+
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (!routine.perDay) {
+                              const synced: Record<
+                                number,
+                                readonly DayBlockItem[]
+                              > = {};
+                              for (const weekday of routine.weekdays) {
+                                synced[weekday] = routine.dayBlocks[
+                                  weekday
+                                ] ?? [
+                                  {
+                                    blockId: `${routine.uiId}_b_${weekday}_${nextIdCounter.current++}`,
+                                    start: routine.uniformStart,
+                                    end: routine.uniformEnd,
+                                  },
+                                ];
+                              }
+                              replaceRoutine(index, {
+                                ...routine,
+                                perDay: true,
+                                dayBlocks: synced,
+                              });
+                            } else {
+                              replaceRoutine(index, {
+                                ...routine,
+                                perDay: false,
+                              });
+                            }
+                          }}
+                          className="min-h-11 font-bold text-line-blue text-sm underline"
+                        >
+                          {routine.perDay
+                            ? t("profileEdit.routine.sameHoursToggle")
+                            : t("profileEdit.routine.perDayToggle")}
+                        </button>
+                      </div>
+                    )}
+
+                    <p className="mt-3 rounded-sign bg-panel px-2.5 py-2 font-bold text-sm">
+                      {describeRoutine(previewTemplate)}
+                    </p>
+                  </article>
+                );
+              })}
+            </div>
+          )}
+
+          <div className="mt-3 flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={addWeeklyRoutine}
+              className={buttonClasses.secondary}
             >
-              {t("answer.profile.none")}
-            </Chip>
-            <Chip
-              selected={routines.workweek.on}
-              onClick={() =>
-                update({
-                  ...routines,
-                  workweek: { ...routines.workweek, on: !routines.workweek.on },
-                })
-              }
+              {t("profileEdit.routine.addWeekly")}
+            </button>
+            <button
+              type="button"
+              onClick={addCycleRoutine}
+              className={buttonClasses.secondary}
             >
-              {t("answer.profile.workweek")}
-            </Chip>
-            <Chip
-              selected={routines.shifts.on}
-              onClick={() =>
-                update({
-                  ...routines,
-                  shifts: { ...routines.shifts, on: !routines.shifts.on },
-                })
-              }
-            >
-              {t("answer.profile.shifts")}
-            </Chip>
-            <Chip
-              selected={routines.classes.on}
-              onClick={() =>
-                update({
-                  ...routines,
-                  classes: { ...routines.classes, on: !routines.classes.on },
-                })
-              }
-            >
-              {t("answer.profile.classes")}
-            </Chip>
+              {t("profileEdit.routine.addCycle")}
+            </button>
           </div>
 
-          {routines.workweek.on ? (
-            <div className="mt-3 flex items-center gap-2 text-sm">
-              <span className="font-bold">{t("answer.workweek.hours")}</span>
-              {(["start", "end"] as const).map((field) => (
-                <select
-                  key={field}
-                  aria-label={`${t("answer.workweek.hours")} ${field === "start" ? "1" : "2"}`}
-                  value={routines.workweek[field]}
-                  onChange={(e) =>
-                    update({
-                      ...routines,
-                      workweek: {
-                        ...routines.workweek,
-                        [field]: Number(e.target.value),
-                      },
-                    })
-                  }
-                  className="min-h-11 rounded-sign border-[1.5px] border-rule-strong bg-white px-2"
-                >
-                  {(field === "start" ? WORK_STARTS : WORK_ENDS).map((m) => (
-                    <option key={m} value={m}>
-                      {formatTime(m)}
-                    </option>
-                  ))}
-                </select>
-              ))}
-            </div>
-          ) : null}
-
-          {routines.shifts.on ? (
-            <div className="mt-3">
-              <p className="text-mute text-sm">{t("answer.shifts.pattern")}</p>
-              <p className="mt-2 font-bold text-sm">
-                {t("answer.shifts.today")}
-              </p>
-              <div className="mt-1.5 flex flex-wrap gap-1.5">
-                {SHIFT_TODAY.map((key, index) => (
-                  <Chip
-                    key={key}
-                    selected={routines.shifts.todayIndex === index}
-                    onClick={() =>
-                      update({
-                        ...routines,
-                        shifts: { on: true, todayIndex: index },
-                      })
-                    }
-                  >
-                    {t(`answer.shifts.${key}` as MessageKey)}
-                  </Chip>
-                ))}
-              </div>
-            </div>
-          ) : null}
-
-          {routines.classes.on ? (
-            <div className="mt-3">
-              <p className="text-mute text-sm">{t("answer.classes.hint")}</p>
-              <ul className="mt-2 border-rule border-t">
-                {CLASS_WEEKDAYS.map((weekday) => {
-                  const marks = routines.classes.marks[weekday] ?? [];
-                  const label = t(`weekday.short.${weekday}` as MessageKey);
-                  return (
-                    <li
-                      key={weekday}
-                      className="flex items-center border-rule border-b py-1"
-                    >
-                      <span className="w-[4.25rem] flex-none font-extrabold text-sm">
-                        {label}
-                      </span>
-                      <span className="relative h-11 flex-1">
-                        <span
-                          aria-hidden="true"
-                          className="absolute inset-x-0 top-1/2 h-px bg-rule-strong"
-                        />
-                        {SEGMENTS.map((seg, index) => {
-                          const on = marks.includes(seg.key);
-                          const style = {
-                            left: `${pct(seg.start)}%`,
-                            width: `${pct(seg.end) - pct(seg.start)}%`,
-                          };
-                          return (
-                            <span key={seg.key}>
-                              {on ? (
-                                <span
-                                  aria-hidden="true"
-                                  className="hatch-busy absolute top-1/2 -mt-2 h-4 rounded-[3px]"
-                                  style={style}
-                                />
-                              ) : null}
-                              <button
-                                type="button"
-                                aria-pressed={on}
-                                aria-label={`${label}, ${t(`answer.segment.${seg.key}` as MessageKey)}`}
-                                onClick={() =>
-                                  update({
-                                    ...routines,
-                                    classes: {
-                                      on: true,
-                                      marks: {
-                                        ...routines.classes.marks,
-                                        [weekday]: on
-                                          ? marks.filter((k) => k !== seg.key)
-                                          : [...marks, seg.key],
-                                      },
-                                    },
-                                  })
-                                }
-                                className={`absolute inset-y-0 active:bg-ink/[0.06] ${
-                                  index > 0
-                                    ? "border-rule border-l border-dashed"
-                                    : ""
-                                }`}
-                                style={style}
-                              />
-                            </span>
-                          );
-                        })}
-                      </span>
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
-          ) : null}
-
-          <div className="mt-4">
+          <div className="mt-5">
             <label htmlFor="profile-timezone" className={legend}>
               {t("profileEdit.timezone")}
             </label>
@@ -482,14 +1122,33 @@ export function ProfileEditor({
 
         <section
           aria-labelledby="days-title"
-          className="mt-5 lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:mt-4"
+          className="mt-5 lg:col-start-2 lg:row-span-2 lg:row-start-1"
         >
-          <h2 id="days-title" className={legend}>
-            {t("profileEdit.days.title")}
-          </h2>
-          <p className="mt-0.5 text-mute text-sm">
-            {t("profileEdit.days.hint")}
-          </p>
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <h2 id="days-title" className={legend}>
+                {t("profileEdit.days.title")}
+              </h2>
+              <p className="mt-0.5 text-mute text-sm">
+                {t("profileEdit.days.hint")}
+              </p>
+            </div>
+            <div className="flex gap-1.5">
+              <Chip
+                selected={granularity === "blocks"}
+                onClick={() => selectGranularity("blocks")}
+              >
+                {t("profileEdit.days.mode.blocks")}
+              </Chip>
+              <Chip
+                selected={granularity === "hours"}
+                onClick={() => selectGranularity("hours")}
+              >
+                {t("profileEdit.days.mode.hours")}
+              </Chip>
+            </div>
+          </div>
+
           <div
             aria-hidden="true"
             className="mt-2 flex pb-1 text-[0.6875rem] text-mute"
@@ -514,74 +1173,172 @@ export function ProfileEditor({
             {days.map((day) => {
               const busy = availability[day.date]?.busy ?? [];
               return (
-                <li
-                  key={day.date}
-                  className="flex items-center border-rule border-b py-1"
-                >
-                  <span className="w-[4.25rem] flex-none font-extrabold text-[0.9375rem]">
-                    {day.label}
-                  </span>
-                  <span className="relative h-11 flex-1">
-                    <span
-                      aria-hidden="true"
-                      className="absolute inset-x-0 top-1/2 -mt-[3px] h-1.5 rounded-full"
-                      style={{ background: lineColor }}
-                    />
-                    {busy
-                      .filter((i) => i.end > TRACK.start && i.start < TRACK.end)
-                      .map((i) => {
-                        const left = pct(Math.max(i.start, TRACK.start));
-                        const right = pct(Math.min(i.end, TRACK.end));
-                        return (
-                          <span
-                            key={i.start}
-                            aria-hidden="true"
-                            className="hatch-busy absolute top-1/2 -mt-2 h-4 rounded-[3px]"
-                            style={{
-                              left: `${left}%`,
-                              width: `${right - left}%`,
-                            }}
-                          />
-                        );
-                      })}
-                    {SEGMENTS.map((seg, index) => {
-                      const covered = overlap(busy, seg);
-                      const state =
-                        covered === 0
-                          ? "free"
-                          : covered >= seg.end - seg.start
-                            ? "busy"
-                            : "partial";
-                      return (
-                        <button
-                          key={seg.key}
-                          type="button"
-                          onClick={() => tap(day.date, seg.key)}
-                          aria-pressed={state !== "free"}
-                          aria-label={t("answer.segment.label", {
-                            day: day.label,
-                            segment: t(
-                              `answer.segment.${seg.key}` as MessageKey,
-                            ),
-                            from: formatTime(seg.start),
-                            to: formatTime(seg.end),
-                            state: t(
-                              `answer.segment.state.${state}` as MessageKey,
-                            ),
-                          })}
-                          className={`absolute inset-y-0 active:bg-ink/[0.06] ${
-                            index > 0
-                              ? "border-rule border-l border-dashed"
-                              : ""
-                          }`}
-                          style={{
-                            left: `${pct(seg.start)}%`,
-                            width: `${pct(seg.end) - pct(seg.start)}%`,
-                          }}
-                        />
-                      );
-                    })}
-                  </span>
+                <li key={day.date} className="border-rule border-b py-1.5">
+                  <div className="flex items-center">
+                    <span className="w-[4.25rem] flex-none font-extrabold text-[0.9375rem]">
+                      {day.label}
+                    </span>
+                    <span className="relative h-11 flex-1">
+                      <span
+                        aria-hidden="true"
+                        className="absolute inset-x-0 top-1/2 -mt-[3px] h-1.5 rounded-full"
+                        style={{ background: lineColor }}
+                      />
+                      {busy
+                        .filter(
+                          (i) => i.end > TRACK.start && i.start < TRACK.end,
+                        )
+                        .map((i) => {
+                          const left = pct(Math.max(i.start, TRACK.start));
+                          const right = pct(Math.min(i.end, TRACK.end));
+                          return (
+                            <span
+                              key={i.start}
+                              aria-hidden="true"
+                              className="hatch-busy absolute top-1/2 -mt-2 h-4 rounded-[3px]"
+                              style={{
+                                left: `${left}%`,
+                                width: `${right - left}%`,
+                              }}
+                            />
+                          );
+                        })}
+                      {granularity === "blocks"
+                        ? SEGMENTS.map((seg, index) => {
+                            const covered = overlap(busy, seg);
+                            const state =
+                              covered === 0
+                                ? "free"
+                                : covered >= seg.end - seg.start
+                                  ? "busy"
+                                  : "partial";
+                            return (
+                              <button
+                                key={seg.key}
+                                type="button"
+                                onClick={() => tap(day.date, seg.key)}
+                                aria-pressed={state !== "free"}
+                                aria-label={t("answer.segment.label", {
+                                  day: day.label,
+                                  segment: t(
+                                    `answer.segment.${seg.key}` as MessageKey,
+                                  ),
+                                  from: formatTime(seg.start),
+                                  to: formatTime(seg.end),
+                                  state: t(
+                                    `answer.segment.state.${state}` as MessageKey,
+                                  ),
+                                })}
+                                className={`absolute inset-y-0 active:bg-ink/[0.06] ${
+                                  index > 0
+                                    ? "border-rule border-l border-dashed"
+                                    : ""
+                                }`}
+                                style={{
+                                  left: `${pct(seg.start)}%`,
+                                  width: `${pct(seg.end) - pct(seg.start)}%`,
+                                }}
+                              />
+                            );
+                          })
+                        : null}
+                    </span>
+                  </div>
+
+                  {granularity === "hours" ? (
+                    <div className="mt-1 pl-[4.25rem]">
+                      <div className="space-y-1.5">
+                        {busy.map((interval, idx) => (
+                          <div
+                            key={interval.start}
+                            className="flex flex-wrap items-center gap-1.5"
+                          >
+                            <input
+                              type="time"
+                              step="900"
+                              aria-label={t("profileEdit.days.hours.start", {
+                                day: day.label,
+                                index: idx + 1,
+                              })}
+                              value={formatTime(interval.start)}
+                              onChange={(e) => {
+                                const startClock = parseTimeInput(
+                                  e.target.value,
+                                  interval.start,
+                                );
+                                const nextInterval = intervalFromClocks(
+                                  startClock,
+                                  interval.end % 1440,
+                                );
+                                setDayIntervals(
+                                  day.date,
+                                  busy.map((item, i) =>
+                                    i === idx ? nextInterval : item,
+                                  ),
+                                );
+                              }}
+                              className="min-h-11 rounded-sign border-[1.5px] border-rule-strong bg-white px-2 font-bold text-sm"
+                            />
+                            <span aria-hidden="true">–</span>
+                            <input
+                              type="time"
+                              step="900"
+                              aria-label={t("profileEdit.days.hours.end", {
+                                day: day.label,
+                                index: idx + 1,
+                              })}
+                              value={formatTime(interval.end)}
+                              onChange={(e) => {
+                                const endClock = parseTimeInput(
+                                  e.target.value,
+                                  interval.end % 1440,
+                                );
+                                const nextInterval = intervalFromClocks(
+                                  interval.start,
+                                  endClock,
+                                );
+                                setDayIntervals(
+                                  day.date,
+                                  busy.map((item, i) =>
+                                    i === idx ? nextInterval : item,
+                                  ),
+                                );
+                              }}
+                              className="min-h-11 rounded-sign border-[1.5px] border-rule-strong bg-white px-2 font-bold text-sm"
+                            />
+                            <button
+                              type="button"
+                              aria-label={`${t("profileEdit.days.hours.remove")} ${day.label} ${idx + 1}`}
+                              onClick={() =>
+                                setDayIntervals(
+                                  day.date,
+                                  busy.filter((_, i) => i !== idx),
+                                )
+                              }
+                              className="min-h-11 rounded-sign border border-rule-strong px-2 font-bold text-xs hover:bg-panel"
+                            >
+                              {t("profileEdit.days.hours.remove")}
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const lastEnd = busy.at(-1)?.end ?? h(9);
+                          const start = Math.min(
+                            h(22),
+                            Math.max(h(8), lastEnd),
+                          );
+                          const end = Math.min(h(24), start + 60);
+                          setDayIntervals(day.date, [...busy, { start, end }]);
+                        }}
+                        className="mt-1 min-h-11 font-bold text-line-blue text-xs underline"
+                      >
+                        {t("profileEdit.days.hours.add")}
+                      </button>
+                    </div>
+                  ) : null}
                 </li>
               );
             })}
@@ -602,7 +1359,7 @@ export function ProfileEditor({
             ? t("profileEdit.saved")
             : status === "error"
               ? t("profileEdit.error")
-              : " "}
+              : "\u00a0"}
         </p>
         <button
           type="button"

@@ -59,6 +59,7 @@ export {
   joinGroup,
   leaveGroup,
   type NewGroup,
+  renameMember,
   updateGroup,
 } from "./group/group";
 export {
