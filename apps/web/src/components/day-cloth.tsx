@@ -8,31 +8,31 @@ export interface ClothThread extends DayLine {
   readonly colorIndex: number;
 }
 
-type Span = { readonly start: number; readonly end: number };
+export type ClothSpan = { readonly start: number; readonly end: number };
 
 interface DayClothProps {
   readonly dayLabel: string;
   /** Replaces the default "<day> · quién está libre" heading. */
   readonly heading?: string;
-  readonly span: Span;
+  readonly span: ClothSpan;
   /** The option's window: the band the cloth closes into. */
-  readonly band: Span;
+  readonly band: ClothSpan;
   readonly threads: readonly ClothThread[];
 }
 
 /** Above this many people each thread gets thinner, so the cloth stays short. */
 const DENSE_FROM = 9;
 
-const pct = (value: number, span: Span) =>
+export const spanPct = (value: number, span: ClothSpan) =>
   ((value - span.start) / (span.end - span.start)) * 100;
 
-const place = (from: number, to: number, span: Span) => ({
-  left: `${pct(from, span)}%`,
-  width: `${pct(to, span) - pct(from, span)}%`,
+const place = (from: number, to: number, span: ClothSpan) => ({
+  left: `${spanPct(from, span)}%`,
+  width: `${spanPct(to, span) - spanPct(from, span)}%`,
 });
 
 /** On top over the whole band. */
-function onTopThroughout(thread: DayLine, band: Span) {
+function onTopThroughout(thread: DayLine, band: ClothSpan) {
   return thread.segments.some(
     (s) => s.state === "free" && s.start <= band.start && s.end >= band.end,
   );
@@ -51,6 +51,103 @@ function threadLabel(thread: DayLine): string {
 }
 
 /**
+ * Renders the bare warp line plus free (yarn), busy (under-thread + ticks),
+ * and unknown (loose dotted) segments across `span`.
+ */
+export function ThreadSegments({
+  segments,
+  span,
+  color,
+  ply = 1,
+  dense = false,
+}: {
+  readonly segments: readonly LineSegment[];
+  readonly span: ClothSpan;
+  readonly color: string;
+  readonly ply?: 1 | 2;
+  readonly dense?: boolean;
+}) {
+  return (
+    <span aria-hidden="true" className="relative h-full flex-1">
+      <span className="absolute inset-x-0 top-1/2 h-0.5 -translate-y-1/2 rounded-full bg-rule" />
+      {segments.map((segment: LineSegment) => {
+        const style = place(segment.start, segment.end, span);
+        if (segment.state === "free") {
+          if (ply === 2) {
+            return (
+              <span
+                key={segment.start}
+                className={`weave-move absolute top-1/2 flex -translate-y-1/2 flex-col justify-between ${
+                  dense ? "h-2" : "h-2.5"
+                }`}
+                style={style}
+              >
+                <span
+                  className={`yarn block w-full rounded-full ${
+                    dense ? "h-[3px]" : "h-1"
+                  }`}
+                  style={{ backgroundColor: color }}
+                />
+                <span
+                  className={`yarn block w-full rounded-full ${
+                    dense ? "h-[3px]" : "h-1"
+                  }`}
+                  style={{ backgroundColor: color }}
+                />
+              </span>
+            );
+          }
+          return (
+            <span
+              key={segment.start}
+              className={`weave-move yarn absolute top-1/2 -translate-y-1/2 rounded-full ${
+                dense ? "h-2.5" : "h-3.5"
+              }`}
+              style={{ ...style, backgroundColor: color }}
+            />
+          );
+        }
+        if (segment.state === "busy") {
+          const diveIn = segment.start > span.start;
+          const diveOut = segment.end < span.end;
+          return (
+            <span
+              key={segment.start}
+              className="weave-move absolute top-1/2 flex h-3 -translate-y-1/2 items-center"
+              style={style}
+            >
+              {diveIn ? (
+                <span
+                  className="h-2.5 w-[2.5px] flex-none rounded-full"
+                  style={{ backgroundColor: color }}
+                />
+              ) : null}
+              <span className="thread-dive h-[3px] flex-1" />
+              {diveOut ? (
+                <span
+                  className="h-2.5 w-[2.5px] flex-none rounded-full"
+                  style={{ backgroundColor: color }}
+                />
+              ) : null}
+            </span>
+          );
+        }
+        if (segment.state === "unknown") {
+          return (
+            <span
+              key={segment.start}
+              className="weave-move thread-loose absolute top-1/2 h-0.5 -translate-y-1/2"
+              style={style}
+            />
+          );
+        }
+        return null;
+      })}
+    </span>
+  );
+}
+
+/**
  * One woven row: free time rides on top in the person's colour (double-ply for
  * second-cycle members), busy time dives under the cloth with a solid
  * under-thread and coloured warp ticks at dive boundaries, unknown time hangs
@@ -64,7 +161,7 @@ function Thread({
 }: {
   readonly thread: ClothThread;
   readonly initial: string;
-  readonly span: Span;
+  readonly span: ClothSpan;
   readonly dense: boolean;
 }) {
   const color = threadColor(thread.colorIndex).value;
@@ -81,87 +178,24 @@ function Thread({
         <span className="hidden lg:inline">{thread.displayName}</span>
       </span>
       <span className="sr-only">{threadLabel(thread)}</span>
-      <span aria-hidden="true" className="relative h-full flex-1">
-        <span className="absolute inset-x-0 top-1/2 h-0.5 -translate-y-1/2 rounded-full bg-rule" />
-        {thread.segments.map((segment: LineSegment) => {
-          const style = place(segment.start, segment.end, span);
-          if (segment.state === "free") {
-            if (ply === 2) {
-              return (
-                <span
-                  key={segment.start}
-                  className={`weave-move absolute top-1/2 flex -translate-y-1/2 flex-col justify-between ${
-                    dense ? "h-2" : "h-2.5"
-                  }`}
-                  style={style}
-                >
-                  <span
-                    className={`yarn block w-full rounded-full ${
-                      dense ? "h-[3px]" : "h-1"
-                    }`}
-                    style={{ backgroundColor: color }}
-                  />
-                  <span
-                    className={`yarn block w-full rounded-full ${
-                      dense ? "h-[3px]" : "h-1"
-                    }`}
-                    style={{ backgroundColor: color }}
-                  />
-                </span>
-              );
-            }
-            return (
-              <span
-                key={segment.start}
-                className={`weave-move yarn absolute top-1/2 -translate-y-1/2 rounded-full ${
-                  dense ? "h-2.5" : "h-3.5"
-                }`}
-                style={{ ...style, backgroundColor: color }}
-              />
-            );
-          }
-          if (segment.state === "busy") {
-            const diveIn = segment.start > span.start;
-            const diveOut = segment.end < span.end;
-            return (
-              <span
-                key={segment.start}
-                className="weave-move absolute top-1/2 flex h-3 -translate-y-1/2 items-center"
-                style={style}
-              >
-                {diveIn ? (
-                  <span
-                    className="h-2.5 w-[2.5px] flex-none rounded-full"
-                    style={{ backgroundColor: color }}
-                  />
-                ) : null}
-                <span className="thread-dive h-[3px] flex-1" />
-                {diveOut ? (
-                  <span
-                    className="h-2.5 w-[2.5px] flex-none rounded-full"
-                    style={{ backgroundColor: color }}
-                  />
-                ) : null}
-              </span>
-            );
-          }
-          if (segment.state === "unknown") {
-            return (
-              <span
-                key={segment.start}
-                className="weave-move thread-loose absolute top-1/2 h-0.5 -translate-y-1/2"
-                style={style}
-              />
-            );
-          }
-          return null;
-        })}
-      </span>
+      <ThreadSegments
+        segments={thread.segments}
+        span={span}
+        color={color}
+        ply={ply}
+        dense={dense}
+      />
     </li>
   );
 }
 
-function Axis({ span }: { readonly span: Span }) {
+export function TimeAxis({
+  span,
+  labelSpacerClass = "w-8 flex-none lg:w-28",
+}: {
+  readonly span: ClothSpan;
+  readonly labelSpacerClass?: string;
+}) {
   const ticks: number[] = [];
   const length = span.end - span.start;
   const step = length <= 6 * 60 ? 60 : length <= 10 * 60 ? 120 : 240;
@@ -170,10 +204,10 @@ function Axis({ span }: { readonly span: Span }) {
     ticks.push(minute);
   return (
     <div aria-hidden="true" className="mt-1 flex">
-      <span className="w-8 flex-none lg:w-28" />
+      <span className={labelSpacerClass} />
       <span className="relative h-4 flex-1 text-caption text-mute">
         {ticks.map((tick) => {
-          const left = pct(tick, span);
+          const left = spanPct(tick, span);
           if (left < 7 || left > 93) return null;
           return (
             <span
@@ -243,7 +277,7 @@ export function DayCloth({
         </ul>
       </div>
 
-      <Axis span={span} />
+      <TimeAxis span={span} />
       <p className="mt-1.5 pl-8 font-bold text-sm lg:pl-28">
         {closed
           ? t("cloth.closed", { time: formatSpan(band.start, band.end) })

@@ -5,7 +5,7 @@ import {
   workweek,
 } from "@amigo/core";
 import { describe, expect, it } from "vitest";
-import { describeRoutine } from "./routine-sentence";
+import { describeRoutine, summarizeRoutine } from "./routine-sentence";
 
 const h = (hours: number, mins = 0) => hours * 60 + mins;
 
@@ -82,5 +82,25 @@ describe("describeRoutine (S2)", () => {
     expect(describeRoutine(cycle)).toBe(
       "Ciclo de 7 días desde el 20 nov: días 1–4 07:30–19:30, días 5–7 libre",
     );
+  });
+});
+
+describe("summarizeRoutine", () => {
+  it("formats compact weekly ranges and single days", () => {
+    expect(summarizeRoutine(workweek())).toBe("Lun–Vie 09:00–18:00");
+    expect(
+      summarizeRoutine({
+        kind: "workweek",
+        blocks: [{ weekday: 4, start: h(19), end: h(22) }],
+      }),
+    ).toBe("Jue 19:00–22:00");
+  });
+
+  it("formats compact shift cycles", () => {
+    const cycle = shiftCycle({
+      anchor: parseLocalDate("2026-11-20"),
+      pattern: ["day", "night", "off", "off"],
+    });
+    expect(summarizeRoutine(cycle)).toBe("Ciclo 4 días · 08:00–20:00");
   });
 });

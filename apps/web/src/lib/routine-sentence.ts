@@ -136,3 +136,75 @@ export function describeRoutine(template: BusyTemplate): string {
     .join("; ");
   return t("routine.summary.weekly", { detail });
 }
+
+function formatCompactIntervals(intervals: readonly Interval[]): string {
+  return mergeIntervals(intervals)
+    .map(
+      (interval) =>
+        `${formatTime(interval.start)}–${endTimeLabel(interval.end)}`,
+    )
+    .join(", ");
+}
+
+function formatCompactWeekdays(indices: readonly number[]): string {
+  const short = (idx: number) =>
+    t(`weekday.short.${WEEKDAYS_MON_FIRST[idx] ?? 1}` as MessageKey);
+  if (indices.length >= 3) {
+    const consecutive = indices.every(
+      (idx, i) => i === 0 || idx === (indices[i - 1] ?? 0) + 1,
+    );
+    if (consecutive) {
+      return `${short(indices[0] ?? 0)}–${short(indices.at(-1) ?? 0)}`;
+    }
+  }
+  return indices.map(short).join(", ");
+}
+
+/**
+ * Compact one-line summary for routine list rows (e.g. "Lun–Vie 09:00–18:00").
+ */
+export function summarizeRoutine(template: BusyTemplate): string {
+  if (template.kind === "shifts") {
+    const count = template.cycle.length;
+    const unit =
+      count === 1
+        ? t("routine.summary.cycle.dayUnit.one")
+        : t("routine.summary.cycle.dayUnit.other");
+    const firstBusy = template.cycle.find((step) => step.length > 0);
+    if (!firstBusy) {
+      return t("routine.compact.cycleFree", { count, unit });
+    }
+    return t("routine.compact.cycle", {
+      count,
+      unit,
+      hours: formatCompactIntervals(firstBusy),
+    });
+  }
+
+  const byWeekday = new Map<number, Interval[]>();
+  for (const block of template.blocks) {
+    const existing = byWeekday.get(block.weekday) ?? [];
+    existing.push({ start: block.start, end: block.end });
+    byWeekday.set(block.weekday, existing);
+  }
+  const activeIndices = WEEKDAYS_MON_FIRST.flatMap((weekday, index) => {
+    const intervals = byWeekday.get(weekday);
+    return intervals && intervals.length > 0
+      ? [{ index, hours: formatCompactIntervals(intervals) }]
+      : [];
+  });
+  if (activeIndices.length === 0) {
+    return t("routine.compact.empty");
+  }
+
+  const groups: { indices: number[]; hours: string }[] = [];
+  for (const entry of activeIndices) {
+    const match = groups.find((g) => g.hours === entry.hours);
+    if (match) match.indices.push(entry.index);
+    else groups.push({ indices: [entry.index], hours: entry.hours });
+  }
+
+  return groups
+    .map((group) => `${formatCompactWeekdays(group.indices)} ${group.hours}`)
+    .join("; ");
+}

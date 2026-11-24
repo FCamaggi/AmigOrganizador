@@ -35,7 +35,12 @@ test("at 390x844, keyboard focus on the last option row is not covered by the st
   await member.waitForURL(`**${groupPath}`);
   await member.getByRole("button", { name: "Unirme al grupo" }).click();
   await member.waitForURL(/\/perfil/);
-  await member.getByRole("button", { name: "Agregar rutina semanal" }).click();
+  // Empty profile: pick "Trabajo" and close its sheet, so the profile has a routine.
+  await member.getByRole("button", { name: "Trabajo" }).click();
+  await member
+    .getByRole("dialog")
+    .getByRole("button", { name: "Listo" })
+    .click();
   await member.getByRole("button", { name: "Guardar perfil" }).click();
   await member.waitForURL(`**${groupPath}`);
 
@@ -77,7 +82,9 @@ test("at 390x844, keyboard focus on the last option row is not covered by the st
 
   const optionBox = await lastOption.boundingBox();
   const rowBox = await lastOption.locator("..").boundingBox();
-  const footerBox = await member.locator("footer.sticky-footer").boundingBox();
+  const footerBox = await member
+    .locator("footer.sticky-footer:visible")
+    .boundingBox();
 
   expect(optionBox).not.toBeNull();
   expect(rowBox).not.toBeNull();

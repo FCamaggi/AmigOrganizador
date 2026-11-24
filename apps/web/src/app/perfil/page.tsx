@@ -143,10 +143,6 @@ async function ProfileScreen({
   return (
     <>
       <TopBar backHref={next ?? "/"} backLabel={t("profileEdit.back")} />
-      <h1 className="mt-2 font-extrabold text-[1.75rem] leading-tight">
-        {t("profileEdit.title")}
-      </h1>
-      <p className="mt-1 text-mute text-sm">{t("profileEdit.intro")}</p>
 
       <PersonSchedules
         displayName={person?.displayName ?? session.displayName}
@@ -160,6 +156,7 @@ async function ProfileScreen({
       <ProfileEditor
         key={activeId}
         profile={profile}
+        hasSavedProfile={storedSchedules.length > 0}
         today={today}
         timeZone={timeZone}
         days={days}
@@ -167,13 +164,8 @@ async function ProfileScreen({
         next={next}
         save={saveProfileAction}
       >
-        <section aria-labelledby="import-title" className="mt-6">
-          <h2 id="import-title" className="font-extrabold text-lg">
-            {t("profileEdit.import.title")}
-          </h2>
-          <p className="mt-0.5 text-mute text-sm">
-            {t("profileEdit.import.hint")}
-          </p>
+        <div>
+          <p className="text-mute text-sm">{t("profileEdit.import.hint")}</p>
           {profile.importedCalendars.length > 0 ? (
             <ul className="mt-3 rounded-cloth border border-rule bg-surface px-3">
               {profile.importedCalendars.map((calendar) => (
@@ -221,7 +213,7 @@ async function ProfileScreen({
             </ul>
           ) : null}
           <ImportForm scheduleId={activeId} />
-        </section>
+        </div>
       </ProfileEditor>
     </>
   );

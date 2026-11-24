@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import { type MessageKey, t } from "@/i18n/t";
 import { buttonClasses } from "@/lib/ui";
 import {
@@ -14,6 +14,7 @@ import {
   savePersonNameAction,
   setDefaultScheduleAction,
 } from "@/server/group-actions";
+import { Sheet } from "./sheet";
 
 const fieldLabel = "font-bold text-sm text-ink";
 
@@ -34,6 +35,10 @@ interface PersonSchedulesProps {
   readonly next: string | null;
 }
 
+interface LocalNameState extends PersonNameState {
+  readonly seq: number;
+}
+
 export function PersonSchedules({
   displayName,
   schedules,
@@ -42,10 +47,22 @@ export function PersonSchedules({
   activeIsDefault,
   next,
 }: PersonSchedulesProps) {
+  const [editingName, setEditingName] = useState(false);
+  const [justSavedName, setJustSavedName] = useState(false);
+  const [schedulesOpen, setSchedulesOpen] = useState(false);
+  const nameInputRef = useRef<HTMLInputElement>(null);
+  const lastSeqHandled = useRef(0);
+
   const [nameState, nameAction, namePending] = useActionState<
-    PersonNameState,
+    LocalNameState,
     FormData
-  >(savePersonNameAction, { error: null, saved: false });
+  >(
+    async (prev, formData) => {
+      const result = await savePersonNameAction(prev, formData);
+      return { ...result, seq: prev.seq + 1 };
+    },
+    { error: null, saved: false, seq: 0 },
+  );
 
   const [createState, createAction, createPending] = useActionState<
     ScheduleActionState,
@@ -62,59 +79,158 @@ export function PersonSchedules({
     FormData
   >(removeScheduleAction, { error: null });
 
+  useEffect(() => {
+    if (nameState.seq === lastSeqHandled.current) return;
+    lastSeqHandled.current = nameState.seq;
+    if (nameState.saved) {
+      setEditingName(false);
+      setJustSavedName(true);
+    }
+  }, [nameState]);
+
+  useEffect(() => {
+    if (editingName) {
+      nameInputRef.current?.focus();
+      nameInputRef.current?.select();
+    }
+  }, [editingName]);
+
+  // Close the schedules sheet after a redirect switches the active schedule.
+  useEffect(() => {
+    void activeScheduleId;
+    setSchedulesOpen(false);
+  }, [activeScheduleId]);
+
   return (
-    <div className="mt-4 grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:items-stretch lg:gap-x-10">
-      <div className="min-w-0 rounded-cloth border border-rule bg-surface p-4">
-        <form action={nameAction} noValidate>
-          <label htmlFor="person-display-name" className={fieldLabel}>
-            {t("profileEdit.name.label")}
-          </label>
-          <p className="mt-0.5 text-mute text-sm">
-            {t("profileEdit.name.hint")}
-          </p>
-          <div className="mt-2 flex flex-wrap gap-2">
-            <input
-              id="person-display-name"
-              name="displayName"
-              defaultValue={displayName}
-              required
-              maxLength={60}
-              aria-invalid={nameState.error !== null}
-              className="min-h-12 min-w-0 flex-1 rounded-cloth border-[1.5px] border-ink bg-surface px-3 font-bold text-lg"
-            />
-            <button
-              type="submit"
-              disabled={namePending}
-              className={`${buttonClasses.secondary} min-w-fit flex-none px-4`}
+    <>
+      <header className="mt-2 flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+        <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1.5">
+          <h1 className="font-extrabold text-[1.75rem] leading-[1.25]">
+            {t("profileEdit.title")}
+          </h1>
+
+          {editingName ? (
+            <form
+              action={nameAction}
+              noValidate
+              className="flex flex-wrap items-center gap-2"
             >
-              {t("profileEdit.name.save")}
-            </button>
-          </div>
-          {nameState.error ? (
-            <p role="alert" className="mt-1.5 font-bold text-danger text-sm">
-              {t(`profileEdit.name.error.${nameState.error}` as MessageKey)}
-            </p>
-          ) : null}
-          {nameState.saved ? (
-            <p aria-live="polite" className="mt-1.5 font-bold text-sm">
-              {t("profileEdit.name.saved")}
-            </p>
-          ) : null}
-        </form>
-      </div>
+              <label htmlFor="person-display-name" className="sr-only">
+                {t("profileEdit.name.label")}
+              </label>
+              <input
+                ref={nameInputRef}
+                id="person-display-name"
+                name="displayName"
+                defaultValue={displayName}
+                required
+                maxLength={60}
+                aria-invalid={nameState.error !== null}
+                className="min-h-11 w-44 max-w-full rounded-cloth border-[1.5px] border-ink bg-surface px-3 font-bold"
+              />
+              <button
+                type="submit"
+                disabled={namePending}
+                className={`${buttonClasses.secondary} flex-none px-3 text-sm`}
+              >
+                {t("profileEdit.name.save")}
+              </button>
+              <button
+                type="button"
+                onClick={() => setEditingName(false)}
+                className="min-h-11 rounded-knot px-2.5 font-bold text-mute text-sm hover:bg-panel"
+              >
+                {t("profileEdit.name.cancel")}
+              </button>
+              {nameState.error ? (
+                <p
+                  role="alert"
+                  className="w-full font-bold text-danger text-sm"
+                >
+                  {t(`profileEdit.name.error.${nameState.error}` as MessageKey)}
+                </p>
+              ) : null}
+            </form>
+          ) : (
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setJustSavedName(false);
+                  setEditingName(true);
+                }}
+                aria-label={t("profileEdit.name.edit", { name: displayName })}
+                className="inline-flex min-h-11 items-center gap-1.5 rounded-knot px-2.5 font-bold text-base text-ink hover:bg-panel"
+              >
+                <span className="max-w-48 truncate">{displayName}</span>
+                <svg
+                  aria-hidden="true"
+                  viewBox="0 0 16 16"
+                  className="size-4 flex-none text-mute"
+                >
+                  <path
+                    d="M11.5 2.5a1.4 1.4 0 0 1 2 2L5.2 12.8l-2.7.7.7-2.7 8.3-8.3Z"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.6"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </button>
+              {justSavedName ? (
+                <p aria-live="polite" className="font-bold text-mute text-sm">
+                  {t("profileEdit.name.saved")}
+                </p>
+              ) : null}
+            </div>
+          )}
+        </div>
 
-      <section
-        aria-labelledby="schedules-heading"
-        className="min-w-0 rounded-cloth border border-rule bg-surface p-4"
+        <button
+          type="button"
+          aria-haspopup="dialog"
+          aria-label={t("profileEdit.schedules.trigger", {
+            name: activeScheduleName,
+          })}
+          onClick={() => setSchedulesOpen(true)}
+          className="inline-flex min-h-11 items-center gap-1.5 rounded-cloth border-[1.5px] border-ink bg-surface px-3 font-bold text-[0.9375rem] text-ink hover:bg-panel"
+        >
+          <span className="max-w-44 truncate">{activeScheduleName}</span>
+          <svg
+            aria-hidden="true"
+            viewBox="0 0 16 16"
+            className="size-4 flex-none"
+          >
+            <path
+              d="M4 6l4 4 4-4"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </button>
+      </header>
+
+      <Sheet
+        open={schedulesOpen}
+        title={t("profileEdit.schedules.title")}
+        onClose={() => setSchedulesOpen(false)}
+        footer={
+          <button
+            type="button"
+            onClick={() => setSchedulesOpen(false)}
+            className="flex min-h-11 flex-1 items-center justify-center rounded-cloth bg-ink px-4 font-extrabold text-[0.9375rem] text-surface hover:opacity-90"
+          >
+            {t("profileEdit.sheet.done")}
+          </button>
+        }
       >
-        <h2 id="schedules-heading" className="font-extrabold text-lg">
-          {t("profileEdit.schedules.title")}
-        </h2>
-        <p className="mt-0.5 text-mute text-sm">
-          {t("profileEdit.schedules.hint")}
-        </p>
+        <p className="text-mute text-sm">{t("profileEdit.schedules.hint")}</p>
 
-        <ul className="mt-2.5 divide-y divide-rule border-rule border-y">
+        <ul className="mt-3 divide-y divide-rule border-rule border-y">
           {schedules.map((item) => {
             const selected = item.id === activeScheduleId;
             return (
@@ -122,6 +238,7 @@ export function PersonSchedules({
                 <Link
                   href={item.href}
                   aria-current={selected ? "page" : undefined}
+                  onClick={() => setSchedulesOpen(false)}
                   className={`flex min-h-12 items-center justify-between gap-2 px-2 py-2 no-underline ${
                     selected ? "bg-panel font-extrabold" : "hover:bg-panel/60"
                   }`}
@@ -151,7 +268,7 @@ export function PersonSchedules({
           })}
         </ul>
 
-        <form action={renameAction} className="mt-3" noValidate>
+        <form action={renameAction} className="mt-4" noValidate>
           <input type="hidden" name="scheduleId" value={activeScheduleId} />
           <label htmlFor="schedule-rename-input" className={fieldLabel}>
             {t("profileEdit.schedules.rename.label")}
@@ -183,7 +300,7 @@ export function PersonSchedules({
           ) : null}
         </form>
 
-        <div className="mt-2.5 flex flex-wrap gap-2">
+        <div className="mt-3 flex flex-wrap gap-2">
           <form
             action={duplicateScheduleAction.bind(null, activeScheduleId, next)}
           >
@@ -228,7 +345,7 @@ export function PersonSchedules({
 
         <form
           action={createAction}
-          className="mt-3 border-rule border-t pt-3"
+          className="mt-4 border-rule border-t pt-4"
           noValidate
         >
           {next ? <input type="hidden" name="next" value={next} /> : null}
@@ -260,7 +377,7 @@ export function PersonSchedules({
             </p>
           ) : null}
         </form>
-      </section>
-    </div>
+      </Sheet>
+    </>
   );
 }

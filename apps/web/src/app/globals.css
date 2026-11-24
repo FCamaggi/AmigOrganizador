@@ -173,6 +173,17 @@
   );
 }
 
+/* Under-thread: busy time dives under the cloth; coloured ticks mark where
+   the thread goes under and comes back up. Solid so at 2-3px it never
+   reads as the dotted "no schedule" thread. */
+.thread-dive {
+  background-color: var(--color-rule-strong);
+}
+
+body:has(dialog[open]) {
+  overflow: hidden;
+}
+
 @media (prefers-reduced-motion: no-preference) {
   .weave-move {
     transition:
