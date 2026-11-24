@@ -7,6 +7,11 @@ const nextConfig: NextConfig = {
     "@amigo/adapter-ics",
   ],
   cacheComponents: true,
+  // The link preview reads its fonts and brand images at runtime, some by a
+  // computed name, so tracing cannot see them on its own.
+  outputFileTracingIncludes: {
+    "/g/[code]/opengraph-image": ["./src/assets/**/*"],
+  },
   // The service worker must never be cached, or a fix would not reach
   // installed apps until the old copy expired.
   async headers() {
