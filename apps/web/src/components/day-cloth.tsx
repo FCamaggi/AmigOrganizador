@@ -52,7 +52,7 @@ function threadLabel(thread: DayLine): string {
 
 /**
  * One woven row: free time rides on top in the person's colour (double-ply for
- * second-cycle members), busy time dives under the cloth with a hatched
+ * second-cycle members), busy time dives under the cloth with a solid
  * under-thread and coloured warp ticks at dive boundaries, unknown time hangs
  * loose and dotted. Shape carries the state; colour only says who.
  */

@@ -155,8 +155,7 @@
 }
 
 /* A loose, unspun thread: someone without a schedule. Never reads as free. */
-.thread-loose,
-.track-unknown {
+.thread-loose {
   background-image: repeating-linear-gradient(
     90deg,
     var(--color-mute) 0 3px,

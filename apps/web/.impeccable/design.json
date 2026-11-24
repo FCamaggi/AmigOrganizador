@@ -1,312 +1,433 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-11-15T00:00:00Z",
+  "generatedAt": "2026-11-24T00:00:00Z",
   "title": "Design System: AmigOrganizador",
   "extensions": {
     "colorMeta": {
       "ground": {
         "role": "neutral",
-        "displayName": "Enamel White",
-        "canonical": "oklch(100.0% 0.000 89.9)",
+        "displayName": "Grey Wool",
+        "canonical": "oklch(93.8% 0.005 134.9)",
+        "tonalRamp": [
+          "#0a0c0a",
+          "#232422",
+          "#3f403e",
+          "#5c5e5c",
+          "#7c7e7b",
+          "#9d9f9c",
+          "#c3c5c2",
+          "#edefec"
+        ]
+      },
+      "surface": {
+        "role": "neutral",
+        "displayName": "Bleached Cloth",
+        "canonical": "oklch(98.8% 0.001 106.4)",
         "tonalRamp": [
           "#0b0b0b",
-          "#242424",
-          "#404040",
-          "#5d5d5d",
-          "#7d7d7d",
-          "#9e9e9e",
-          "#c4c4c4",
-          "#eeeeee"
+          "#242423",
+          "#40403f",
+          "#5e5e5d",
+          "#7d7d7c",
+          "#9e9e9d",
+          "#c4c4c3",
+          "#eeeeed"
+        ]
+      },
+      "panel": {
+        "role": "neutral",
+        "displayName": "Fold Shadow",
+        "canonical": "oklch(96.0% 0.004 121.6)",
+        "tonalRamp": [
+          "#0b0b0a",
+          "#242422",
+          "#3f403e",
+          "#5d5e5b",
+          "#7d7e7b",
+          "#9e9f9c",
+          "#c3c4c2",
+          "#eeefec"
         ]
       },
       "ink": {
         "role": "neutral",
-        "displayName": "Signage Ink",
-        "canonical": "oklch(23.0% 0.004 106.7)",
+        "displayName": "Indigo-Black Ink",
+        "canonical": "oklch(27.5% 0.037 277.1)",
         "tonalRamp": [
-          "#0b0b09",
-          "#242422",
-          "#40403e",
-          "#5e5e5b",
-          "#7d7d7b",
-          "#9e9e9c",
-          "#c4c4c1",
-          "#efefec"
+          "#08091b",
+          "#1f2236",
+          "#3b3e54",
+          "#585c73",
+          "#777c94",
+          "#989db6",
+          "#bec2dd",
+          "#e8edff"
+        ]
+      },
+      "ink-sub": {
+        "role": "neutral",
+        "displayName": "Pale Indigo",
+        "canonical": "oklch(84.6% 0.017 274.8)",
+        "tonalRamp": [
+          "#090b12",
+          "#21242c",
+          "#3d3f49",
+          "#5b5d67",
+          "#7a7d88",
+          "#9b9ea9",
+          "#c1c3cf",
+          "#ebeefa"
         ]
       },
       "mute": {
         "role": "neutral",
-        "displayName": "Platform Grey",
-        "canonical": "oklch(44.9% 0.005 106.6)",
+        "displayName": "Slate Mute",
+        "canonical": "oklch(42.5% 0.032 277.9)",
         "tonalRamp": [
-          "#0b0b09",
-          "#242422",
-          "#40403d",
-          "#5e5e5b",
-          "#7d7d7a",
-          "#9f9f9b",
-          "#c4c4c1",
-          "#efefeb"
+          "#080918",
+          "#202333",
+          "#3b3e51",
+          "#595c70",
+          "#787c90",
+          "#999db3",
+          "#bfc3d9",
+          "#e9edff"
         ]
       },
       "rule": {
         "role": "neutral",
         "displayName": "Hairline",
-        "canonical": "oklch(91.8% 0.004 106.5)",
+        "canonical": "oklch(87.2% 0.009 128.6)",
         "tonalRamp": [
-          "#0b0b09",
-          "#242422",
-          "#40403d",
-          "#5e5e5b",
-          "#7d7d7b",
-          "#9e9e9c",
-          "#c4c4c1",
-          "#efefec"
+          "#0a0c08",
+          "#232520",
+          "#3e413c",
+          "#5c5f59",
+          "#7c7e79",
+          "#9d9f9a",
+          "#c2c5bf",
+          "#edf0ea"
         ]
       },
       "rule-strong": {
         "role": "neutral",
-        "displayName": "Strong Hairline",
-        "canonical": "oklch(79.7% 0.006 106.5)",
+        "displayName": "Strong Rule",
+        "canonical": "oklch(55.6% 0.028 278.0)",
         "tonalRamp": [
-          "#0b0b09",
-          "#242421",
-          "#40403d",
-          "#5e5e5a",
-          "#7d7d7a",
-          "#9f9f9b",
-          "#c4c4c0",
-          "#efefeb"
+          "#080a17",
+          "#212332",
+          "#3c3f4f",
+          "#5a5c6e",
+          "#797c8e",
+          "#9a9db0",
+          "#bfc3d7",
+          "#eaedff"
         ]
       },
-      "panel": {
-        "role": "neutral",
-        "displayName": "Panel Grey",
-        "canonical": "oklch(96.7% 0.003 106.4)",
-        "tonalRamp": [
-          "#0b0b0a",
-          "#242423",
-          "#40403e",
-          "#5e5e5c",
-          "#7d7d7b",
-          "#9e9e9d",
-          "#c4c4c2",
-          "#eeeeec"
-        ]
-      },
-      "sign-sub": {
-        "role": "neutral",
-        "displayName": "Sign Subtext",
-        "canonical": "oklch(87.5% 0.004 106.5)",
-        "tonalRamp": [
-          "#0b0b09",
-          "#242422",
-          "#40403d",
-          "#5e5e5b",
-          "#7d7d7b",
-          "#9e9e9c",
-          "#c4c4c1",
-          "#efefec"
-        ]
-      },
-      "line-red": {
-        "role": "secondary",
-        "displayName": "Línea 1 Red",
-        "canonical": "oklch(58.5% 0.221 29.2)",
-        "tonalRamp": [
-          "#1e0100",
-          "#4b0101",
-          "#7b0805",
-          "#af130c",
-          "#e3281d",
-          "#fd6756",
-          "#fcada0",
-          "#fee9e6"
-        ]
-      },
-      "line-blue": {
+      "madder": {
         "role": "primary",
-        "displayName": "Línea 2 Blue",
-        "canonical": "oklch(50.9% 0.159 253.4)",
+        "displayName": "Madder Red",
+        "canonical": "oklch(52.2% 0.172 28.1)",
         "tonalRamp": [
-          "#000b1e",
-          "#00244a",
-          "#023f79",
-          "#075dad",
-          "#297ed8",
-          "#4fa1fe",
-          "#9cc8fd",
-          "#e4f0fe"
+          "#220000",
+          "#4d0000",
+          "#7e0002",
+          "#a9221d",
+          "#d0493e",
+          "#f76d5f",
+          "#ffa89b",
+          "#ffe5e0"
         ]
       },
-      "line-yellow": {
-        "role": "secondary",
-        "displayName": "Línea 4 Yellow",
-        "canonical": "oklch(84.6% 0.172 85.3)",
+      "madder-pressed": {
+        "role": "primary",
+        "displayName": "Pressed Madder",
+        "canonical": "oklch(46.3% 0.151 28.1)",
         "tonalRamp": [
-          "#110a00",
-          "#302200",
-          "#523c02",
-          "#765907",
-          "#9c7719",
-          "#c49723",
-          "#f2bb2b",
-          "#ffedc6"
+          "#220000",
+          "#4c0000",
+          "#7d0004",
+          "#a23028",
+          "#c75347",
+          "#ee7568",
+          "#ffa89c",
+          "#ffe5e0"
         ]
       },
-      "line-green": {
-        "role": "secondary",
-        "displayName": "Línea 5 Green",
-        "canonical": "oklch(63.5% 0.170 151.2)",
+      "madder-active": {
+        "role": "primary",
+        "displayName": "Deep Madder",
+        "canonical": "oklch(41.3% 0.134 28.0)",
         "tonalRamp": [
-          "#001003",
-          "#012d12",
-          "#074d24",
-          "#117038",
-          "#079649",
-          "#31bb65",
-          "#61e38a",
-          "#c8ffd4"
+          "#210000",
+          "#500000",
+          "#771310",
+          "#9b3830",
+          "#c0594e",
+          "#e67b6f",
+          "#ffa99d",
+          "#ffe6e1"
         ]
       },
-      "line-purple": {
+      "indigo": {
         "role": "secondary",
-        "displayName": "Línea 6 Purple",
-        "canonical": "oklch(47.8% 0.170 326.1)",
+        "displayName": "Loom Indigo",
+        "canonical": "oklch(45.1% 0.140 265.3)",
         "tonalRamp": [
-          "#18001a",
-          "#3d0540",
-          "#69026e",
-          "#8b308f",
-          "#af52b2",
-          "#d374d6",
-          "#fc9aff",
-          "#fee5fe"
+          "#01003a",
+          "#041566",
+          "#1b3788",
+          "#3758ab",
+          "#5479d0",
+          "#749bf5",
+          "#a8c4ff",
+          "#e4efff"
         ]
       },
       "danger": {
         "role": "error",
-        "displayName": "Alarm Red",
-        "canonical": "oklch(48.9% 0.190 29.3)",
+        "displayName": "Danger",
+        "canonical": "oklch(46.8% 0.166 28.9)",
         "tonalRamp": [
-          "#1e0000",
-          "#4b0000",
-          "#7c0502",
-          "#b00e07",
-          "#d74031",
-          "#ff6553",
-          "#fdac9f",
-          "#fee9e5"
+          "#220000",
+          "#4c0000",
+          "#820000",
+          "#a7271e",
+          "#cd4c3f",
+          "#f47060",
+          "#ffa99b",
+          "#ffe6e0"
         ]
       },
-      "line-blue-pressed": {
-        "role": "primary",
-        "displayName": "Pressed Blue",
-        "canonical": "#00539c",
+      "thread-indigo": {
+        "role": "tertiary",
+        "displayName": "Indigo Thread",
+        "canonical": "oklch(45.1% 0.140 265.3)",
         "tonalRamp": [
-          "#000b1e",
-          "#00244a",
-          "#023f79",
-          "#075dad",
-          "#297ed8",
-          "#4fa1fe",
-          "#9cc8fd",
-          "#e4f0fe"
+          "#01003a",
+          "#041566",
+          "#1b3788",
+          "#3758ab",
+          "#5479d0",
+          "#749bf5",
+          "#a8c4ff",
+          "#e4efff"
+        ]
+      },
+      "thread-ochre": {
+        "role": "tertiary",
+        "displayName": "Ochre Thread",
+        "canonical": "oklch(56.0% 0.115 76.7)",
+        "tonalRamp": [
+          "#140800",
+          "#341f00",
+          "#583800",
+          "#7e5400",
+          "#a3731b",
+          "#c69444",
+          "#eeba6a",
+          "#ffe69f"
+        ]
+      },
+      "thread-moss": {
+        "role": "tertiary",
+        "displayName": "Moss Thread",
+        "canonical": "oklch(53.7% 0.086 157.4)",
+        "tonalRamp": [
+          "#001104",
+          "#002e14",
+          "#024d2d",
+          "#2c6c4a",
+          "#4e8d69",
+          "#6faf89",
+          "#95d5ae",
+          "#beffd8"
+        ]
+      },
+      "thread-plum": {
+        "role": "tertiary",
+        "displayName": "Plum Thread",
+        "canonical": "oklch(50.2% 0.132 309.2)",
+        "tonalRamp": [
+          "#160026",
+          "#370052",
+          "#542573",
+          "#744595",
+          "#9465b8",
+          "#b786dc",
+          "#ddacff",
+          "#f8e7ff"
+        ]
+      },
+      "thread-teal": {
+        "role": "tertiary",
+        "displayName": "Teal Thread",
+        "canonical": "oklch(53.1% 0.082 201.6)",
+        "tonalRamp": [
+          "#000f11",
+          "#002b2f",
+          "#004b50",
+          "#006b71",
+          "#368c92",
+          "#5aaeb4",
+          "#81d4da",
+          "#abffff"
+        ]
+      },
+      "thread-rose": {
+        "role": "tertiary",
+        "displayName": "Rose Thread",
+        "canonical": "oklch(52.7% 0.144 355.7)",
+        "tonalRamp": [
+          "#1f000c",
+          "#4a0026",
+          "#740943",
+          "#983161",
+          "#bd5380",
+          "#e375a2",
+          "#ffa0c7",
+          "#ffe4ef"
+        ]
+      },
+      "thread-walnut": {
+        "role": "tertiary",
+        "displayName": "Walnut Thread",
+        "canonical": "oklch(43.8% 0.064 63.1)",
+        "tonalRamp": [
+          "#190500",
+          "#391c00",
+          "#573818",
+          "#775636",
+          "#997555",
+          "#bb9675",
+          "#e2bc9a",
+          "#ffe7c7"
+        ]
+      },
+      "thread-ink": {
+        "role": "tertiary",
+        "displayName": "Ink Thread",
+        "canonical": "oklch(27.5% 0.037 277.1)",
+        "tonalRamp": [
+          "#08091b",
+          "#1f2236",
+          "#3b3e54",
+          "#585c73",
+          "#777c94",
+          "#989db6",
+          "#bec2dd",
+          "#e8edff"
         ]
       }
     },
     "typographyMeta": {
       "display-hero": {
-        "displayName": "Display hero",
-        "purpose": "Signed-out home headline only."
+        "displayName": "Display Hero",
+        "purpose": "Signed-out home headline only; 2.5rem, 3rem from sm, 3.75rem from lg."
+      },
+      "display-decision": {
+        "displayName": "Display Decision",
+        "purpose": "Day and time in the ink decision panel; 1.875rem from sm."
+      },
+      "headline-group": {
+        "displayName": "Headline Group",
+        "purpose": "Group or plan name at the top of the group view; 2.25rem from sm."
       },
       "title-page": {
-        "displayName": "Title page",
-        "purpose": "Page title on screens without a sign (groups list, profile)."
+        "displayName": "Title Page",
+        "purpose": "Single-task and list screen titles."
       },
-      "display": {
-        "displayName": "Display",
-        "purpose": "Group or plan name inside the ink sign."
+      "title-section": {
+        "displayName": "Title Section",
+        "purpose": "Section headings such as Próximas 4 semanas and Mejores días."
       },
-      "headline": {
-        "displayName": "Headline",
-        "purpose": "Option day on ranked rows."
-      },
-      "numeral": {
-        "displayName": "Numeral",
-        "purpose": "The free/total count on option rows."
+      "title-row": {
+        "displayName": "Title Row",
+        "purpose": "Option days, plan names and group names in lists."
       },
       "body": {
         "displayName": "Body",
-        "purpose": "Running text and inputs."
+        "purpose": "Default text with tabular numerals."
       },
       "body-small": {
-        "displayName": "Body small",
-        "purpose": "Window notes, hints, empty-state bodies in Platform Grey."
+        "displayName": "Body Small",
+        "purpose": "Supporting lines in mute."
       },
       "label": {
         "displayName": "Label",
-        "purpose": "Uppercase tracked section headings and the diagram caption."
+        "purpose": "Field labels, chip names, cloth captions."
       },
       "caption": {
         "displayName": "Caption",
-        "purpose": "Axis ticks, legend, reason chips, badge, station pills, avatar initials."
+        "purpose": "Axis ticks, legend, avatar initials, tags."
       },
       "button": {
         "displayName": "Button",
-        "purpose": "Primary button text."
+        "purpose": "Primary button label."
       },
       "button-small": {
-        "displayName": "Button small",
-        "purpose": "Secondary buttons, chips and profile-editor day labels."
+        "displayName": "Button Small",
+        "purpose": "Secondary button label."
       }
     },
     "shadows": [],
     "patterns": [
       {
+        "name": "yarn",
+        "value": "repeating-linear-gradient(-55deg, rgb(255 255 255 / 0.36) 0 1.5px, transparent 1.5px 4px)",
+        "purpose": "Spun twist over a thread colour: free time riding on top."
+      },
+      {
+        "name": "thread-dive",
+        "value": "background-color: var(--color-rule-strong)",
+        "purpose": "Solid busy under-thread; solid on purpose so it never reads as the dotted unknown thread."
+      },
+      {
+        "name": "thread-loose",
+        "value": "repeating-linear-gradient(90deg, var(--color-mute) 0 3px, transparent 3px 7px)",
+        "purpose": "Loose dotted thread: no schedule. Never reads as free."
+      },
+      {
+        "name": "cloth-closed",
+        "value": "rgb(35 38 58 / 0.08) with 90deg and 0deg repeating 1px ink lines every 5px (0.16 and 0.12 alpha)",
+        "purpose": "Warp-and-weft fill behind the band when every member fits."
+      },
+      {
         "name": "hatch-busy",
-        "value": "background-color:#1d1d1b; background-image:repeating-linear-gradient(-45deg, transparent 0 4px, rgb(255 255 255 / 0.28) 4px 6px)",
-        "purpose": "Out-of-service hatch for busy time, in the diagram and the busy editor."
-      },
-      {
-        "name": "track-unknown",
-        "value": "repeating-linear-gradient(90deg, #555552 0 5px, transparent 5px 10px)",
-        "purpose": "Grey dashed track for people who haven't answered."
-      },
-      {
-        "name": "yellow-outline",
-        "value": "inset 0 0 0 1px #1d1d1b",
-        "purpose": "Ink outline on yellow line segments (fails 3:1 on white). An outline, not elevation."
+        "value": "ink with repeating-linear-gradient(-45deg, transparent 0 4px, rgb(255 255 255 / 0.28) 4px 6px)",
+        "purpose": "Busy blocks in the profile schedule editor."
       }
     ],
     "focus": {
-      "value": "outline: 3px solid #0065bd; outline-offset: 2px; border-radius: 4px",
-      "purpose": "Global :focus-visible ring."
+      "value": "outline: 3px solid var(--color-indigo); outline-offset: 2px; border-radius: 6px",
+      "purpose": "Global focus-visible ring; woven bands take it from their row's hidden radio."
     },
     "motion": [
       {
-        "name": "ease-station",
-        "value": "cubic-bezier(0.16, 1, 0.3, 1)",
-        "purpose": "Station and line segments slide to a newly selected option."
-      },
-      {
-        "name": "duration-station",
-        "value": "220ms",
-        "purpose": "left/width transition of station and lines; only under prefers-reduced-motion: no-preference."
+        "name": "weave-move",
+        "value": "left, width 220ms cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "Thread segments and the band re-weave when the selected option changes; only under prefers-reduced-motion: no-preference."
       }
     ],
-    "breakpoints": [],
+    "breakpoints": [
+      {
+        "name": "sm",
+        "value": "640px"
+      },
+      {
+        "name": "md",
+        "value": "768px"
+      },
+      {
+        "name": "lg",
+        "value": "1024px"
+      }
+    ],
     "layout": {
-      "maxWidth": "28rem",
-      "gutter": "16px",
-      "minTarget": "44px",
-      "track": "08:00–24:00",
-      "maxSeparateLines": 6,
-      "maxBlockerLanes": 3,
-      "trunkThickness": "3px–10px by free share",
-      "stripDays": 28,
-      "stripCell": "40px",
-      "groupOrder": "sign, strip, diagram, ranked days, plans, links, sticky footer"
+      "shellWide": "full width, 16px gutter; sm 42rem / 24px; md 48rem; lg 72rem / 32px",
+      "shellNarrow": "full width, 16px gutter; sm 36rem / 24px",
+      "groupColumns": "lg: minmax(0,1fr) + 22rem sticky aside, 40px gap",
+      "stickyFooter": "ground fill, hairline top border, safe-area bottom padding; html:has(.sticky-footer) reserves scroll-padding-bottom of footer height + 12px"
     }
   },
   "components": [
@@ -314,169 +435,129 @@
       "name": "Primary Button",
       "kind": "button",
       "refersTo": "button-primary",
-      "description": "The single full-width action in the sticky footer; the label names the outcome.",
-      "html": "<button class=\"ds-btn-primary\">Proponer Sáb 12 dic</button>",
-      "css": ".ds-btn-primary{font-family:var(--font-sign, 'Roboto Condensed','Arial Narrow',sans-serif);display:flex;align-items:center;justify-content:center;width:100%;height:3.125rem;padding:0 16px;border:none;border-radius:6px;background:var(--color-line-blue,#0065bd);color:#fff;font-weight:800;font-size:1.0625rem;cursor:pointer}.ds-btn-primary:active{background:#00539c}.ds-btn-primary:focus-visible{outline:3px solid var(--color-line-blue,#0065bd);outline-offset:2px;}.ds-btn-primary:disabled{background:var(--color-rule-strong,#bdbdb9);color:var(--color-ink,#1d1d1b)}"
+      "description": "The single madder-red action per screen; full width, in the sticky footer on phones.",
+      "html": "<button class=\"ds-btn-primary\">Proponer Sáb 5 dic</button>",
+      "css": ".ds-btn-primary { display: flex; align-items: center; justify-content: center; width: 100%; height: 3.125rem; padding: 0 16px; border: 0; border-radius: 14px; background: var(--color-madder, #b8322a); color: #ffffff; font-family: Figtree, system-ui, sans-serif; font-weight: 800; font-size: 1.0625rem; cursor: pointer; } .ds-btn-primary:hover { background: var(--color-madder-pressed, #9c2a23); } .ds-btn-primary:active { background: var(--color-madder-active, #85231d); } .ds-btn-primary:disabled { background: var(--color-rule, #d3d6d0); color: var(--color-mute, #4a4d60); } .ds-btn-primary:focus-visible { outline: 3px solid var(--color-indigo, #2f4fa2); outline-offset: 2px; }"
     },
     {
       "name": "Secondary Button",
       "kind": "button",
       "refersTo": "button-secondary",
-      "description": "White ink-bordered buttons that share the row under the primary action.",
-      "html": "<div class=\"ds-row\"><button class=\"ds-btn-secondary\">Invitar al grupo</button><button class=\"ds-btn-secondary\">Compartir link</button></div>",
-      "css": ".ds-row{display:flex;gap:8px}.ds-btn-secondary{font-family:var(--font-sign, 'Roboto Condensed','Arial Narrow',sans-serif);flex:1;display:flex;align-items:center;justify-content:center;min-height:2.75rem;padding:0 12px;border:1.5px solid var(--color-ink,#1d1d1b);border-radius:6px;background:#fff;color:var(--color-ink,#1d1d1b);font-weight:700;font-size:0.9375rem;cursor:pointer}.ds-btn-secondary:active{background:var(--color-panel,#f4f4f2)}.ds-btn-secondary:focus-visible{outline:3px solid var(--color-line-blue,#0065bd);outline-offset:2px;}"
-    },
-    {
-      "name": "Routine Chips",
-      "kind": "chip",
-      "refersTo": "chip",
-      "description": "Combinable toggle chips; selected inverts to ink. Nada fijo is on only when no routine is.",
-      "html": "<div class=\"ds-chips\"><button class=\"ds-chip\" aria-pressed=\"false\">Nada fijo</button><button class=\"ds-chip\" aria-pressed=\"false\">Trabajo L-V</button><button class=\"ds-chip\" aria-pressed=\"true\">Turnos</button><button class=\"ds-chip\" aria-pressed=\"true\">Clases</button></div>",
-      "css": ".ds-chips{display:flex;flex-wrap:wrap;gap:6px}.ds-chip{font-family:var(--font-sign, 'Roboto Condensed','Arial Narrow',sans-serif);min-height:2.75rem;padding:0 12px;border:1.5px solid var(--color-rule-strong,#bdbdb9);border-radius:6px;background:#fff;color:var(--color-ink,#1d1d1b);font-weight:700;font-size:0.9375rem;cursor:pointer}.ds-chip[aria-pressed=true]{background:var(--color-ink,#1d1d1b);border-color:var(--color-ink,#1d1d1b);color:#fff}.ds-chip:hover{border-color:var(--color-ink,#1d1d1b)}.ds-chip:focus-visible{outline:3px solid var(--color-line-blue,#0065bd);outline-offset:2px;}"
+      "description": "Bleached cloth with a 1.5px ink border; pairs share a row (Invitar / Compartir).",
+      "html": "<button class=\"ds-btn-secondary\">Invitar al grupo</button>",
+      "css": ".ds-btn-secondary { display: flex; align-items: center; justify-content: center; min-height: 44px; padding: 0 12px; border: 1.5px solid var(--color-ink, #23263a); border-radius: 14px; background: var(--color-surface, #fbfbfa); color: var(--color-ink, #23263a); font-family: Figtree, system-ui, sans-serif; font-weight: 700; font-size: 0.9375rem; cursor: pointer; } .ds-btn-secondary:hover { background: var(--color-panel, #f1f2ef); } .ds-btn-secondary:active { background: var(--color-rule, #d3d6d0); } .ds-btn-secondary:focus-visible { outline: 3px solid var(--color-indigo, #2f4fa2); outline-offset: 2px; }"
     },
     {
       "name": "Text Input",
       "kind": "input",
       "refersTo": "input-text",
-      "description": "48px field with a 1.5px ink border and an uppercase label above.",
-      "html": "<label class=\"ds-field\"><span class=\"ds-label\">¿Qué hacemos?</span><input class=\"ds-input\" placeholder=\"Asado en lo de Javi\"></label>",
-      "css": ".ds-field{display:block;font-family:var(--font-sign, 'Roboto Condensed','Arial Narrow',sans-serif);}.ds-label{display:block;font-weight:800;font-size:0.75rem;letter-spacing:0.06em;text-transform:uppercase;color:var(--color-ink,#1d1d1b)}.ds-input{font-family:var(--font-sign, 'Roboto Condensed','Arial Narrow',sans-serif);display:block;width:100%;margin-top:6px;min-height:3rem;padding:0 12px;border:1.5px solid var(--color-ink,#1d1d1b);border-radius:6px;background:#fff;color:var(--color-ink,#1d1d1b);font-weight:700;font-size:1.125rem}.ds-input::placeholder{color:var(--color-mute,#555552);font-weight:400}.ds-input:focus-visible{outline:3px solid var(--color-line-blue,#0065bd);outline-offset:2px;}"
+      "description": "Surface field with cloth corners and a bold label above; focus is the global indigo ring.",
+      "html": "<label class=\"ds-field\"><span class=\"ds-field-label\">Nombre del plan</span><input class=\"ds-input\" placeholder=\"Padel\"></label>",
+      "css": ".ds-field { display: block; font-family: Figtree, system-ui, sans-serif; color: var(--color-ink, #23263a); } .ds-field-label { display: block; font-weight: 700; font-size: 0.875rem; } .ds-input { display: block; width: 100%; margin-top: 4px; min-height: 48px; padding: 0 12px; border: 1.5px solid var(--color-rule-strong, #6f7284); border-radius: 14px; background: var(--color-surface, #fbfbfa); font: inherit; color: inherit; } .ds-input::placeholder { color: var(--color-mute, #4a4d60); } .ds-input:focus-visible { outline: 3px solid var(--color-indigo, #2f4fa2); outline-offset: 2px; border-color: var(--color-ink, #23263a); }"
     },
     {
       "name": "Top Bar",
       "kind": "nav",
-      "refersTo": "top-bar",
-      "description": "Blue back link with a drawn chevron, a short ink context line on the right.",
-      "html": "<nav class=\"ds-topbar\"><a class=\"ds-back\" href=\"#\"><svg viewBox=\"0 0 16 16\" width=\"16\" height=\"16\" aria-hidden=\"true\"><path d=\"M10 3 5 8l5 5\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg>Planes</a><span class=\"ds-aside\">Organiza Ana</span></nav>",
-      "css": ".ds-topbar{font-family:var(--font-sign, 'Roboto Condensed','Arial Narrow',sans-serif);display:flex;align-items:center;justify-content:space-between;font-weight:700;font-size:0.875rem}.ds-back{display:flex;align-items:center;gap:2px;min-height:2.75rem;padding:0 8px;margin-left:-8px;color:var(--color-line-blue,#0065bd);text-decoration:none}.ds-back:hover{text-decoration:underline;text-underline-offset:3px}.ds-back:focus-visible{outline:3px solid var(--color-line-blue,#0065bd);outline-offset:2px;}.ds-aside{color:var(--color-ink,#1d1d1b)}"
+      "refersTo": null,
+      "description": "One row: indigo back link with chevron, optional ink aside; no app chrome.",
+      "html": "<nav class=\"ds-topbar\"><a class=\"ds-back\" href=\"#\"><svg viewBox=\"0 0 16 16\" width=\"16\" height=\"16\" aria-hidden=\"true\"><path d=\"M10 3 5 8l5 5\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg>Grupos</a></nav>",
+      "css": ".ds-topbar { display: flex; align-items: center; justify-content: space-between; font-family: Figtree, system-ui, sans-serif; font-weight: 700; font-size: 0.875rem; } .ds-back { display: flex; align-items: center; gap: 2px; min-height: 44px; padding: 0 8px; margin-left: -8px; color: var(--color-indigo, #2f4fa2); text-decoration: none; } .ds-back:hover { text-decoration: underline; text-underline-offset: 3px; } .ds-back:focus-visible { outline: 3px solid var(--color-indigo, #2f4fa2); outline-offset: 2px; }"
     },
     {
-      "name": "Plan Sign",
+      "name": "Member Chip",
+      "kind": "chip",
+      "refersTo": "member-chip",
+      "description": "Knot-cornered name chip led by a spun-yarn swatch in the member's thread colour; dotted on panel when they have no schedule.",
+      "html": "<span class=\"ds-chip\"><span class=\"ds-swatch\" style=\"background-color:#2f4fa2\"></span>Ana</span> <span class=\"ds-chip ds-chip-unknown\"><span class=\"ds-swatch\" style=\"background-color:#3e7d5a\"></span>Caro</span>",
+      "css": ".ds-chip { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border: 1px solid var(--color-rule-strong, #6f7284); border-radius: 6px; background: var(--color-surface, #fbfbfa); color: var(--color-ink, #23263a); font-family: Figtree, system-ui, sans-serif; font-weight: 700; font-size: 0.875rem; } .ds-chip-unknown { border-style: dotted; background: var(--color-panel, #f1f2ef); color: var(--color-mute, #4a4d60); } .ds-swatch { width: 16px; height: 8px; border-radius: 9999px; background-image: repeating-linear-gradient(-55deg, rgb(255 255 255 / 0.36) 0 1.5px, transparent 1.5px 4px); }"
+    },
+    {
+      "name": "Decision Panel",
       "kind": "card",
-      "refersTo": "plan-sign",
-      "description": "The ink enamel sign at the top of every group and plan screen with a line-colour badge.",
-      "html": "<header class=\"ds-sign\"><span class=\"ds-badge\">L</span><div><h1 class=\"ds-sign-title\">Los del colegio</h1><p class=\"ds-sign-meta\">6 personas · 5 con perfil</p></div></header>",
-      "css": ".ds-sign{font-family:var(--font-sign, 'Roboto Condensed','Arial Narrow',sans-serif);display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:6px;background:var(--color-ink,#1d1d1b);color:#fff}.ds-badge{display:grid;place-items:center;flex:none;width:32px;height:32px;border-radius:9999px;background:var(--color-line-red,#e1251b);font-weight:800}.ds-sign-title{margin:0;font-weight:800;font-size:1.25rem;line-height:1.25;letter-spacing:0.01em}.ds-sign-meta{margin:1px 0 0;font-size:0.75rem;color:var(--color-sign-sub,#d6d6d3)}"
+      "refersTo": "decision-panel",
+      "description": "The ink slab naming the closed band: the day and time in Bricolage, who can and who is missing below.",
+      "html": "<section class=\"ds-decision\"><h2>Sáb 5 dic · 19:00</h2><p>Pueden 10 de 12 · faltan los horarios de Caro, Isi</p></section>",
+      "css": ".ds-decision { padding: 16px; border-radius: 14px; background: var(--color-ink, #23263a); color: var(--color-surface, #fbfbfa); font-family: Figtree, system-ui, sans-serif; } .ds-decision h2 { margin: 0; font-family: 'Bricolage Grotesque', Figtree, sans-serif; font-weight: 800; font-size: 1.625rem; line-height: 1.08; letter-spacing: -0.02em; } .ds-decision p { margin: 4px 0 0; font-size: 0.9375rem; color: var(--color-ink-sub, #c9ccd8); }"
     },
     {
-      "name": "Line Diagram",
+      "name": "Day Cloth",
       "kind": "custom",
-      "refersTo": "station-platform",
-      "description": "Each person a line: solid free, ink hatch busy, grey dashed unknown; the station with guides, time pill and platforms.",
-      "html": "<figure class=\"ds-diagram\"><figcaption class=\"ds-cap\">Sáb 21 nov · quién está libre</figcaption><div class=\"ds-tracks\"><span class=\"ds-guide\" style=\"left:68.75%;width:18.75%\"><span class=\"ds-pill\">19:00–22:00</span></span><div class=\"ds-lane\"><b>A</b><span class=\"ds-track\"><span class=\"ds-free\" style=\"left:0;width:100%;background:var(--color-line-red,#e1251b)\"></span><span class=\"ds-plat\" style=\"left:68.75%;width:18.75%\"></span></span></div><div class=\"ds-lane\"><b>B</b><span class=\"ds-track\"><span class=\"ds-busy\" style=\"left:0;width:50%\"></span><span class=\"ds-free\" style=\"left:50%;width:50%;background:var(--color-line-blue,#0065bd)\"></span><span class=\"ds-plat\" style=\"left:68.75%;width:18.75%\"></span></span></div><div class=\"ds-lane\"><b>C</b><span class=\"ds-track\"><span class=\"ds-free\" style=\"left:30%;width:70%;background:var(--color-line-yellow,#ffc20e);box-shadow:inset 0 0 0 1px var(--color-ink,#1d1d1b)\"></span><span class=\"ds-plat\" style=\"left:68.75%;width:18.75%\"></span></span></div><div class=\"ds-lane\"><b>D</b><span class=\"ds-track\"><span class=\"ds-unknown\" style=\"left:0;width:100%\"></span></span></div></div><p class=\"ds-station\">Estación común · 19:00–22:00</p></figure>",
-      "css": ".ds-diagram{font-family:var(--font-sign, 'Roboto Condensed','Arial Narrow',sans-serif);margin:0;padding:10px 12px 8px;border:1px solid var(--color-rule,#e4e4e1);border-radius:6px;color:var(--color-ink,#1d1d1b);font-variant-numeric:tabular-nums}.ds-cap{font-weight:800;font-size:0.75rem;letter-spacing:0.06em;text-transform:uppercase}.ds-tracks{position:relative;padding-top:24px}.ds-guide{position:absolute;top:0;bottom:-2px;margin-left:24px;border-left:1px dashed rgb(29 29 27/.4);border-right:1px dashed rgb(29 29 27/.4);transition:left 220ms cubic-bezier(0.16,1,0.3,1),width 220ms cubic-bezier(0.16,1,0.3,1)}.ds-pill{position:absolute;top:0;left:50%;transform:translateX(-50%);white-space:nowrap;padding:0 8px;border-radius:9999px;background:var(--color-ink,#1d1d1b);color:#fff;font-weight:800;font-size:0.6875rem;line-height:1.125rem}.ds-lane{display:flex;align-items:center;height:20px;margin-top:4px}.ds-lane b{width:24px;flex:none;font-weight:800;font-size:0.8125rem}.ds-track{position:relative;flex:1;height:20px;background:linear-gradient(var(--color-rule,#e4e4e1),var(--color-rule,#e4e4e1)) center/100% 1px no-repeat}.ds-free{position:absolute;top:7px;height:6px;border-radius:9999px}.ds-busy{position:absolute;top:6px;height:8px;border-radius:2px;background-color:var(--color-ink,#1d1d1b);background-image:repeating-linear-gradient(-45deg,transparent 0 4px,rgb(255 255 255/.28) 4px 6px)}.ds-unknown{position:absolute;top:9px;height:2px;background-image:repeating-linear-gradient(90deg,var(--color-mute,#555552) 0 5px,transparent 5px 10px)}.ds-plat{position:absolute;top:50%;height:14px;transform:translateY(-50%);box-sizing:border-box;border:2px solid var(--color-ink,#1d1d1b);border-radius:9999px;background:#fff}.ds-station{margin:6px 0 0 24px;font-weight:800;font-size:0.75rem}"
+      "refersTo": "cloth-card",
+      "description": "Signature: one thread per member across the day; free rides on top as spun yarn, busy dives to a solid under-thread between coloured ticks, unknown hangs loose and dotted; the band is outlined in ink and fills with warp and weft when everyone fits.",
+      "html": "<figure class=\"ds-cloth\"><figcaption>Sáb 5 dic · quién está libre</figcaption><div class=\"ds-cloth-body\"><span class=\"ds-band\"><span class=\"ds-band-label\">19:00–22:00</span></span><div class=\"ds-row\"><b>A</b><span class=\"ds-track\"><span class=\"ds-free\" style=\"left:0;width:20%;background-color:#2f4fa2\"></span><span class=\"ds-tick\" style=\"left:20%;background-color:#2f4fa2\"></span><span class=\"ds-dive\" style=\"left:20%;width:20%\"></span><span class=\"ds-tick\" style=\"left:40%;background-color:#2f4fa2\"></span><span class=\"ds-free\" style=\"left:40%;width:60%;background-color:#2f4fa2\"></span></span></div><div class=\"ds-row\"><b>B</b><span class=\"ds-track\"><span class=\"ds-free\" style=\"left:0;width:100%;background-color:#9a6a0a\"></span></span></div><div class=\"ds-row\"><b>C</b><span class=\"ds-track\"><span class=\"ds-loose\" style=\"left:0;width:100%\"></span></span></div><div class=\"ds-row\"><b>D</b><span class=\"ds-track\"><span class=\"ds-free\" style=\"left:0;width:100%;background-color:#7a4b9c\"></span></span></div></div><p class=\"ds-cloth-sum\">Calzan 3 de 4 · 19:00–22:00</p><p class=\"ds-cloth-legend\">Hilo arriba: libre · pasa por debajo: ocupado · punteado: sin horario</p></figure>",
+      "css": ".ds-cloth { margin: 0; padding: 10px 12px; border-radius: 14px; background: var(--color-surface, #fbfbfa); color: var(--color-ink, #23263a); font-family: Figtree, system-ui, sans-serif; } .ds-cloth figcaption { font-weight: 700; font-size: 0.875rem; } .ds-cloth-body { position: relative; padding: 28px 0 4px; } .ds-band { position: absolute; top: 20px; bottom: -2px; left: calc(32px + 62%); width: 22%; border: 2px dashed var(--color-ink, #23263a); border-radius: 6px; } .ds-band-label { position: absolute; top: -20px; left: 50%; transform: translateX(-50%); white-space: nowrap; padding: 0 8px; border-radius: 9999px; background: var(--color-ink, #23263a); color: var(--color-surface, #fbfbfa); font-weight: 700; font-size: 0.75rem; line-height: 1.125rem; } .ds-row { display: flex; align-items: center; height: 20px; } .ds-row b { width: 32px; flex: none; font-size: 0.8125rem; } .ds-track { position: relative; flex: 1; height: 100%; } .ds-track::before { content: ''; position: absolute; left: 0; right: 0; top: 50%; height: 2px; transform: translateY(-50%); border-radius: 9999px; background: var(--color-rule, #d3d6d0); } .ds-free { position: absolute; top: 50%; height: 8px; transform: translateY(-50%); border-radius: 9999px; background-image: repeating-linear-gradient(-55deg, rgb(255 255 255 / 0.36) 0 1.5px, transparent 1.5px 4px); } .ds-dive { position: absolute; top: 50%; height: 3px; transform: translateY(-50%); background: var(--color-rule-strong, #6f7284); } .ds-tick { position: absolute; top: 50%; width: 2.5px; height: 10px; transform: translate(-50%, -50%); border-radius: 9999px; } .ds-loose { position: absolute; top: 50%; height: 2px; transform: translateY(-50%); background-image: repeating-linear-gradient(90deg, var(--color-mute, #4a4d60) 0 3px, transparent 3px 7px); } .ds-cloth-sum { margin: 6px 0 0 32px; font-weight: 700; font-size: 0.875rem; } .ds-cloth-legend { margin: 2px 0 0 32px; font-size: 0.75rem; color: var(--color-mute, #4a4d60); }"
     },
     {
-      "name": "Option Row",
+      "name": "Woven Band",
       "kind": "custom",
-      "refersTo": "option-row-selected",
-      "description": "Ranked option: rank ring, day and span, reason chips, state avatars, count and the Mejor badge.",
-      "html": "<label class=\"ds-opt\"><span class=\"ds-ring\"></span><span><span class=\"ds-day\">Sáb 21 nov <span class=\"ds-span\">19:00–22:00</span></span><span class=\"ds-reasons\"><span class=\"ds-reason\">Buen día</span><span class=\"ds-reason\">Más pronto</span></span><span class=\"ds-avs\"><span class=\"ds-av ds-av-free\">A</span><span class=\"ds-av ds-av-unknown\">C</span><span class=\"ds-av ds-av-busy\">D</span></span></span><span class=\"ds-count\"><b>8/10</b><small>pueden</small><span class=\"ds-best\">Mejor</span></span></label>",
-      "css": ".ds-opt{font-family:var(--font-sign, 'Roboto Condensed','Arial Narrow',sans-serif);display:grid;grid-template-columns:1.75rem 1fr auto;gap:0 10px;padding:12px 4px 12px 0;border-bottom:1px solid var(--color-rule,#e4e4e1);background:var(--color-panel,#f4f4f2);color:var(--color-ink,#1d1d1b);cursor:pointer;font-variant-numeric:tabular-nums}.ds-ring{width:22px;height:22px;box-sizing:border-box;margin:2px 0 0 2px;border:5px solid var(--color-line-red,#e1251b);border-radius:9999px;background:#fff}.ds-day{display:block;font-weight:800;font-size:1.0625rem;line-height:1.25}.ds-span{font-weight:500;font-size:0.9375rem;color:var(--color-mute,#555552)}.ds-reasons{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}.ds-reason{padding:1px 6px;border:1px solid var(--color-rule-strong,#bdbdb9);border-radius:3px;font-weight:700;font-size:0.6875rem}.ds-avs{display:flex;gap:3px;margin-top:6px}.ds-av{position:relative;display:grid;place-items:center;width:24px;height:24px;box-sizing:border-box;overflow:hidden;border:1.5px solid var(--color-ink,#1d1d1b);border-radius:9999px;font-weight:800;font-size:0.6875rem}.ds-av-free{background:var(--color-ink,#1d1d1b);color:#fff}.ds-av-unknown{border-style:dashed;border-color:var(--color-mute,#555552);color:var(--color-mute,#555552)}.ds-av-busy::after{content:'';position:absolute;left:-2px;right:-2px;top:50%;height:1.5px;background:var(--color-ink,#1d1d1b);transform:rotate(-45deg)}.ds-count{text-align:right}.ds-count b{display:block;font-weight:800;font-size:1.25rem;line-height:1}.ds-count small{display:block;font-weight:500;font-size:0.6875rem;color:var(--color-mute,#555552)}.ds-best{display:inline-block;margin-top:8px;padding:2px 6px;border-radius:3px;background:var(--color-line-red,#e1251b);color:#fff;font-weight:800;font-size:0.6875rem}"
+      "refersTo": null,
+      "description": "Signature miniature of the cloth beside each option and in each strip day; frame weight carries rank.",
+      "html": "<span class=\"ds-wband ds-wband-best\"><span class=\"ds-wrow\"><span class=\"ds-wfree\" style=\"background-color:#2f4fa2\"></span></span><span class=\"ds-wrow\"><span class=\"ds-wfree\" style=\"background-color:#9a6a0a\"></span></span><span class=\"ds-wrow\"><span class=\"ds-wloose\"></span></span><span class=\"ds-wrow\"><span class=\"ds-wtick\" style=\"background-color:#7a4b9c\"></span><span class=\"ds-wdive\"></span><span class=\"ds-wtick\" style=\"background-color:#7a4b9c\"></span></span></span>",
+      "css": ".ds-wband { display: inline-flex; flex-direction: column; gap: 3px; width: 40px; padding: 6px; border-radius: 6px; border: 1px solid var(--color-rule-strong, #6f7284); background: var(--color-panel, #f1f2ef); } .ds-wband-best { border: 2.5px solid var(--color-ink, #23263a); background: var(--color-surface, #fbfbfa); } .ds-wband:hover { background: var(--color-surface, #fbfbfa); } .ds-wrow { display: flex; align-items: center; height: 6px; } .ds-wfree { display: block; width: 100%; height: 6px; border-radius: 9999px; background-image: repeating-linear-gradient(-55deg, rgb(255 255 255 / 0.36) 0 1.5px, transparent 1.5px 4px); } .ds-wloose { display: block; width: 100%; height: 2px; background-image: repeating-linear-gradient(90deg, var(--color-mute, #4a4d60) 0 3px, transparent 3px 7px); } .ds-wdive { flex: 1; height: 2px; background: var(--color-rule-strong, #6f7284); } .ds-wtick { flex: none; width: 2px; height: 5px; border-radius: 9999px; }"
     },
     {
-      "name": "Busy Editor Day",
+      "name": "Avatars",
       "kind": "custom",
-      "refersTo": "busy-editor-day",
-      "description": "A day is the person's own line; busy time lays the ink hatch over it; three 44px tap segments. Reused by the profile editor and, with a hairline baseline, the class routine.",
-      "html": "<div class=\"ds-day-row\"><span class=\"ds-day-label\">Lun 17</span><span class=\"ds-day-track\"><span class=\"ds-own\"></span><span class=\"ds-hatch\" style=\"left:6.25%;width:62.5%\"></span><button class=\"ds-seg\" style=\"left:0;width:31.25%\" aria-label=\"Mañana\"></button><button class=\"ds-seg ds-seg-div\" style=\"left:31.25%;width:37.5%\" aria-label=\"Tarde\"></button><button class=\"ds-seg ds-seg-div\" style=\"left:68.75%;width:31.25%\" aria-label=\"Noche\"></button></span></div>",
-      "css": ".ds-day-row{font-family:var(--font-sign, 'Roboto Condensed','Arial Narrow',sans-serif);display:flex;align-items:center;padding:4px 0;border-bottom:1px solid var(--color-rule,#e4e4e1);color:var(--color-ink,#1d1d1b)}.ds-day-label{width:4.25rem;flex:none;font-weight:800;font-size:0.9375rem}.ds-day-track{position:relative;flex:1;height:2.75rem}.ds-own{position:absolute;left:0;right:0;top:50%;margin-top:-3px;height:6px;border-radius:9999px;background:var(--color-line-green,#00a651)}.ds-hatch{position:absolute;top:50%;margin-top:-8px;height:16px;border-radius:3px;background-color:var(--color-ink,#1d1d1b);background-image:repeating-linear-gradient(-45deg,transparent 0 4px,rgb(255 255 255/.28) 4px 6px)}.ds-seg{position:absolute;top:0;bottom:0;border:0;background:transparent;cursor:pointer}.ds-seg-div{border-left:1px dashed var(--color-rule,#e4e4e1)}.ds-seg:active{background:rgb(29 29 27/.06)}.ds-seg:focus-visible{outline:3px solid var(--color-line-blue,#0065bd);outline-offset:2px;}"
-    },
-    {
-      "name": "Day Strip",
-      "kind": "custom",
-      "refersTo": "strip-station-all",
-      "description": "Four weeks as one ink line: filled station = everyone with a profile can come, hollow ring = some, grey dot = none; selected day outlined.",
-      "html": "<section class=\"ds-strip\"><h2 class=\"ds-cap\">Próximas 4 semanas</h2><ol><li><button aria-pressed=\"false\"><small>Do</small><i class=\"ds-st ds-st-all\"></i><b>15</b><small>5/6</small></button></li><li><button aria-pressed=\"true\"><small>Lu</small><i class=\"ds-st ds-st-some\"></i><b>16</b><small>4/6</small></button></li><li><span><small>Ma</small><i class=\"ds-st ds-st-none\"></i><b>17</b><small>–</small></span></li><li><button aria-pressed=\"false\"><small>Mi</small><i class=\"ds-st ds-st-all\"></i><b>18</b><small>5/6</small></button></li></ol></section>",
-      "css": ".ds-strip{font-family:var(--font-sign, 'Roboto Condensed','Arial Narrow',sans-serif);color:var(--color-ink,#1d1d1b);font-variant-numeric:tabular-nums}.ds-strip .ds-cap{margin:0;font-weight:800;font-size:0.75rem;letter-spacing:0.06em;text-transform:uppercase}.ds-strip ol{position:relative;display:flex;gap:2px;margin:4px 0 0;padding:0;list-style:none}.ds-strip ol::before{content:'';position:absolute;top:1.9rem;left:16px;right:16px;height:4px;border-radius:9999px;background:var(--color-ink,#1d1d1b)}.ds-strip button,.ds-strip span{position:relative;display:flex;flex-direction:column;align-items:center;gap:2px;width:40px;min-height:44px;padding:4px 0;border:0;border-radius:6px;background:transparent;font:inherit;color:inherit;cursor:pointer}.ds-strip span{cursor:default}.ds-strip button[aria-pressed=true]{background:var(--color-panel,#f4f4f2);outline:2px solid var(--color-ink,#1d1d1b)}.ds-strip button:focus-visible{outline:3px solid var(--color-line-blue,#0065bd);outline-offset:2px}.ds-strip small{font-size:0.6875rem;color:var(--color-mute,#555552);line-height:1}.ds-strip b{font-weight:800;font-size:0.75rem}.ds-st{display:grid;place-items:center;height:24px}.ds-st::after{content:'';display:block;border-radius:9999px}.ds-st-all::after{width:20px;height:20px;box-sizing:border-box;border:3px solid var(--color-ink,#1d1d1b);background:var(--color-ink,#1d1d1b)}.ds-st-some::after{width:20px;height:20px;box-sizing:border-box;border:3px solid var(--color-ink,#1d1d1b);background:#fff}.ds-st-none::after{width:8px;height:8px;background:var(--color-rule-strong,#bdbdb9)}"
-    },
-    {
-      "name": "Plan Row",
-      "kind": "custom",
-      "refersTo": "plan-marker",
-      "description": "Platform-capsule marker (dashed grey when proposed), title with muted day/time, equal secondary calendar buttons, destructive action behind a disclosure.",
-      "html": "<ul class=\"ds-plans\"><li><div class=\"ds-plan-head\"><span class=\"ds-pm ds-pm-proposed\"></span><div><p class=\"ds-plan-title\">Pichanga <span>Sáb 12 dic · 19:00–22:00</span></p><p class=\"ds-plan-status\">Propuesto por Ana</p></div></div><div class=\"ds-plan-actions\"><button class=\"ds-btn2\">Google Calendar</button><button class=\"ds-btn2\">Archivo .ics</button></div><details class=\"ds-more\"><summary><svg viewBox=\"0 0 16 16\" width=\"16\" height=\"16\" aria-hidden=\"true\"><path d=\"M6 3l5 5-5 5\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg>Más opciones</summary><button class=\"ds-btn2\">Cancelar plan</button></details></li></ul>",
-      "css": ".ds-plans{font-family:var(--font-sign, 'Roboto Condensed','Arial Narrow',sans-serif);margin:0;padding:0;list-style:none;border-top:1px solid var(--color-rule,#e4e4e1);color:var(--color-ink,#1d1d1b)}.ds-plans li{padding:12px 0;border-bottom:1px solid var(--color-rule,#e4e4e1)}.ds-plan-head{display:flex;align-items:flex-start;gap:10px}.ds-pm{flex:none;width:28px;height:14px;margin-top:4px;box-sizing:border-box;border:2px solid var(--color-ink,#1d1d1b);border-radius:9999px;background:#fff}.ds-pm-proposed{border-style:dashed;border-color:var(--color-mute,#555552)}.ds-plan-title{margin:0;font-weight:800;font-size:1.0625rem;line-height:1.25}.ds-plan-title span{font-weight:500;color:var(--color-mute,#555552)}.ds-plan-status{margin:0;font-size:0.875rem;color:var(--color-mute,#555552)}.ds-plan-actions{display:flex;gap:8px;margin-top:8px;padding-left:32px}.ds-btn2{flex:1;min-height:44px;padding:0 12px;border:1.5px solid var(--color-ink,#1d1d1b);border-radius:6px;background:#fff;color:var(--color-ink,#1d1d1b);font:inherit;font-weight:700;font-size:0.9375rem;cursor:pointer}.ds-btn2:active{background:var(--color-panel,#f4f4f2)}.ds-btn2:focus-visible{outline:3px solid var(--color-line-blue,#0065bd);outline-offset:2px}.ds-more{margin-top:4px;padding-left:32px;font-size:0.875rem}.ds-more summary{display:flex;align-items:center;gap:4px;min-height:44px;font-weight:700;list-style:none;cursor:pointer}.ds-more summary::-webkit-details-marker{display:none}.ds-more svg{transition:transform 150ms}.ds-more[open] svg{transform:rotate(90deg)}"
-    },
-    {
-      "name": "Action Panel",
-      "kind": "card",
-      "refersTo": "action-panel",
-      "description": "2px ink-bordered panel for the one thing the screen needs first: the one-person group invite, the profile prompt, the propose form.",
-      "html": "<section class=\"ds-panel\"><h2>Por ahora estás solo</h2><p>Invita a tu grupo para comparar disponibilidad.</p><div class=\"ds-row\"><button class=\"ds-btn2\">Invitar al grupo</button><button class=\"ds-btn2\">Compartir link</button></div></section>",
-      "css": ".ds-panel{font-family:var(--font-sign, 'Roboto Condensed','Arial Narrow',sans-serif);padding:16px 12px;border:2px solid var(--color-ink,#1d1d1b);border-radius:6px;background:#fff;color:var(--color-ink,#1d1d1b)}.ds-panel h2{margin:0;font-weight:800;font-size:1.125rem}.ds-panel p{margin:4px 0 0;font-size:0.875rem;color:var(--color-mute,#555552)}.ds-panel .ds-row{display:flex;gap:8px;margin-top:12px}.ds-panel .ds-btn2{flex:1;min-height:44px;padding:0 12px;border:1.5px solid var(--color-ink,#1d1d1b);border-radius:6px;background:#fff;color:var(--color-ink,#1d1d1b);font:inherit;font-weight:700;font-size:0.9375rem;cursor:pointer}.ds-panel .ds-btn2:active{background:var(--color-panel,#f4f4f2)}.ds-panel .ds-btn2:focus-visible{outline:3px solid var(--color-line-blue,#0065bd);outline-offset:2px}"
+      "refersTo": "avatar",
+      "description": "24px initials: filled when free, bordered with an ink strike when busy, dashed mute when unknown.",
+      "html": "<span class=\"ds-av\" style=\"background-color:#2f4fa2\">A</span><span class=\"ds-av ds-av-busy\" style=\"border-color:#9a6a0a\">B</span><span class=\"ds-av ds-av-unknown\">C</span>",
+      "css": ".ds-av { position: relative; display: inline-grid; place-items: center; width: 24px; height: 24px; margin-right: 3px; overflow: hidden; border: 1.5px solid transparent; border-radius: 9999px; color: #ffffff; font-family: Figtree, system-ui, sans-serif; font-weight: 800; font-size: 0.75rem; box-sizing: border-box; } .ds-av-busy { background: var(--color-surface, #fbfbfa); color: var(--color-ink, #23263a); } .ds-av-busy::after { content: ''; position: absolute; left: -2px; right: -2px; top: 50%; height: 1.5px; background: var(--color-ink, #23263a); transform: rotate(-45deg); } .ds-av-unknown { border: 1.5px dashed var(--color-mute, #4a4d60); background: var(--color-surface, #fbfbfa); color: var(--color-mute, #4a4d60); }"
     }
   ],
   "narrative": {
-    "northStar": "Línea de Metro",
-    "overview": "Each friend is a metro line running across the day. Where every line runs free at once, a station appears, and that station is the day the group can meet. A group is persistent; each person keeps one saved availability profile shared by all their groups, and the group view compares every profile live, so a plan is an output proposed from a good day, never the entry point. The system refuses the category default of a days-by-people check table: availability is read as a transit diagram, not as a grid of ticks.\n\nThe material is enamel transit signage: a white ground, ink signs, Santiago Metro line colours, bold condensed type for every label and time. Everything is flat. Depth comes from ink panels and hairline rules, never from shadows or gradients. The density is phone-first and compact, one narrow column, because people check their groups and touch up their profile in short bursts between classes or in transit. Light only, by design: signage is white enamel, and there is no dark theme.\n\nState is carried by shape before colour. A free stretch is a solid coloured line, busy time is an ink hatched \"out of service\" segment, and a friend who hasn't answered is a grey dashed track that is never drawn as free. The same three shapes appear wherever availability appears: the group diagram, the profile editor and the class routine alike. A member who has not set up a profile is unknown, never free.",
+    "northStar": "Telar",
+    "overview": "The app is a loom. Each person in a group is one dyed-wool thread running across the hours of a day. Where a person is free their thread rides on top of the cloth in their colour, spun so its twist shows; where they are busy the thread dives under the cloth and only a thin grey under-thread runs between two coloured ticks; where nobody knows their schedule the thread hangs loose and dotted. Where every thread rides on top at once, the cloth closes into a band, and that band is the day the group meets. The whole interface exists to make that band visible and to propose it in one tap.\n\nThe ground is undyed grey wool, the ink is indigo-black, and the only saturated colour that is not a person is madder red, reserved for the one action that ends the screen. Surfaces are flat folded cloth with soft 14px blanket-edge corners; there are no shadows anywhere. Density is phone-first and generous at the target level (44px minimum) but tight in the woven diagrams, which grow denser, never taller, as groups grow. The app is light only on purpose: it is read on phones outdoors, in daylight.\n\nThe world refuses the scheduling category's green heatmap grid and the replaced \"Línea de Metro\" signage. The weave is one form at every scale: the full day cloth, the small woven band beside each option, the day strip, the member chips, the plan marks, the app icon and the link preview all draw the same thread language.",
     "keyCharacteristics": [
-      "White enamel ground, ink signage, one Santiago Metro line colour per person.",
-      "Free = solid line, busy = ink hatch, unknown = grey dashes; colour never carries state alone.",
-      "The station (the confirmable slot) is marked with dashed guides, an ink time pill and white platforms.",
-      "Roboto Condensed at heavy weights with tabular numerals for every time and count.",
-      "Flat: no shadows, no gradients; ink fills and hairline rules give structure.",
-      "One narrow phone column: sign, then availability (strip, diagram, ranked days), then plans and links, closed by a sticky action footer."
+      "One thread per person, coloured by join order; colour says *who*, shape says *state*.",
+      "Free = spun thread on top; busy = solid grey under-thread with coloured dive ticks; unknown = loose dotted thread. Unknown never reads as free.",
+      "The closed band (an ink-outlined window with a faint warp-and-weft fill) is the decision.",
+      "Madder red is the single primary action per screen and is never a person's colour.",
+      "Flat cloth surfaces, 14px and 6px corners, no shadows, light ground only.",
+      "Bricolage Grotesque for names and big numbers; Figtree for everything you operate."
     ],
     "rules": [
       {
-        "name": "The Line Belongs to a Person Rule",
-        "body": "Line colours are assigned one per person in join order: red, blue, yellow, green, purple, ink, then the cycle repeats. A line colour is never used as decoration or as a state signal; blue doubles as the action colour and red as the rank-one marker, both always paired with a shape or a word.",
+        "name": "The Colour Says Who Rule",
+        "body": "A thread colour identifies a person and nothing else. Free, busy and unknown are carried by shape (spun on top, dived under, loose dotted), so the cloth reads the same in greyscale.",
         "section": "colors"
       },
       {
-        "name": "The Yellow Outline Rule",
-        "body": "Yellow is always drawn with a 1px ink inset outline, because it fails 3:1 against white.",
+        "name": "The Madder Is Not A Person Rule",
+        "body": "Madder red is reserved for the primary action and is never given to a thread. If a screen has two madder elements, one of them is wrong.",
         "section": "colors"
       },
       {
-        "name": "The Shape Before Colour Rule",
-        "body": "Free, busy and unknown must stay distinguishable in greyscale: solid line, ink hatch, grey dashes. Unknown is never drawn as free.",
+        "name": "The Double-Ply Rule",
+        "body": "When a group outgrows the eight colours, second-cycle members (`threadPly(index) === 2`) draw every thread, swatch and avatar border double-ply, so no member relies on colour alone.",
         "section": "colors"
       },
       {
-        "name": "The Signage Weight Rule",
-        "body": "Labels, times and counts are set at 700–800; 400 is reserved for running text and captions that explain.",
+        "name": "The Names Are Display Rule",
+        "body": "Bricolage is for group names, the decided day and the hero; anything you tap or read in a list is Figtree.",
         "section": "typography"
       },
       {
-        "name": "The Tabular Time Rule",
-        "body": "Every time and count uses tabular numerals.",
-        "section": "typography"
-      },
-      {
-        "name": "The Availability First Rule",
-        "body": "Nothing is inserted between the sign and the strip except a one-line status (\"Falta el perfil de Caro\") or the action panel asking the viewer to set up their own profile.",
-        "section": "layout"
-      },
-      {
-        "name": "The Enamel Rule",
-        "body": "Nothing floats. If an element needs separation, give it an ink fill or a hairline, never a shadow.",
+        "name": "The Flat Cloth Rule",
+        "body": "Surfaces never cast shadows. To raise importance, thicken the ink border (1px rule, 1.5px ink, 2.5–3px ink) or invert to the ink panel.",
         "section": "elevation"
       }
     ],
     "dos": [
-      "**Do** assign line colours by join order (red, blue, yellow, green, purple, ink) and keep a person's colour stable across screens.",
-      "**Do** outline yellow with a 1px ink inset wherever it is drawn as a line.",
-      "**Do** draw free as a solid line, busy as the ink hatch and unknown as the grey dashed track, in every view that shows availability.",
-      "**Do** mark the station as the confirmable slot with dashed guides, the ink time pill and a platform on every line free through it.",
-      "**Do** span the diagram over the useful day 08:00–24:00, the same track as the busy editor.",
-      "**Do** collapse beyond 6 people into the ink trunk with the \"8/10\" capsule, keeping at most 3 blocker lanes and a \"Ver a todos\" toggle.",
-      "**Do** keep every tap target at least 44px tall and one full-width primary action in a sticky footer.",
-      "**Do** put availability (strip, diagram, ranked days) right under the sign, and plans and links after it, before the footer.",
-      "**Do** draw a plan as a platform capsule (solid ink border confirmed, dashed grey proposed).",
-      "**Do** put destructive actions behind a \"Más opciones\" disclosure as secondary buttons.",
-      "**Do** write copy in Spanish (Chile), informal tú, through i18n keys."
+      "Do give every person exactly one thread colour from the eight-colour wool palette in join order, and switch second-cycle members to double-ply.",
+      "Do carry free, busy and unknown by shape: spun yarn on top, solid under-thread with dive ticks, loose dotted thread.",
+      "Do use madder red (#b8322a) for the one primary action per screen, in the sticky footer on phones.",
+      "Do use cloth corners (14px) for surfaces and controls and knot corners (6px) for chips, tags and woven bands.",
+      "Do raise emphasis with ink border weight or the ink panel, never with shadow.",
+      "Do keep every target at least 44px and reserve scroll padding under sticky footers.",
+      "Do let big groups make the cloth denser, never collapse members into an aggregate."
     ],
     "donts": [
-      "**Don't** use shadows or gradients for depth; the world is flat enamel.",
-      "**Don't** let colour carry state alone, and never draw an unanswered person as free.",
-      "**Don't** use line colours as decoration or behind body text where contrast fails.",
-      "**Don't** fall back to a days-by-people check table for availability.",
-      "**Don't** add a dark theme; light only is a decision, not a gap.",
-      "**Don't** paint destructive actions in Alarm Red or reuse the red rank ring as a plan marker.",
-      "**Don't** put plans or links between the sign and the availability."
-    ],
-    "knownGaps": "Not built yet, so not part of the system: the 30-minute \"Ajustar\" sheet for fine-tuning a segment; real authentication (the app runs in a local mode); each person's own timezone (Chile is assumed for profiles). No dark theme, by decision."
+      "Don't give madder red to a person's thread, or use thread colours for text, buttons or panels.",
+      "Don't draw unknown time as anything that could read as free; never solid, never coloured.",
+      "Don't draw the busy under-thread dotted or dashed; at 2–3px it would read as the \"no schedule\" thread.",
+      "Don't add box-shadows, elevation or a dark theme; the ground is daylight grey wool.",
+      "Don't build availability as a green heatmap grid or as transit-line signage.",
+      "Don't cap a screen at phone width on desktop."
+    ]
   }
 }

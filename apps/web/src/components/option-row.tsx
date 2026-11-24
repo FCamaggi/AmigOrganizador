@@ -10,7 +10,7 @@ const DENSE_FROM = 7;
 
 /**
  * Small woven band showing one short segment per member: spun yarn in their
- * colour if free for the window, hatched under-thread with dive ticks if busy,
+ * colour if free for the window, solid under-thread with dive ticks if busy,
  * loose dotted if they have no schedule. Frame border weight carries rank.
  */
 export function WovenBand({
