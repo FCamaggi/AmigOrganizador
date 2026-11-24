@@ -31,7 +31,7 @@ Full vision: `docs/product/VISION.md`.
 
 ## Positioning
 
-AmigOrganizador does not compete with personal calendars; it reads them and
+Knot does not compete with personal calendars; it reads them and
 writes back to them. Its mechanism is a live, ranked view of the days a group
 can meet, each with a human reason, computed from busy time that each person
 describes once: optional templates (student classes, office week, nurse
@@ -63,11 +63,11 @@ a profile is shown as unknown, never assumed free.
   See `docs/product/ROADMAP.md`.
 - Stack: Next.js 16 PWA, Tailwind CSS 4, pure TypeScript core; Supabase and
   Vercel (beta on the default `*.vercel.app` domain).
-- Undecided: logo; profile "tastes" fields.
+- Undecided: profile "tastes" fields.
 
 ## Brand Commitments
 
-- Name: AmigOrganizador (beta).
+- Name: Knot (beta). Read aloud it plays on "not" (can or can't make it) and a knot is what ties people together. Logo: a calendar woven from threads, with a madder button as the knot (assets in `public/brand/`, sources in `Knot-Lana/`).
 - Voice: close, Chilean, like a friend in the group ("juntémonos",
   "¿quién se suma?", "lucas"), informal without overdoing slang. Copy is
   Spanish (Chile), behind i18n keys.

@@ -1,0 +1,28 @@
+# Knot: yarn material, rebrand and profile UX
+
+Make the Telar world read as real yarn and cloth, rename the product to Knot
+with the owner's logo, and redesign the profile editor around the task.
+Branch `rebuild`. Delivery: work-unit commits (pre-authorized on `rebuild`; push asks).
+Tests: `pnpm check`, `pnpm --filter @amigo/web e2e`. Brand sources: `Knot-Lana/`.
+
+## Specs
+
+- S1. Threads must look like real yarn with texture, and the background like cloth. Owner: "me falta mucho trabajo en imagen para parecer un Telar y que sean hilos, realmente me gustaria que fueran efectivamente hilos con su textura e imagen, ademas el fondo que sea como de tela, etc. its not giving me el estilo de hilos".
+- S2. Rename the product to Knot. Owner: "ya se me ocurrio que el nombre sea Knot, dado el juego de como se escribe y dice como si puedes o no, ademas el significado de nudo que une".
+- S3. Logo: a calendar woven from threads, from the owner's files. Owner: "el logo quiero que sea un calendario formado por los hilos, eso lo estoy produciendo por otro lado en Knot-Lana, puedes usar el contenido de ese directorio".
+- S4. Profile UX. Owner: "falta todo el tema de usabilidad, cuando me meti a mi perfil para organizar mis horarios y cosas asi la estructura que tiene (ademas que no tiene nada que ver con lana o lo que dirigimos en tema de la app) es dificil entender que hay que hacer, puedes agregar rutinas infinitamente yendose hacia abajo cada vez mas la UI sin facilitar el trabajo, el bloque de datos es gigante y solo tiene tu nombre, etc."
+- S5. Overall UI/UX and look. Owner: "hay mucho donde mejorar en temas de UI/UX y como se ve todo".
+- S6. Product rules unchanged (unknown never free, no colour-only meaning, 44px targets, WCAG AA, es-CL copy via i18n, responsive).
+
+## Tasks
+
+- [ ] T1 (S2, S3) inline: rename to Knot in copy, manifest, PRODUCT.md and the PWA test; app icons, maskable icon and header lockup from `Knot-Lana/`.
+- [ ] T2 (S1) inline: yarn material: a repo script adapted from `Knot-Lana/knot_yarn_generator.py` renders seamless yarn strips per thread colour and a cloth ground tile; `.yarn` and the page/surface grounds use them.
+- [ ] T3 (S4) route TBD: profile editor redesigned around the task (impeccable shape first).
+- [ ] T4 (S5) route TBD: polish pass over every screen in the yarn material; link preview and offline page with the Knot brand.
+- [ ] T5 inline: finish review, DESIGN.md update, critique re-run.
+
+## Log
+
+- L1 (2026-11-24): owner request verbatim: "ok, lo veo, pero me falta mucho trabajo en imagen para parecer un Telar y que sean hilos, realmente me gustaria que fueran efectivamente hilos con su textura e imagen, ademas el fondo que sea como de tela, etc. its not giving me el estilo de hilos, además ya se me ocurrio que el nombre sea Knot, dado el juego de como se escribe y dice como si puedes o no, ademas el significado de nudo que une, el logo quiero que sea un calendario formado por los hilos, eso lo estoy produciendo por otro lado en Knot-Lana, puedes usar el contenido de ese directorio, además falta todo el tema de usabilidad, cuando me meti a mi perfil para organizar mis horarios y cosas asi la estructura que tiene (ademas que no tiene nada que ver con lana o lo que dirigimos en tema de la app) es dificil entender que hay que hacer, puedes agregar rutinas infinitamente yendose hacia abajo cada vez mas la UI sin facilitar el trabajo, el bloque de datos es gigante y solo tiene tu nombre, etc. hay mucho donde mejorar en temas de UI/UX y como se ve todo".
+- L2 (2026-11-24): Knot-Lana holds SVG/PNG symbol, lockups (light/dark), app icon, a style sheet and `knot_yarn_generator.py` (plies as rotated ellipses with radial gradients, fractal-noise "fuzz", canvas weave of alternating ellipses). The repo name and package names stay; only the product name changes.

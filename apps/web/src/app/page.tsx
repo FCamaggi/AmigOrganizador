@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { Suspense } from "react";
 import { InstallHint } from "@/components/install-hint";
@@ -15,8 +16,15 @@ import { getSession } from "@/server/session";
 export default function Home() {
   return (
     <main className={`${shellClasses.wide} flex flex-col pt-4`}>
-      <p className="flex items-baseline gap-2 font-extrabold text-lg">
-        {t("app.name")}
+      <p className="flex items-center gap-2">
+        <Image
+          src="/brand/knot-lockup.webp"
+          alt={t("app.name")}
+          width={99}
+          height={40}
+          priority
+          className="h-10 w-auto"
+        />
         <span className="rounded-knot border border-ink px-1 font-bold text-caption uppercase">
           {t("app.beta")}
         </span>

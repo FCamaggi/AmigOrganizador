@@ -19,7 +19,8 @@ export default function manifest(): MetadataRoute.Manifest {
     background_color: "#e9ebe8",
     theme_color: "#e9ebe8",
     categories: ["social", "productivity"],
-    // The art sits inside the maskable safe zone, so one file serves both.
+    // The app icon has transparent corners; the maskable one is full-bleed
+    // ink with the symbol inside the safe zone.
     icons: [
       {
         src: "/icons/icon-192.png",
@@ -34,7 +35,7 @@ export default function manifest(): MetadataRoute.Manifest {
         purpose: "any",
       },
       {
-        src: "/icons/icon-512.png",
+        src: "/icons/icon-maskable-512.png",
         sizes: "512x512",
         type: "image/png",
         purpose: "maskable",

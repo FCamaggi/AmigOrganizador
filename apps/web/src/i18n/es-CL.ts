@@ -3,7 +3,7 @@
  * user-facing text is hard-coded in components.
  */
 export const esCL = {
-  "app.name": "AmigOrganizador",
+  "app.name": "Knot",
   "app.beta": "beta",
   "app.tagline": "De “juntémonos” a un plan en el calendario de todos.",
   "pwa.shortcut.profile": "Mi perfil",
@@ -149,7 +149,7 @@ export const esCL = {
   "confirmed.shareText":
     "Quedó: {title}, {day} {time}. Agrégalo a tu calendario: {url}",
 
-  "signin.title": "Entra a AmigOrganizador",
+  "signin.title": "Entra a Knot",
   "signin.body":
     "Tu perfil y tus grupos quedan en tu cuenta, así los ves desde cualquier teléfono.",
   "signin.name": "Tu nombre (como te conocen tus amigos)",
@@ -243,7 +243,7 @@ export const esCL = {
   "privacy.title": "Política de privacidad",
   "privacy.updated": "Actualizada el 15 de noviembre de 2026.",
   "privacy.intro":
-    "AmigOrganizador ayuda a grupos de amigos a encontrar cuándo juntarse. Esta página explica qué datos guardamos, para qué y cómo borrarlos.",
+    "Knot ayuda a grupos de amigos a encontrar cuándo juntarse. Esta página explica qué datos guardamos, para qué y cómo borrarlos.",
   "privacy.collect.title": "Qué guardamos",
   "privacy.collect.account":
     "Tu cuenta: tu nombre y tu correo, que vienen de Google o del link que te mandamos por correo. Nunca pedimos ni guardamos contraseñas.",
@@ -297,7 +297,7 @@ export const esCL = {
   "group.propose": "Proponer {day}",
   "group.share": "Invitar al grupo",
   "group.shareText":
-    "Únete a {name} en AmigOrganizador para ver qué días podemos juntarnos: {url}",
+    "Únete a {name} en Knot para ver qué días podemos juntarnos: {url}",
   "group.feed": "Suscribirme al calendario del grupo",
   "group.feed.hint": "Los planes confirmados aparecen solos en tu calendario.",
   "group.leave": "Salir del grupo",

@@ -10,7 +10,7 @@ test("the app can be installed to the home screen and opens standalone", async (
 
   const manifest = await (await request.get(href as string)).json();
   expect(manifest).toMatchObject({
-    name: "AmigOrganizador",
+    name: "Knot",
     start_url: "/",
     scope: "/",
     display: "standalone",
