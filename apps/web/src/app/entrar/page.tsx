@@ -64,13 +64,10 @@ async function SignInScreen({
         </div>
       ) : (
         <section
-          className="mt-5 rounded-cloth border-2 border-ink px-3 py-3"
+          className="mt-5 rounded-cloth border border-rule-strong bg-surface p-4"
           aria-labelledby="local-mode"
         >
-          <h2
-            id="local-mode"
-            className="font-extrabold text-xs uppercase tracking-[0.06em]"
-          >
+          <h2 id="local-mode" className="font-extrabold text-lg">
             {t("signin.local.title")}
           </h2>
           <p className="mt-1 text-mute text-sm">{t("signin.local.body")}</p>

@@ -15,7 +15,7 @@ import {
   setDefaultScheduleAction,
 } from "@/server/group-actions";
 
-const legend = "font-extrabold text-xs uppercase tracking-[0.06em]";
+const fieldLabel = "font-bold text-sm text-ink";
 
 export interface ScheduleSummary {
   readonly id: string;
@@ -63,10 +63,10 @@ export function PersonSchedules({
   >(removeScheduleAction, { error: null });
 
   return (
-    <div className="mt-4 grid gap-5 lg:grid-cols-2 lg:items-stretch lg:gap-x-10">
-      <div className="rounded-cloth border border-rule p-3">
+    <div className="mt-4 grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:items-stretch lg:gap-x-10">
+      <div className="min-w-0 rounded-cloth border border-rule bg-surface p-4">
         <form action={nameAction} noValidate>
-          <label htmlFor="person-display-name" className={legend}>
+          <label htmlFor="person-display-name" className={fieldLabel}>
             {t("profileEdit.name.label")}
           </label>
           <p className="mt-0.5 text-mute text-sm">
@@ -85,7 +85,7 @@ export function PersonSchedules({
             <button
               type="submit"
               disabled={namePending}
-              className={`${buttonClasses.secondary} flex-none px-4`}
+              className={`${buttonClasses.secondary} min-w-fit flex-none px-4`}
             >
               {t("profileEdit.name.save")}
             </button>
@@ -105,9 +105,9 @@ export function PersonSchedules({
 
       <section
         aria-labelledby="schedules-heading"
-        className="rounded-cloth border border-rule p-3"
+        className="min-w-0 rounded-cloth border border-rule bg-surface p-4"
       >
-        <h2 id="schedules-heading" className={legend}>
+        <h2 id="schedules-heading" className="font-extrabold text-lg">
           {t("profileEdit.schedules.title")}
         </h2>
         <p className="mt-0.5 text-mute text-sm">
@@ -132,7 +132,7 @@ export function PersonSchedules({
                         {item.name}
                       </span>
                       {item.isDefault ? (
-                        <span className="rounded-knot border border-ink bg-surface px-1.5 py-px font-bold text-caption uppercase">
+                        <span className="rounded-knot border border-ink bg-panel px-1.5 py-px font-bold text-caption">
                           {t("profileEdit.schedules.defaultBadge")}
                         </span>
                       ) : null}
@@ -153,7 +153,7 @@ export function PersonSchedules({
 
         <form action={renameAction} className="mt-3" noValidate>
           <input type="hidden" name="scheduleId" value={activeScheduleId} />
-          <label htmlFor="schedule-rename-input" className={legend}>
+          <label htmlFor="schedule-rename-input" className={fieldLabel}>
             {t("profileEdit.schedules.rename.label")}
           </label>
           <div className="mt-1 flex flex-wrap gap-2">
@@ -169,7 +169,7 @@ export function PersonSchedules({
             <button
               type="submit"
               disabled={renamePending}
-              className={`${buttonClasses.secondary} flex-none`}
+              className={`${buttonClasses.secondary} min-w-fit flex-none`}
             >
               {t("profileEdit.schedules.rename.submit")}
             </button>
@@ -187,7 +187,10 @@ export function PersonSchedules({
           <form
             action={duplicateScheduleAction.bind(null, activeScheduleId, next)}
           >
-            <button type="submit" className={buttonClasses.secondary}>
+            <button
+              type="submit"
+              className={`${buttonClasses.secondary} min-w-fit`}
+            >
               {t("profileEdit.schedules.duplicate")}
             </button>
           </form>
@@ -195,7 +198,10 @@ export function PersonSchedules({
             <form
               action={setDefaultScheduleAction.bind(null, activeScheduleId)}
             >
-              <button type="submit" className={buttonClasses.secondary}>
+              <button
+                type="submit"
+                className={`${buttonClasses.secondary} min-w-fit`}
+              >
                 {t("profileEdit.schedules.makeDefault")}
               </button>
             </form>
@@ -206,7 +212,7 @@ export function PersonSchedules({
             <button
               type="submit"
               disabled={removePending}
-              className={buttonClasses.secondary}
+              className={`${buttonClasses.secondary} min-w-fit`}
             >
               {t("profileEdit.schedules.delete")}
             </button>
@@ -226,7 +232,7 @@ export function PersonSchedules({
           noValidate
         >
           {next ? <input type="hidden" name="next" value={next} /> : null}
-          <label htmlFor="schedule-new-input" className={legend}>
+          <label htmlFor="schedule-new-input" className={fieldLabel}>
             {t("profileEdit.schedules.new.label")}
           </label>
           <div className="mt-1 flex flex-wrap gap-2">
@@ -241,7 +247,7 @@ export function PersonSchedules({
             <button
               type="submit"
               disabled={createPending}
-              className={`${buttonClasses.secondary} flex-none`}
+              className={`${buttonClasses.secondary} min-w-fit flex-none`}
             >
               {t("profileEdit.schedules.new.submit")}
             </button>

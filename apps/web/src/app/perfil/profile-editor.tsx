@@ -32,7 +32,7 @@ type SegmentKey = (typeof SEGMENTS)[number]["key"];
 const TRACK = { start: h(8), end: h(24) };
 const WEEKDAYS_MON_FIRST = [1, 2, 3, 4, 5, 6, 0] as const;
 const DEFAULT_WEEKDAYS = [1, 2, 3, 4, 5] as const;
-const legend = "font-extrabold text-xs uppercase tracking-[0.06em]";
+const legend = "font-bold text-sm text-ink";
 
 type DayGranularity = "blocks" | "hours";
 
@@ -488,12 +488,12 @@ export function ProfileEditor({
   // right. Below `lg` everything stacks in DOM order.
   return (
     <>
-      <div className="contents lg:grid lg:grid-cols-2 lg:grid-rows-[auto_1fr] lg:items-start lg:gap-x-10">
+      <div className="contents lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:grid-rows-[auto_1fr] lg:items-start lg:gap-x-10">
         <section
           aria-labelledby="routines-title"
-          className="mt-5 lg:col-start-1 lg:row-start-1"
+          className="mt-5 min-w-0 lg:col-start-1 lg:row-start-1"
         >
-          <h2 id="routines-title" className={legend}>
+          <h2 id="routines-title" className="font-extrabold text-lg">
             {t("profileEdit.routines")}
           </h2>
 
@@ -1122,11 +1122,11 @@ export function ProfileEditor({
 
         <section
           aria-labelledby="days-title"
-          className="mt-5 lg:col-start-2 lg:row-span-2 lg:row-start-1"
+          className="mt-5 min-w-0 lg:col-start-2 lg:row-span-2 lg:row-start-1"
         >
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div>
-              <h2 id="days-title" className={legend}>
+              <h2 id="days-title" className="font-extrabold text-lg">
                 {t("profileEdit.days.title")}
               </h2>
               <p className="mt-0.5 text-mute text-sm">
@@ -1149,203 +1149,211 @@ export function ProfileEditor({
             </div>
           </div>
 
-          <div
-            aria-hidden="true"
-            className="mt-2 flex pb-1 text-caption text-mute"
-          >
-            <span className="w-[4.25rem] flex-none" />
-            <span className="relative h-4 flex-1">
-              {SEGMENTS.map((seg) => (
-                <span
-                  key={seg.key}
-                  className="absolute top-0 text-center font-bold uppercase tracking-[0.06em]"
-                  style={{
-                    left: `${pct(seg.start)}%`,
-                    width: `${pct(seg.end) - pct(seg.start)}%`,
-                  }}
-                >
-                  {t(`answer.segment.${seg.key}` as MessageKey)}
-                </span>
-              ))}
-            </span>
-          </div>
-          <ul className="border-rule border-t">
-            {days.map((day) => {
-              const busy = availability[day.date]?.busy ?? [];
-              return (
-                <li key={day.date} className="border-rule border-b py-1.5">
-                  <div className="flex items-center">
-                    <span className="w-[4.25rem] flex-none font-extrabold text-[0.9375rem]">
-                      {day.label}
-                    </span>
-                    <span className="relative h-11 flex-1">
-                      <span
-                        aria-hidden="true"
-                        className="absolute inset-x-0 top-1/2 -mt-[3px] h-1.5 rounded-full"
-                        style={{ background: lineColor }}
-                      />
-                      {busy
-                        .filter(
-                          (i) => i.end > TRACK.start && i.start < TRACK.end,
-                        )
-                        .map((i) => {
-                          const left = pct(Math.max(i.start, TRACK.start));
-                          const right = pct(Math.min(i.end, TRACK.end));
-                          return (
-                            <span
-                              key={i.start}
-                              aria-hidden="true"
-                              className="hatch-busy absolute top-1/2 -mt-2 h-4 rounded-[3px]"
-                              style={{
-                                left: `${left}%`,
-                                width: `${right - left}%`,
-                              }}
-                            />
-                          );
-                        })}
-                      {granularity === "blocks"
-                        ? SEGMENTS.map((seg, index) => {
-                            const covered = overlap(busy, seg);
-                            const state =
-                              covered === 0
-                                ? "free"
-                                : covered >= seg.end - seg.start
-                                  ? "busy"
-                                  : "partial";
+          <div className="mt-2.5 rounded-cloth border border-rule bg-surface px-3 py-2">
+            <div
+              aria-hidden="true"
+              className="flex pb-1 text-caption text-mute"
+            >
+              <span className="w-[4.25rem] flex-none" />
+              <span className="relative h-4 flex-1">
+                {SEGMENTS.map((seg) => (
+                  <span
+                    key={seg.key}
+                    className="absolute top-0 text-center font-bold"
+                    style={{
+                      left: `${pct(seg.start)}%`,
+                      width: `${pct(seg.end) - pct(seg.start)}%`,
+                    }}
+                  >
+                    {t(`answer.segment.${seg.key}` as MessageKey)}
+                  </span>
+                ))}
+              </span>
+            </div>
+            <ul className="border-rule border-t">
+              {days.map((day) => {
+                const busy = availability[day.date]?.busy ?? [];
+                return (
+                  <li
+                    key={day.date}
+                    className="border-rule border-b py-1.5 last:border-b-0"
+                  >
+                    <div className="flex items-center">
+                      <span className="w-[4.25rem] flex-none font-extrabold text-[0.9375rem]">
+                        {day.label}
+                      </span>
+                      <span className="relative h-11 min-w-0 flex-1">
+                        <span
+                          aria-hidden="true"
+                          className="yarn absolute inset-x-0 top-1/2 -mt-1 h-2 rounded-full"
+                          style={{ background: lineColor }}
+                        />
+                        {busy
+                          .filter(
+                            (i) => i.end > TRACK.start && i.start < TRACK.end,
+                          )
+                          .map((i) => {
+                            const left = pct(Math.max(i.start, TRACK.start));
+                            const right = pct(Math.min(i.end, TRACK.end));
                             return (
-                              <button
-                                key={seg.key}
-                                type="button"
-                                onClick={() => tap(day.date, seg.key)}
-                                aria-pressed={state !== "free"}
-                                aria-label={t("answer.segment.label", {
-                                  day: day.label,
-                                  segment: t(
-                                    `answer.segment.${seg.key}` as MessageKey,
-                                  ),
-                                  from: formatTime(seg.start),
-                                  to: formatTime(seg.end),
-                                  state: t(
-                                    `answer.segment.state.${state}` as MessageKey,
-                                  ),
-                                })}
-                                className={`absolute inset-y-0 active:bg-ink/[0.06] ${
-                                  index > 0
-                                    ? "border-rule border-l border-dashed"
-                                    : ""
-                                }`}
+                              <span
+                                key={i.start}
+                                aria-hidden="true"
+                                className="hatch-busy absolute top-1/2 -mt-2 h-4 rounded-[3px]"
                                 style={{
-                                  left: `${pct(seg.start)}%`,
-                                  width: `${pct(seg.end) - pct(seg.start)}%`,
+                                  left: `${left}%`,
+                                  width: `${right - left}%`,
                                 }}
                               />
                             );
-                          })
-                        : null}
-                    </span>
-                  </div>
-
-                  {granularity === "hours" ? (
-                    <div className="mt-1 pl-[4.25rem]">
-                      <div className="space-y-1.5">
-                        {busy.map((interval, idx) => (
-                          <div
-                            key={interval.start}
-                            className="flex flex-wrap items-center gap-1.5"
-                          >
-                            <input
-                              type="time"
-                              step="900"
-                              aria-label={t("profileEdit.days.hours.start", {
-                                day: day.label,
-                                index: idx + 1,
-                              })}
-                              value={formatTime(interval.start)}
-                              onChange={(e) => {
-                                const startClock = parseTimeInput(
-                                  e.target.value,
-                                  interval.start,
-                                );
-                                const nextInterval = intervalFromClocks(
-                                  startClock,
-                                  interval.end % 1440,
-                                );
-                                setDayIntervals(
-                                  day.date,
-                                  busy.map((item, i) =>
-                                    i === idx ? nextInterval : item,
-                                  ),
-                                );
-                              }}
-                              className="min-h-11 rounded-cloth border-[1.5px] border-rule-strong bg-surface px-2 font-bold text-sm"
-                            />
-                            <span aria-hidden="true">–</span>
-                            <input
-                              type="time"
-                              step="900"
-                              aria-label={t("profileEdit.days.hours.end", {
-                                day: day.label,
-                                index: idx + 1,
-                              })}
-                              value={formatTime(interval.end)}
-                              onChange={(e) => {
-                                const endClock = parseTimeInput(
-                                  e.target.value,
-                                  interval.end % 1440,
-                                );
-                                const nextInterval = intervalFromClocks(
-                                  interval.start,
-                                  endClock,
-                                );
-                                setDayIntervals(
-                                  day.date,
-                                  busy.map((item, i) =>
-                                    i === idx ? nextInterval : item,
-                                  ),
-                                );
-                              }}
-                              className="min-h-11 rounded-cloth border-[1.5px] border-rule-strong bg-surface px-2 font-bold text-sm"
-                            />
-                            <button
-                              type="button"
-                              aria-label={`${t("profileEdit.days.hours.remove")} ${day.label} ${idx + 1}`}
-                              onClick={() =>
-                                setDayIntervals(
-                                  day.date,
-                                  busy.filter((_, i) => i !== idx),
-                                )
-                              }
-                              className="min-h-11 rounded-cloth border border-rule-strong px-2 font-bold text-xs hover:bg-panel"
-                            >
-                              {t("profileEdit.days.hours.remove")}
-                            </button>
-                          </div>
-                        ))}
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const lastEnd = busy.at(-1)?.end ?? h(9);
-                          const start = Math.min(
-                            h(22),
-                            Math.max(h(8), lastEnd),
-                          );
-                          const end = Math.min(h(24), start + 60);
-                          setDayIntervals(day.date, [...busy, { start, end }]);
-                        }}
-                        className="mt-1 min-h-11 font-bold text-indigo text-xs underline"
-                      >
-                        {t("profileEdit.days.hours.add")}
-                      </button>
+                          })}
+                        {granularity === "blocks"
+                          ? SEGMENTS.map((seg, index) => {
+                              const covered = overlap(busy, seg);
+                              const state =
+                                covered === 0
+                                  ? "free"
+                                  : covered >= seg.end - seg.start
+                                    ? "busy"
+                                    : "partial";
+                              return (
+                                <button
+                                  key={seg.key}
+                                  type="button"
+                                  onClick={() => tap(day.date, seg.key)}
+                                  aria-pressed={state !== "free"}
+                                  aria-label={t("answer.segment.label", {
+                                    day: day.label,
+                                    segment: t(
+                                      `answer.segment.${seg.key}` as MessageKey,
+                                    ),
+                                    from: formatTime(seg.start),
+                                    to: formatTime(seg.end),
+                                    state: t(
+                                      `answer.segment.state.${state}` as MessageKey,
+                                    ),
+                                  })}
+                                  className={`absolute inset-y-0 active:bg-ink/[0.06] ${
+                                    index > 0
+                                      ? "border-rule border-l border-dashed"
+                                      : ""
+                                  }`}
+                                  style={{
+                                    left: `${pct(seg.start)}%`,
+                                    width: `${pct(seg.end) - pct(seg.start)}%`,
+                                  }}
+                                />
+                              );
+                            })
+                          : null}
+                      </span>
                     </div>
-                  ) : null}
-                </li>
-              );
-            })}
-          </ul>
+
+                    {granularity === "hours" ? (
+                      <div className="mt-1 pl-[4.25rem]">
+                        <div className="space-y-1.5">
+                          {busy.map((interval, idx) => (
+                            <div
+                              key={interval.start}
+                              className="flex flex-wrap items-center gap-1.5"
+                            >
+                              <input
+                                type="time"
+                                step="900"
+                                aria-label={t("profileEdit.days.hours.start", {
+                                  day: day.label,
+                                  index: idx + 1,
+                                })}
+                                value={formatTime(interval.start)}
+                                onChange={(e) => {
+                                  const startClock = parseTimeInput(
+                                    e.target.value,
+                                    interval.start,
+                                  );
+                                  const nextInterval = intervalFromClocks(
+                                    startClock,
+                                    interval.end % 1440,
+                                  );
+                                  setDayIntervals(
+                                    day.date,
+                                    busy.map((item, i) =>
+                                      i === idx ? nextInterval : item,
+                                    ),
+                                  );
+                                }}
+                                className="min-h-11 rounded-cloth border-[1.5px] border-rule-strong bg-surface px-2 font-bold text-sm"
+                              />
+                              <span aria-hidden="true">–</span>
+                              <input
+                                type="time"
+                                step="900"
+                                aria-label={t("profileEdit.days.hours.end", {
+                                  day: day.label,
+                                  index: idx + 1,
+                                })}
+                                value={formatTime(interval.end)}
+                                onChange={(e) => {
+                                  const endClock = parseTimeInput(
+                                    e.target.value,
+                                    interval.end % 1440,
+                                  );
+                                  const nextInterval = intervalFromClocks(
+                                    interval.start,
+                                    endClock,
+                                  );
+                                  setDayIntervals(
+                                    day.date,
+                                    busy.map((item, i) =>
+                                      i === idx ? nextInterval : item,
+                                    ),
+                                  );
+                                }}
+                                className="min-h-11 rounded-cloth border-[1.5px] border-rule-strong bg-surface px-2 font-bold text-sm"
+                              />
+                              <button
+                                type="button"
+                                aria-label={`${t("profileEdit.days.hours.remove")} ${day.label} ${idx + 1}`}
+                                onClick={() =>
+                                  setDayIntervals(
+                                    day.date,
+                                    busy.filter((_, i) => i !== idx),
+                                  )
+                                }
+                                className="min-h-11 rounded-cloth border border-rule-strong px-2 font-bold text-xs hover:bg-panel"
+                              >
+                                {t("profileEdit.days.hours.remove")}
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const lastEnd = busy.at(-1)?.end ?? h(9);
+                            const start = Math.min(
+                              h(22),
+                              Math.max(h(8), lastEnd),
+                            );
+                            const end = Math.min(h(24), start + 60);
+                            setDayIntervals(day.date, [
+                              ...busy,
+                              { start, end },
+                            ]);
+                          }}
+                          className="mt-1 min-h-11 font-bold text-indigo text-xs underline"
+                        >
+                          {t("profileEdit.days.hours.add")}
+                        </button>
+                      </div>
+                    ) : null}
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
         </section>
 
-        <div className="lg:col-start-1 lg:row-start-2">{children}</div>
+        <div className="min-w-0 lg:col-start-1 lg:row-start-2">{children}</div>
       </div>
 
       <div

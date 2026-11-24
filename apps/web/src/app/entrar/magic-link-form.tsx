@@ -19,9 +19,9 @@ export function MagicLinkForm({ next }: { readonly next: string }) {
     return (
       <section
         aria-live="polite"
-        className="mt-5 rounded-cloth border-2 border-ink px-3 py-3"
+        className="mt-5 rounded-cloth border border-rule-strong bg-surface p-4"
       >
-        <h2 className="font-extrabold">{t("signin.sent.title")}</h2>
+        <h2 className="font-extrabold text-lg">{t("signin.sent.title")}</h2>
         <p className="mt-1 text-mute text-sm">
           {t("signin.sent.body", { email })}
         </p>

@@ -5,7 +5,7 @@ import { type MessageKey, t } from "@/i18n/t";
 import { buttonClasses } from "@/lib/ui";
 import { type ImportState, importCalendarAction } from "@/server/group-actions";
 
-const legend = "font-extrabold text-xs uppercase tracking-[0.06em]";
+const fieldLabel = "font-bold text-sm text-ink";
 
 /** Adds a calendar by its ICS link (S4). The link is never shown back. */
 export function ImportForm({
@@ -23,7 +23,7 @@ export function ImportForm({
     <form action={action} className="mt-3 space-y-2.5">
       <input type="hidden" name="scheduleId" value={scheduleId} />
       <div>
-        <label htmlFor="import-name" className={legend}>
+        <label htmlFor="import-name" className={fieldLabel}>
           {t("profileEdit.import.name")}
         </label>
         <input
@@ -36,7 +36,7 @@ export function ImportForm({
         />
       </div>
       <div>
-        <label htmlFor="import-url" className={legend}>
+        <label htmlFor="import-url" className={fieldLabel}>
           {t("profileEdit.import.url")}
         </label>
         <input

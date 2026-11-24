@@ -66,15 +66,10 @@ function optionFromWindow(
         ? "unknown"
         : "busy";
   const busy = group.members.filter((m) => state(m.accountId) === "busy");
-  const unknown = group.members.filter((m) => state(m.accountId) === "unknown");
   const note =
     busy.length === 1 && busy[0]
       ? t("options.cannot", { name: busy[0].displayName })
-      : unknown.length === 1 && unknown[0]
-        ? t("options.unknown.one", { name: unknown[0].displayName })
-        : unknown.length > 1
-          ? t("options.unknown.many", { count: unknown.length })
-          : null;
+      : null;
   return {
     key: `${window.date}-${window.start}`,
     date: window.date,
@@ -91,9 +86,11 @@ function optionFromWindow(
         .map((r) => t(`reason.${r.code}` as MessageKey)),
       ...(sooner ? [t("reason.SOONER")] : []),
     ],
-    people: group.members.map((m) => ({
+    people: group.members.map((m, index) => ({
+      accountId: m.accountId,
       name: m.displayName,
       state: state(m.accountId),
+      colorIndex: index,
     })),
     note,
     span,

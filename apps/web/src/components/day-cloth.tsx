@@ -66,10 +66,12 @@ function Thread({
 }) {
   const color = threadColor(thread.colorIndex).value;
   return (
-    <li className={`flex items-center ${dense ? "h-3.5" : "h-5"}`}>
+    <li className={`flex items-center ${dense ? "h-4" : "h-5"}`}>
       <span
         aria-hidden="true"
-        className="w-6 flex-none font-bold text-[0.8125rem] leading-none"
+        className={`w-6 flex-none font-bold leading-none ${
+          dense ? "text-caption" : "text-[0.8125rem]"
+        }`}
       >
         {initialOf(thread.displayName)}
       </span>

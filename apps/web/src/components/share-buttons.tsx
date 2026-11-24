@@ -4,7 +4,7 @@ import { useState } from "react";
 import { t } from "@/i18n/t";
 import { buttonClasses } from "@/lib/ui";
 
-const secondary = buttonClasses.secondary;
+const secondary = `${buttonClasses.secondary} min-w-fit`;
 
 /** Opens WhatsApp with a ready message. */
 export function WhatsAppLink({

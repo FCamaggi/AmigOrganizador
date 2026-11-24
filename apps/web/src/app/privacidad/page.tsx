@@ -42,9 +42,7 @@ export default function PrivacyPage() {
       <p className="mt-4">{t("privacy.intro")}</p>
       {SECTIONS.map((section) => (
         <section key={section.title} className="mt-6">
-          <h2 className="font-extrabold text-xs uppercase tracking-[0.06em]">
-            {t(section.title)}
-          </h2>
+          <h2 className="font-extrabold text-lg">{t(section.title)}</h2>
           {section.body.map((key) => (
             <p key={key} className="mt-2">
               {t(key)}

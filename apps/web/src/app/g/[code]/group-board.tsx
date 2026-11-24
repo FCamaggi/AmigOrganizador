@@ -7,6 +7,7 @@ import { ShareButton, WhatsAppLink } from "@/components/share-buttons";
 import { type MessageKey, t } from "@/i18n/t";
 import { formatDuration, formatTime } from "@/lib/format";
 import type { StripDay } from "@/lib/group-view-model";
+import { threadColor } from "@/lib/lines";
 import type { OptionView } from "@/lib/option-view";
 import { DURATIONS } from "@/lib/plan-options";
 import { buttonClasses, shellClasses } from "@/lib/ui";
@@ -17,8 +18,12 @@ interface GroupBoardProps {
   readonly alone: boolean;
   readonly options: readonly OptionView[];
   readonly strip: readonly StripDay[];
+  /** Members who do not have a schedule yet. */
+  readonly missing: readonly string[];
   readonly inviteUrl: string;
   readonly shareText: string;
+  /** Optional prompt when the signed-in viewer still has no schedule. */
+  readonly noProfileNotice?: React.ReactNode;
   /** Rendered after the ranked days and before the sticky footer. */
   readonly children?: React.ReactNode;
   readonly propose: (
@@ -27,7 +32,39 @@ interface GroupBoardProps {
   ) => Promise<ProposeState>;
 }
 
-const legend = "font-extrabold text-xs uppercase tracking-[0.06em]";
+const fieldLabel = "font-bold text-sm text-ink";
+
+function missingLine(names: readonly string[]): string {
+  if (names.length === 0) return t("group.missing.none");
+  if (names.length === 1)
+    return t("group.missing.one", { name: names[0] ?? "" });
+  if (names.length <= 3)
+    return t("group.missing.few", { names: names.join(", ") });
+  return t("group.missing.many", { count: names.length });
+}
+
+function decisionLine(option: OptionView, missing: readonly string[]): string {
+  const base = { free: option.freeCount, total: option.memberCount };
+  if (option.freeCount === option.memberCount) {
+    return t("group.decision.all", base);
+  }
+  if (missing.length === 1 && missing[0]) {
+    return t("group.decision.missingOne", { ...base, name: missing[0] });
+  }
+  if (missing.length > 1 && missing.length <= 3) {
+    return t("group.decision.missingFew", {
+      ...base,
+      names: missing.join(", "),
+    });
+  }
+  if (missing.length > 3) {
+    return t("group.decision.missingMany", { ...base, count: missing.length });
+  }
+  if (option.note) {
+    return t("group.decision.withNote", { ...base, note: option.note });
+  }
+  return t("group.decision.some", base);
+}
 
 /** Start times offered for a proposal: every 30 min inside the free window. */
 function startTimes(option: OptionView, duration: number): number[] {
@@ -52,25 +89,39 @@ function Strip({
   readonly selectedKey: string | null;
   readonly onSelect: (key: string) => void;
 }) {
+  const selectedRef = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    const el = selectedRef.current;
+    if (!el) return;
+    const reduced = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+    el.scrollIntoView({
+      inline: "center",
+      block: "nearest",
+      behavior: reduced ? "auto" : "smooth",
+    });
+  }, []);
+
   return (
-    <section aria-labelledby="strip-title" className="mt-4">
-      <h2 id="strip-title" className={legend}>
+    <section aria-labelledby="strip-title" className="mt-5">
+      <h2 id="strip-title" className="font-extrabold text-base">
         {t("group.strip.title")}
       </h2>
-      <div className="-mx-4 mt-1 overflow-x-auto px-4 pb-1 sm:-mx-6 sm:px-6 lg:mx-0 lg:px-0">
-        <ol className="relative flex w-max gap-0.5">
+      <div className="-mx-4 mt-1.5 overflow-x-auto px-4 pb-1 sm:-mx-6 sm:px-6 lg:mx-0 lg:px-0">
+        <ol className="relative flex w-max gap-1">
           <span
             aria-hidden="true"
-            className="absolute top-[1.9rem] right-4 left-4 h-1 rounded-full bg-ink"
+            className="absolute top-[1.95rem] right-5 left-5 h-0.5 rounded-full bg-rule-strong"
           />
           {days.map((day) => {
             const selected =
               day.optionKey !== null && day.optionKey === selectedKey;
             const marker = !day.hasOption
-              ? "size-2 rounded-full bg-rule-strong"
+              ? "h-1.5 w-2 rounded-full bg-rule-strong"
               : day.allKnownFree
-                ? "size-5 rounded-full border-[3px] border-ink bg-ink"
-                : "size-5 rounded-full border-[3px] border-ink bg-surface";
+                ? "h-3 w-6 rounded-full bg-ink"
+                : "h-3 w-6 rounded-full border-2 border-ink bg-surface";
             const content = (
               <>
                 <span className="text-caption text-mute">
@@ -89,12 +140,15 @@ function Strip({
               <li key={day.date} className="relative">
                 {day.optionKey ? (
                   <button
+                    ref={selected ? selectedRef : undefined}
                     type="button"
                     onClick={() => day.optionKey && onSelect(day.optionKey)}
                     aria-pressed={selected}
                     aria-label={day.label}
-                    className={`flex min-h-11 w-10 flex-col items-center gap-0.5 rounded-cloth py-1 ${
-                      selected ? "bg-panel outline-2 outline-ink" : ""
+                    className={`flex min-h-11 w-11 flex-col items-center gap-0.5 rounded-cloth border-[1.5px] py-1 ${
+                      selected
+                        ? "border-ink bg-surface"
+                        : "border-transparent hover:bg-panel/80"
                     }`}
                   >
                     {content}
@@ -103,7 +157,7 @@ function Strip({
                   <span
                     role="img"
                     aria-label={day.label}
-                    className="flex min-h-11 w-10 flex-col items-center gap-0.5 py-1"
+                    className="flex min-h-11 w-11 flex-col items-center gap-0.5 py-1"
                   >
                     {content}
                   </span>
@@ -137,7 +191,13 @@ function ProposeForm({
   );
   const formRef = useRef<HTMLFormElement>(null);
   useEffect(() => {
-    formRef.current?.scrollIntoView({ block: "start", behavior: "smooth" });
+    const reduced = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+    formRef.current?.scrollIntoView({
+      block: "start",
+      behavior: reduced ? "auto" : "smooth",
+    });
     formRef.current
       ?.querySelector<HTMLInputElement>("input[name=title]")
       ?.focus({ preventScroll: true });
@@ -149,16 +209,16 @@ function ProposeForm({
     <form
       ref={formRef}
       action={action}
-      className="mt-3 scroll-mt-4 space-y-3 rounded-cloth border-2 border-ink px-3 py-3"
+      className="mt-4 scroll-mt-4 space-y-3 rounded-cloth border-[1.5px] border-ink bg-surface p-4"
       aria-labelledby="propose-title"
     >
-      <h2 id="propose-title" className="font-extrabold text-lg">
+      <h2 id="propose-title" className="font-extrabold text-xl">
         {t("propose.title")} · {option.dayLabel}
       </h2>
       <input type="hidden" name="date" value={option.date} />
       <input type="hidden" name="duration" value={duration} />
       <div>
-        <label htmlFor="propose-title-input" className={legend}>
+        <label htmlFor="propose-title-input" className={fieldLabel}>
           {t("propose.field.title")}
         </label>
         <input
@@ -171,7 +231,7 @@ function ProposeForm({
         />
       </div>
       <fieldset>
-        <legend className={legend}>{t("propose.field.duration")}</legend>
+        <legend className={fieldLabel}>{t("propose.field.duration")}</legend>
         <div className="mt-1 grid grid-cols-4 gap-1.5">
           {DURATIONS.map((minutes) => (
             <button
@@ -181,7 +241,7 @@ function ProposeForm({
               onClick={() => setDuration(minutes)}
               className={`min-h-11 rounded-cloth border-[1.5px] font-bold ${
                 duration === minutes
-                  ? "border-ink bg-ink text-white"
+                  ? "border-ink bg-ink text-surface"
                   : "border-rule-strong bg-surface"
               }`}
             >
@@ -191,7 +251,7 @@ function ProposeForm({
         </div>
       </fieldset>
       <div>
-        <label htmlFor="propose-start" className={legend}>
+        <label htmlFor="propose-start" className={fieldLabel}>
           {t("propose.field.start")}
         </label>
         <select
@@ -219,7 +279,7 @@ function ProposeForm({
           )}
         </p>
       ) : null}
-      <div className="flex gap-2">
+      <div className="flex flex-wrap gap-2">
         <button
           type="button"
           onClick={onClose}
@@ -230,7 +290,7 @@ function ProposeForm({
         <button
           type="submit"
           disabled={pending}
-          className={`${buttonClasses.primary} flex-1`}
+          className={`${buttonClasses.primary} min-w-40 flex-1`}
         >
           {t("propose.submit")}
         </button>
@@ -244,8 +304,10 @@ export function GroupBoard({
   alone,
   options,
   strip,
+  missing,
   inviteUrl,
   shareText,
+  noProfileNotice,
   propose,
 }: GroupBoardProps) {
   const [selectedKey, setSelectedKey] = useState(options[0]?.key ?? null);
@@ -260,15 +322,31 @@ export function GroupBoard({
   if (alone) {
     return (
       <>
+        {noProfileNotice}
         <section
           aria-labelledby="alone-title"
-          className="mt-5 rounded-cloth border-2 border-ink px-3 py-4"
+          className="mt-5 rounded-cloth border border-rule bg-surface p-4 sm:p-5"
         >
-          <h2 id="alone-title" className="font-extrabold text-lg">
+          <div
+            className="mb-3 flex max-w-52 flex-col gap-1.5"
+            aria-hidden="true"
+          >
+            <div className="relative flex h-2 items-center">
+              <span className="h-0.5 w-full rounded-full bg-rule" />
+              <span
+                className="yarn absolute left-0 h-2 w-24 rounded-full"
+                style={{ background: threadColor(0).value }}
+              />
+            </div>
+            <div className="relative flex h-2 items-center">
+              <span className="thread-loose h-0.5 w-full" />
+            </div>
+          </div>
+          <h2 id="alone-title" className="font-extrabold text-xl">
             {t("group.alone.title")}
           </h2>
           <p className="mt-1 text-mute text-sm">{t("group.alone.body")}</p>
-          <div className="mt-3 flex gap-2">
+          <div className="mt-4 flex flex-wrap gap-2">
             <WhatsAppLink label={t("group.share")} text={shareText} />
             <ShareButton url={inviteUrl} text={shareText} />
           </div>
@@ -278,12 +356,34 @@ export function GroupBoard({
     );
   }
 
+  const topOptions = options.slice(0, 3);
+  const moreOptions = options.slice(3);
+
   // Phone and tablet: one column in DOM order, the footer sticky to the
   // viewport (the wrappers use `contents` so they never clip it). Desktop:
   // availability on the left, plans and actions in a sticky aside.
   return (
     <div className="contents lg:grid lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start lg:gap-x-10">
       <div className="contents lg:block lg:min-w-0">
+        {selected ? (
+          <section
+            aria-labelledby="decision-heading"
+            className="mt-4 rounded-cloth bg-ink px-4 py-4 text-surface"
+          >
+            <h2
+              id="decision-heading"
+              className="font-extrabold text-[1.625rem] leading-[1.08] tracking-[-0.02em] sm:text-[1.875rem]"
+            >
+              {selected.dayLabel} · {formatTime(selected.start)}
+            </h2>
+            <p className="mt-1 text-[0.9375rem] text-ink-sub">
+              {decisionLine(selected, missing)}
+            </p>
+          </section>
+        ) : null}
+
+        {noProfileNotice}
+
         <Strip
           days={strip}
           selectedKey={selected?.key ?? null}
@@ -309,24 +409,61 @@ export function GroupBoard({
           />
         ) : null}
 
-        <section aria-labelledby="days-title" className="mt-4">
-          <h2 id="days-title" className={legend}>
+        <section aria-labelledby="days-title" className="mt-6">
+          <h2 id="days-title" className="font-extrabold text-base">
             {t("group.days.title")}
           </h2>
+          {missing.length > 0 ? (
+            <p className="mt-0.5 text-mute text-sm">{missingLine(missing)}</p>
+          ) : null}
           {options.length > 0 ? (
-            <ul className="mt-1 border-rule border-t">
-              {options.map((option, index) => (
-                <OptionRow
-                  key={option.key}
-                  option={option}
-                  rank={index}
-                  selected={option.key === selected?.key}
-                  onSelect={() => select(option.key)}
-                />
-              ))}
-            </ul>
+            <>
+              <ul className="mt-2 border-rule border-t">
+                {topOptions.map((option, index) => (
+                  <OptionRow
+                    key={option.key}
+                    option={option}
+                    rank={index}
+                    selected={option.key === selected?.key}
+                    onSelect={() => select(option.key)}
+                  />
+                ))}
+              </ul>
+              {moreOptions.length > 0 ? (
+                <details className="group mt-1">
+                  <summary className="flex min-h-11 cursor-pointer list-none items-center gap-1 font-bold text-indigo text-sm [&::-webkit-details-marker]:hidden">
+                    <svg
+                      aria-hidden="true"
+                      viewBox="0 0 16 16"
+                      className="size-4 transition-transform group-open:rotate-90"
+                    >
+                      <path
+                        d="M6 3l5 5-5 5"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2.2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                    {t("group.days.more")}
+                  </summary>
+                  <ul className="border-rule border-t">
+                    {moreOptions.map((option, index) => (
+                      <OptionRow
+                        key={option.key}
+                        option={option}
+                        rank={index + 3}
+                        selected={option.key === selected?.key}
+                        onSelect={() => select(option.key)}
+                      />
+                    ))}
+                  </ul>
+                </details>
+              ) : null}
+            </>
           ) : (
-            <div className="mt-2 rounded-cloth border border-rule border-dashed px-3 py-4">
+            <div className="mt-2 rounded-cloth border border-rule border-dashed bg-surface px-4 py-4">
               <p className="font-extrabold">{t("group.empty.title")}</p>
               <p className="mt-1 text-mute text-sm">{t("group.empty.body")}</p>
             </div>
@@ -339,7 +476,7 @@ export function GroupBoard({
 
         <footer
           hidden={proposing}
-          className={`${shellClasses.footer} mt-4 lg:static lg:order-first lg:mx-0 lg:border-0 lg:px-0 lg:pt-0 lg:pb-0`}
+          className={`${shellClasses.footer} mt-5 lg:static lg:order-first lg:mx-0 lg:mt-4 lg:border-0 lg:px-0 lg:pt-0 lg:pb-0`}
         >
           {selected && !proposing ? (
             <button
@@ -350,7 +487,11 @@ export function GroupBoard({
               {t("group.propose", { day: selected.dayLabel })}
             </button>
           ) : null}
-          <div className={`flex gap-2 ${selected && !proposing ? "mt-2" : ""}`}>
+          <div
+            className={`flex flex-wrap gap-2 ${
+              selected && !proposing ? "mt-2" : ""
+            }`}
+          >
             <WhatsAppLink label={t("group.share")} text={shareText} />
             <ShareButton url={inviteUrl} text={shareText} />
           </div>

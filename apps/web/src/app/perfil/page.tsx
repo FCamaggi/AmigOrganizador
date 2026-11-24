@@ -168,21 +168,18 @@ async function ProfileScreen({
         save={saveProfileAction}
       >
         <section aria-labelledby="import-title" className="mt-6">
-          <h2
-            id="import-title"
-            className="font-extrabold text-xs uppercase tracking-[0.06em]"
-          >
+          <h2 id="import-title" className="font-extrabold text-lg">
             {t("profileEdit.import.title")}
           </h2>
           <p className="mt-0.5 text-mute text-sm">
             {t("profileEdit.import.hint")}
           </p>
           {profile.importedCalendars.length > 0 ? (
-            <ul className="mt-3 border-rule border-t">
+            <ul className="mt-3 rounded-cloth border border-rule bg-surface px-3">
               {profile.importedCalendars.map((calendar) => (
                 <li
                   key={calendar.id}
-                  className="flex items-center gap-2 border-rule border-b py-2"
+                  className="flex flex-wrap items-center gap-2 border-rule border-b py-2.5 last:border-b-0"
                 >
                   <span className="min-w-0 flex-1">
                     <span className="block font-extrabold">
@@ -195,28 +192,30 @@ async function ProfileScreen({
                       })}
                     </span>
                   </span>
-                  <form action={resyncCalendarAction.bind(null, calendar.id)}>
-                    <button
-                      type="submit"
-                      className={`${buttonClasses.secondary} px-2 text-sm`}
+                  <div className="flex flex-wrap gap-2">
+                    <form action={resyncCalendarAction.bind(null, calendar.id)}>
+                      <button
+                        type="submit"
+                        className={`${buttonClasses.secondary} min-w-fit px-3 text-sm`}
+                      >
+                        {t("profileEdit.import.resync")}
+                      </button>
+                    </form>
+                    <form
+                      action={removeCalendarAction.bind(
+                        null,
+                        calendar.id,
+                        activeId,
+                      )}
                     >
-                      {t("profileEdit.import.resync")}
-                    </button>
-                  </form>
-                  <form
-                    action={removeCalendarAction.bind(
-                      null,
-                      calendar.id,
-                      activeId,
-                    )}
-                  >
-                    <button
-                      type="submit"
-                      className={`${buttonClasses.secondary} px-2 text-sm`}
-                    >
-                      {t("profileEdit.import.remove")}
-                    </button>
-                  </form>
+                      <button
+                        type="submit"
+                        className={`${buttonClasses.secondary} min-w-fit px-3 text-sm`}
+                      >
+                        {t("profileEdit.import.remove")}
+                      </button>
+                    </form>
+                  </div>
                 </li>
               ))}
             </ul>

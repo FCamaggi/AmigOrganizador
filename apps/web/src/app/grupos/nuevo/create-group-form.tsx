@@ -9,7 +9,7 @@ import {
   createGroupAction,
 } from "@/server/group-actions";
 
-const legend = "font-extrabold text-xs uppercase tracking-[0.06em]";
+const fieldLabel = "font-bold text-sm text-ink";
 
 export function CreateGroupForm({
   needsName,
@@ -25,7 +25,7 @@ export function CreateGroupForm({
   return (
     <form action={action} className="mt-4 space-y-5" noValidate>
       <div>
-        <label htmlFor="groupName" className={legend}>
+        <label htmlFor="groupName" className={fieldLabel}>
           {t("groupNew.field.name")}
         </label>
         <input
@@ -41,7 +41,7 @@ export function CreateGroupForm({
       </div>
       {needsName ? (
         <div>
-          <label htmlFor="name" className={legend}>
+          <label htmlFor="name" className={fieldLabel}>
             {t("create.field.name")}
           </label>
           <input
@@ -60,7 +60,7 @@ export function CreateGroupForm({
         </div>
       ) : null}
       <div>
-        <label htmlFor="timezone" className={legend}>
+        <label htmlFor="timezone" className={fieldLabel}>
           {t("create.field.timezone")}
         </label>
         <select

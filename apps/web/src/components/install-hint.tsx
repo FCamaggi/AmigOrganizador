@@ -72,7 +72,7 @@ export function InstallHint() {
   return (
     <section
       aria-labelledby="install-hint-title"
-      className="mt-3 rounded-cloth bg-panel px-3 pt-3 pb-1"
+      className="mt-3 rounded-cloth border border-rule bg-surface px-3.5 pt-3.5 pb-1.5"
     >
       <div className="flex items-start gap-3">
         <Image
@@ -91,12 +91,12 @@ export function InstallHint() {
           </p>
         </div>
       </div>
-      <div className="mt-1 flex items-center gap-2 pl-[3.25rem]">
+      <div className="mt-1.5 flex flex-wrap items-center gap-2 sm:pl-[3.25rem]">
         {hint.kind === "prompt" ? (
           <button
             type="button"
             onClick={install}
-            className="flex min-h-11 flex-1 items-center justify-center rounded-cloth bg-madder px-3 font-bold text-[0.9375rem] text-white hover:bg-madder-pressed active:bg-madder-active"
+            className="flex min-h-11 min-w-fit flex-1 items-center justify-center rounded-cloth bg-madder px-3 font-bold text-[0.9375rem] text-white hover:bg-madder-pressed active:bg-madder-active"
           >
             {t("pwa.install.action")}
           </button>
@@ -104,7 +104,7 @@ export function InstallHint() {
         <button
           type="button"
           onClick={dismiss}
-          className="flex min-h-11 items-center justify-center px-1 font-bold text-indigo text-sm underline"
+          className="flex min-h-11 items-center justify-center px-2 font-bold text-indigo text-sm underline"
         >
           {t("pwa.install.dismiss")}
         </button>

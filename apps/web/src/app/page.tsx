@@ -47,7 +47,7 @@ async function HomeContent() {
           {t("groups.signedOut.body")}
         </p>
         <div className="lg:col-start-2 lg:row-span-3 lg:row-start-1">
-          <HomeLines />
+          <HomeCloth />
         </div>
         <div className="mt-auto pt-8 pb-[max(1.125rem,env(safe-area-inset-bottom))] sm:max-w-sm lg:col-start-1 lg:row-start-3 lg:mt-0">
           <Link href="/grupos/nuevo" className={buttonClasses.primary}>
@@ -76,12 +76,12 @@ async function HomeContent() {
   return (
     <div className="contents lg:grid lg:grid-cols-[minmax(0,20rem)_minmax(0,1fr)] lg:items-start lg:gap-x-12">
       <div className="lg:col-start-1 lg:row-start-1">
-        <div className="mt-6 flex items-baseline justify-between">
+        <div className="mt-6 flex items-baseline justify-between gap-2">
           <h1 className="font-extrabold text-[1.75rem]">{t("groups.title")}</h1>
           <form action={signOut}>
             <button
               type="submit"
-              className="min-h-11 px-1 font-bold text-indigo text-sm underline"
+              className="inline-flex min-h-11 min-w-11 items-center justify-center px-2 font-bold text-indigo text-sm underline"
             >
               {t("signin.signOut")}
             </button>
@@ -93,13 +93,13 @@ async function HomeContent() {
 
         <Link
           href="/perfil"
-          className={`mt-4 flex items-center gap-3 rounded-cloth px-3 py-3 no-underline ${
+          className={`mt-4 flex items-center gap-3 rounded-cloth bg-surface px-3.5 py-3 no-underline ${
             profile ? "border border-rule" : "border-2 border-ink"
           }`}
         >
           <span
             aria-hidden="true"
-            className="h-1.5 w-10 flex-none rounded-full"
+            className="yarn h-2 w-10 flex-none rounded-full"
             style={{ background: threadColor(0).value }}
           />
           <span className="min-w-0 flex-1">
@@ -131,7 +131,7 @@ async function HomeContent() {
 
       <div className="lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:mt-6">
         {mine.length === 0 ? (
-          <div className="mt-6 rounded-cloth border border-rule border-dashed px-3 py-4 lg:mt-0">
+          <div className="mt-6 rounded-cloth border border-rule border-dashed bg-surface px-4 py-4 lg:mt-0">
             <p className="font-extrabold">{t("groups.empty.title")}</p>
             <p className="mt-1 text-mute text-sm">{t("groups.empty.body")}</p>
           </div>
@@ -141,13 +141,9 @@ async function HomeContent() {
               <li key={group.id}>
                 <Link
                   href={`/g/${group.inviteCode}`}
-                  className="flex min-h-16 items-center gap-3 border-rule border-b py-3 no-underline"
+                  className="flex min-h-16 items-center gap-3 border-rule border-b py-3 no-underline hover:bg-panel/60"
                 >
-                  <span
-                    aria-hidden="true"
-                    className="size-[1.375rem] flex-none rounded-full border-[5px] bg-surface"
-                    style={{ borderColor: "var(--ink)" }}
-                  />
+                  <WovenGroupGlyph offset={index} />
                   <span className="min-w-0 flex-1">
                     <span className="block truncate font-extrabold text-[1.0625rem]">
                       {group.name}
@@ -174,33 +170,59 @@ async function HomeContent() {
   );
 }
 
-/** A static three-line diagram that explains the idea before anyone signs in. */
-function HomeLines() {
+/** Miniature woven swatch for each group row, echoing the cloth at icon scale. */
+function WovenGroupGlyph({ offset }: { readonly offset: number }) {
+  return (
+    <span
+      aria-hidden="true"
+      className="relative flex size-7 flex-none flex-col justify-center gap-[3px] rounded-knot border-[1.5px] border-ink bg-surface px-1"
+    >
+      <span
+        className="yarn block h-[3px] w-full rounded-full"
+        style={{ background: threadColor(offset).value }}
+      />
+      <span
+        className="yarn block h-[3px] w-full rounded-full"
+        style={{ background: threadColor(offset + 1).value }}
+      />
+      <span
+        className="yarn block h-[3px] w-full rounded-full"
+        style={{ background: threadColor(offset + 2).value }}
+      />
+    </span>
+  );
+}
+
+/** A static three-thread woven cloth that explains the idea before anyone signs in. */
+function HomeCloth() {
   const rows = [
-    { name: "A", free: [[10, 92]] },
-    { name: "B", free: [[34, 100]] },
+    { name: "A", free: [[8, 86]] },
+    { name: "B", free: [[36, 98]] },
     {
       name: "C",
       free: [
-        [0, 22],
-        [40, 86],
+        [0, 24],
+        [44, 88],
       ],
     },
   ];
   return (
-    <div aria-hidden="true" className="mt-8">
-      <div className="relative">
-        <span className="absolute inset-y-[-6px] left-[calc(1.5rem+40%)] w-[calc((100%-1.5rem)*0.46)] rounded-lg border-2 border-ink" />
-        <ul className="space-y-2">
+    <div
+      aria-hidden="true"
+      className="mt-8 rounded-cloth border border-rule bg-surface p-4 sm:p-5 lg:mt-0"
+    >
+      <div className="relative py-1">
+        <span className="absolute -inset-y-1 left-[calc(1.5rem+(100%-1.5rem)*0.44)] w-[calc((100%-1.5rem)*0.42)] rounded-knot border-[3px] border-ink" />
+        <ul className="relative space-y-2.5">
           {rows.map((row, i) => (
             <li key={row.name} className="flex h-5 items-center">
               <span className="w-6 font-extrabold text-sm">{row.name}</span>
               <span className="relative h-5 flex-1">
-                <span className="absolute inset-x-0 top-1/2 h-px bg-rule" />
+                <span className="absolute inset-x-0 top-1/2 h-0.5 -translate-y-1/2 rounded-full bg-rule" />
                 {row.free.map(([a, b]) => (
                   <span
                     key={a}
-                    className="absolute top-[7px] h-1.5 rounded-full"
+                    className="yarn absolute top-1/2 h-2 -translate-y-1/2 rounded-full"
                     style={{
                       left: `${a}%`,
                       width: `${(b ?? 0) - (a ?? 0)}%`,
