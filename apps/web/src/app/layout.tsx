@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Roboto_Condensed } from "next/font/google";
+import { ServiceWorker } from "@/components/service-worker";
 import { t } from "@/i18n/t";
 import "./globals.css";
 
@@ -17,6 +18,14 @@ export const metadata: Metadata = {
     : undefined,
   title: t("app.name"),
   description: t("app.tagline"),
+  applicationName: t("app.name"),
+  // iOS ignores the manifest: these tags make "Agregar a inicio" open the
+  // app standalone with its own name and icon (`app/apple-icon.png`).
+  appleWebApp: {
+    capable: true,
+    title: t("app.name"),
+    statusBarStyle: "default",
+  },
 };
 
 export const viewport: Viewport = {
@@ -28,7 +37,10 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="es-CL" className={robotoCondensed.variable}>
-      <body>{children}</body>
+      <body>
+        {children}
+        <ServiceWorker />
+      </body>
     </html>
   );
 }

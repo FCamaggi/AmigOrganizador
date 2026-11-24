@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Three metro lines meeting at a station. Full-bleed and drawn inside the
+       maskable safe zone (a centred circle of radius 204), so the same art
+       serves as favicon, home screen icon and Android adaptive icon. -->
+  <rect width="512" height="512" fill="#1d1d1b"/>
+  <rect x="104" y="166" width="304" height="36" rx="18" fill="#e1251b"/>
+  <rect x="104" y="238" width="304" height="36" rx="18" fill="#0065bd"/>
+  <rect x="104" y="310" width="304" height="36" rx="18" fill="#ffc20e"/>
+  <rect x="214" y="134" width="84" height="244" rx="42" fill="#ffffff" stroke="#1d1d1b" stroke-width="14"/>
+</svg>

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Suspense } from "react";
+import { InstallHint } from "@/components/install-hint";
 import { t } from "@/i18n/t";
 import { lineColor } from "@/lib/lines";
 import { buttonClasses, shellClasses } from "@/lib/ui";
@@ -124,6 +125,8 @@ async function HomeContent() {
             />
           </svg>
         </Link>
+        {/* Setting up the profile comes first; installing can wait. */}
+        {profile ? <InstallHint /> : null}
       </div>
 
       <div className="lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:mt-6">

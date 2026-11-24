@@ -6,6 +6,17 @@ export const esCL = {
   "app.name": "AmigOrganizador",
   "app.beta": "beta",
   "app.tagline": "De “juntémonos” a un plan en el calendario de todos.",
+  "pwa.shortcut.profile": "Mi perfil",
+  "pwa.install.title": "Tenla a un toque",
+  "pwa.install.body":
+    "Agrégala a tu pantalla de inicio y ábrela como una app, sin buscar el link.",
+  "pwa.install.action": "Agregar al inicio",
+  "pwa.install.ios": "En Safari, toca Compartir y luego “Agregar a inicio”.",
+  "pwa.install.dismiss": "Ahora no",
+  "offline.title": "Sin conexión",
+  "offline.body":
+    "Necesitas internet para ver tus grupos. Revisa tu conexión y vuelve a intentar.",
+  "offline.retry": "Reintentar",
 
   "home.title": "Tus planes",
   "home.empty.title": "Todavía no hay planes",

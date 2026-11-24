@@ -1,0 +1,48 @@
+import type { MetadataRoute } from "next";
+import { t } from "@/i18n/t";
+
+/**
+ * Web app manifest: lets people add the app to their home screen and open
+ * it standalone, without browser chrome. iOS reads the `appleWebApp`
+ * metadata in the root layout instead.
+ */
+export default function manifest(): MetadataRoute.Manifest {
+  return {
+    id: "/",
+    name: t("app.name"),
+    short_name: t("app.name"),
+    description: t("app.tagline"),
+    lang: "es-CL",
+    start_url: "/",
+    scope: "/",
+    display: "standalone",
+    background_color: "#ffffff",
+    theme_color: "#ffffff",
+    categories: ["social", "productivity"],
+    // The art sits inside the maskable safe zone, so one file serves both.
+    icons: [
+      {
+        src: "/icons/icon-192.png",
+        sizes: "192x192",
+        type: "image/png",
+        purpose: "any",
+      },
+      {
+        src: "/icons/icon-512.png",
+        sizes: "512x512",
+        type: "image/png",
+        purpose: "any",
+      },
+      {
+        src: "/icons/icon-512.png",
+        sizes: "512x512",
+        type: "image/png",
+        purpose: "maskable",
+      },
+    ],
+    shortcuts: [
+      { name: t("pwa.shortcut.profile"), url: "/perfil" },
+      { name: t("groups.create"), url: "/grupos/nuevo" },
+    ],
+  };
+}
