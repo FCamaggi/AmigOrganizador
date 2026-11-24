@@ -1,10 +1,10 @@
 ---
-name: AmigOrganizador
+name: Knot
 description: Telar. Each friend is a thread across the day; where every thread rides on top, the cloth closes into a band, and that band is the plan.
 colors:
   ground: "#e9ebe8"
   surface: "#fbfbfa"
-  panel: "#f1f2ef"
+  panel: "rgba(35, 38, 58, 0.06)"
   ink: "#23263a"
   ink-sub: "#c9ccd8"
   mute: "#4a4d60"
@@ -180,7 +180,7 @@ components:
     size: "24px"
 ---
 
-# Design System: AmigOrganizador
+# Design System: Knot
 
 ## Overview
 
@@ -188,16 +188,17 @@ components:
 
 The app is a loom. Each person in a group is one dyed-wool thread running across the hours of a day. Where a person is free their thread rides on top of the cloth in their colour, spun so its twist shows; where they are busy the thread dives under the cloth and only a thin grey under-thread runs between two coloured ticks; where nobody knows their schedule the thread hangs loose and dotted. Where every thread rides on top at once, the cloth closes into a band, and that band is the day the group meets. The whole interface exists to make that band visible and to propose it in one tap.
 
-The ground is undyed grey wool, the ink is indigo-black, and the only saturated colour that is not a person is madder red, reserved for the one action that ends the screen. Surfaces are flat folded cloth with soft 14px blanket-edge corners; there are no shadows anywhere. Density is phone-first and generous at the target level (44px minimum) but tight in the woven diagrams, which grow denser, never taller, as groups grow. The app is light only on purpose: it is read on phones outdoors, in daylight.
+The material is real: every free thread is drawn with a twisted-wool texture (raster strips generated in `scripts/yarn/` from the brand's yarn generator), and every surface is a woven tile, never a flat fill. The ground is undyed grey wool, the ink is indigo-black, and the only saturated colour that is not a person is madder red, reserved for the one action that ends the screen. Surfaces are folded cloth with soft 14px blanket-edge corners and no box-shadows; the single lift in the system is the soft shadow a thread casts on the weave beneath it. Density is phone-first and generous at the target level (44px minimum) but tight in the woven diagrams, which grow denser, never taller, as groups grow. The app is light only on purpose: it is read on phones outdoors, in daylight.
 
 The world refuses the scheduling category's green heatmap grid and the replaced "Línea de Metro" signage. The weave is one form at every scale: the full day cloth, the small woven band beside each option, the day strip, the member chips, the plan marks, the app icon and the link preview all draw the same thread language.
 
 **Key Characteristics:**
-- One thread per person, coloured by join order; colour says *who*, shape says *state*.
+- One thread per person, in the colour they picked (or a free one by join order); colour says *who*, shape says *state*.
+- Real yarn on woven cloth: textured threads, woven grounds, cards and panels; states are translucent ink washes over the weave.
 - Free = spun thread on top; busy = solid grey under-thread with coloured dive ticks; unknown = loose dotted thread. Unknown never reads as free.
 - The closed band (an ink-outlined window with a faint warp-and-weft fill) is the decision.
 - Madder red is the single primary action per screen and is never a person's colour.
-- Flat cloth surfaces, 14px and 6px corners, no shadows, light ground only.
+- Woven surfaces, 14px and 6px corners, no box-shadows, light ground only.
 - Bricolage Grotesque for names and big numbers; Figtree for everything you operate.
 
 ## Colors
@@ -211,18 +212,19 @@ An undyed, slightly green-grey wool ground with indigo-black ink, eight dyed-woo
 - **Loom Indigo** (indigo): links, back navigation, "Ver más días" disclosure text, and the focus ring. It shares its value with the first thread colour; as a link it is always underlined or paired with a chevron, never colour alone.
 
 ### Tertiary: the thread palette
-Eight dyed-wool colours assigned to members in join order (`threadColor(index)`), each at least 3.9:1 against the grey-wool ground so no thread needs an outline:
+Eight dyed-wool colours, defined once in `@amigo/core` (`THREAD_COLORS`) and drawn through `threadColor(slot)`, each at least 3.9:1 against the grey-wool ground so no thread needs an outline. A person picks theirs in the profile; inside a group `groupThreads` hands out slots in join order: each member claims the colour they picked (or, with no choice, the slot of their join position), and when it is taken, whoever joined first keeps it and the newcomer takes the next free colour. The member whose colour changed sees one line saying so in the group.
 - **Indigo** (thread-indigo), **Ochre** (thread-ochre), **Moss** (thread-moss), **Plum** (thread-plum), **Teal** (thread-teal), **Rose** (thread-rose), **Walnut** (thread-walnut), **Ink** (thread-ink).
-- They appear only as thread material: yarn segments, dive ticks, avatar fills and borders, member-chip swatches. They are never used for text, panels or buttons.
+- They appear only as thread material: yarn segments, dive ticks, avatar fills and borders, member-chip swatches, the profile's colour picker. They are never used for text, panels or buttons.
+- Each colour has a matching yarn strip; `.yarn` picks it from the inline colour, so components pass only `threadColor(slot).value` as `backgroundColor`.
 - Thread colours are emitted as static theme variables because components read them from inline styles.
 
 ### Neutral
-- **Grey Wool** (ground): page background, `html` background, theme colour, and sticky footer fill.
-- **Bleached Cloth** (surface): cards, the day cloth, the selected option row, inputs, secondary buttons.
-- **Fold Shadow** (panel): hover wash, skeletons, the no-schedule member chip, low-rank woven band frames.
-- **Indigo-Black Ink** (ink): all primary text, the decision panel, outlines of the closed band and selected states, the "Mejor" tag.
-- **Pale Indigo** (ink-sub): secondary text on the ink decision panel only (9.3:1 on ink).
-- **Slate Mute** (mute): secondary text, axis labels, placeholders, dotted loose threads (6.9:1 on ground).
+- **Grey Wool** (ground): the page, `html` and sticky footers, drawn as the coarse grey weave tile (96px); the hex is the flat colour underneath while the tile loads and the theme colour.
+- **Bleached Cloth** (surface): cards, the day cloth, the selected option row, inputs, secondary buttons, drawn as the fine light weave tile.
+- **Fold Wash** (panel): a translucent ink wash (6%) over the fine weave: skeletons, the no-schedule member chip, low-rank woven band frames, and the hover state of rows and controls.
+- **Indigo-Black Ink** (ink): all primary text, the decision panel (drawn as the dark wool tile), outlines of the closed band and selected states, the "Mejor" tag.
+- **Pale Indigo** (ink-sub): secondary text on the ink decision panel only (9.3:1 on flat ink, 4.8:1 on the lightest fibres of the dark wool).
+- **Slate Mute** (mute): secondary text, axis labels, placeholders, dotted loose threads (6.9:1 on flat ground, 6.06:1 on the darkest fibres of the grey weave).
 - **Hairline** (rule): list dividers, the bare warp line behind each thread, disabled primary fill.
 - **Strong Rule** (rule-strong): the busy under-thread, input and chip borders, low-rank band frames. Non-text only (4.0:1 on ground).
 - **Danger** (danger): inline error text only.
@@ -231,6 +233,10 @@ Eight dyed-wool colours assigned to members in join order (`threadColor(index)`)
 **The Colour Says Who Rule.** A thread colour identifies a person and nothing else. Free, busy and unknown are carried by shape (spun on top, dived under, loose dotted), so the cloth reads the same in greyscale.
 
 **The Madder Is Not A Person Rule.** Madder red is reserved for the primary action and is never given to a thread. If a screen has two madder elements, one of them is wrong.
+
+**The Measured On The Weave Rule.** Text contrast is measured against the textured tiles at text scale (the 2nd and 98th percentile fibres), not the flat hex. Ink stays above 10.8:1 and mute above 6:1 on every light weave; white on the dark wool stays above 7.6:1.
+
+**The First To Join Keeps It Rule.** A member who joins later never changes anyone else's thread. Clashes resolve in join order, and only the person whose colour moved is told, in one line.
 
 **The Double-Ply Rule.** When a group outgrows the eight colours, second-cycle members (`threadPly(index) === 2`) draw every thread, swatch and avatar border double-ply, so no member relies on colour alone.
 
@@ -269,12 +275,16 @@ The day strip scrolls horizontally and bleeds to the screen edge on phones; each
 
 ## Elevation & Depth
 
-The system is flat. There is no box-shadow anywhere. Depth is tonal and textile: the grey-wool ground, a bleached-cloth surface laid on it, and a darker fold (panel) for hover and inactive material. Emphasis comes from border weight and the ink panel, not from lift.
+There is no box-shadow anywhere. Depth is tonal and textile: the coarse grey-wool ground, a fine bleached-cloth weave laid on it, the dark wool of the decision panel, and translucent ink washes for hover, pressed and inactive material. Emphasis comes from border weight and the ink panel, not from lift.
+
+The one lift is the thread itself: spun yarn carries cylindrical shading (a light top, a dark bottom) and a soft drop shadow (`filter: drop-shadow(0 1px 1px rgb(20 22 34 / 0.28))`) so it reads as rope lying on the cloth at 10–14px. Yarn that carries a label (a free avatar's initial) drops the shadow and takes a uniform 30% dark wash instead, so white text holds 5.9:1 or more on its lightest fibres.
 
 The only "depth" is the woven metaphor itself: a free thread sits on top of the warp line, a busy thread dives beneath it (shown as a thin solid under-thread between coloured ticks), and the closed band is a faint warp-and-weft fill behind the threads.
 
 ### Named Rules
-**The Flat Cloth Rule.** Surfaces never cast shadows. To raise importance, thicken the ink border (1px rule, 1.5px ink, 2.5–3px ink) or invert to the ink panel.
+**The Flat Cloth Rule.** Surfaces never cast shadows; only threads do. To raise importance, thicken the ink border (1px rule, 1.5px ink, 2.5–3px ink) or invert to the ink panel.
+
+**The Opaque Weave Rule.** The tiles are opaque, so a state is a translucent wash layered over the weave (`--cloth-wash`), never a flat colour that would either vanish under the tile or cover it with a flat patch. For the same reason, an inline style on a `.yarn` element sets `backgroundColor`, never the `background` shorthand, which resets the texture to none.
 
 ## Shapes
 
@@ -288,12 +298,12 @@ Borders carry meaning by weight and dash: a solid ink outline is chosen or close
 Tactile and plain: one primary and one secondary shape everywhere (`buttonClasses`).
 - **Shape:** folded-cloth corners (14px).
 - **Primary:** madder red, white 800-weight 1.0625rem text, 50px tall, full width. Hover darkens to pressed madder, active to deep madder; disabled is hairline grey with mute text. One per screen.
-- **Secondary:** bleached cloth with a 1.5px ink border, 700-weight 0.9375rem ink text, at least 44px tall, flexing to share a row (Invitar / Compartir). Hover washes to panel, active to hairline.
+- **Secondary:** bleached cloth weave with a 1.5px ink border, 700-weight 0.9375rem ink text, at least 44px tall, flexing to share a row (Invitar / Compartir). Hover lays a 5% ink wash over the weave, pressed a 10% wash.
 - **Toggle (duration picker):** 44px cloth-cornered cells with a 1.5px strong-rule border; the pressed one inverts to ink with surface text.
 - **Text links:** indigo, bold, underlined with a 3px offset, inside a 44px tall hit area.
 
 ### Chips
-- **Member chip:** knot corners, 1px strong-rule border, bold 0.875rem name, led by a 16×8px spun-yarn swatch in the member's thread colour (two stacked plies for second-cycle members). A member with no schedule gets a dotted border on panel with mute text plus a screen-reader note.
+- **Member chip:** knot corners, 1px strong-rule border, bold 0.875rem name, led by a 16×8px spun-yarn swatch in the member's thread colour (two stacked plies for second-cycle members). A member with no schedule gets a dotted border on panel with mute text plus a screen-reader note. The swatch colour is the member's slot in this group, not their raw pick.
 - **Reason tag:** knot corners, 1px strong-rule border on surface, bold caption ("Tarde-noche", "Buen día").
 - **Best tag:** ink fill with surface text, knot corners, shown only on the top-ranked option.
 
@@ -323,15 +333,26 @@ The day cloth in miniature beside each ranked option and in each day-strip cell:
 A radio row: woven band, day in title-row weight with the time in mute, reason tags, avatars, and a right-aligned "10/12 pueden" count scaled by rank. Rows are separated by hairlines; the selected row lifts to surface, others wash to panel on hover.
 
 ### Avatars
-24px round initials in caption weight 800. Free: filled with the thread colour, white text. Busy: surface fill, thread-coloured 1.5px border, ink text and a diagonal ink strike. Unknown: dashed mute border, mute text. Second-cycle members use a 3px double border. Up to eight show, then "+N".
+24px round initials in caption weight 800. Free: filled with the member's labelled yarn (texture plus a 30% dark wash), white text. Busy: surface fill, thread-coloured 1.5px border, ink text and a diagonal ink strike. Unknown: dashed mute border, mute text. Second-cycle members use a 3px double border. Up to eight show, then "+N".
 
 ### Decision Panel
-The ink slab at the top of the group view: ink fill, surface display-decision text for the day and time, ink-sub line for who can and who is missing. It is the only inverted surface.
+The ink slab at the top of the group view: dark wool weave, surface display-decision text for the day and time, ink-sub line for who can and who is missing. It is the only inverted surface.
+
+### Thread Picker
+Beside the name on the profile, a 44px "Tu hilo" control led by the person's yarn swatch (or a loose dotted thread when the choice is automatic) opens a sheet: eight yarn swatches with their Spanish names in a two-column grid (three from `sm`), plus "Automático". Each choice is a 48px cloth-cornered radio card; the checked one takes an ink border and a 2px ink ring, so selection never relies on the swatch colour. The sheet's one line explains that a group may show another colour when someone who joined earlier already has it.
+
+### Offline Page
+The page the service worker serves when a navigation fails: the Knot lockup, two short threads (one spun, one loose) above "Sin conexión", and a plain "Reintentar" link styled as the primary button. The worker keeps this page's CSS, fonts, logo and cloth tiles and serves them only when the network fails, so offline still looks like Knot.
+
+### Link Preview
+The 1200×630 image WhatsApp shows for an invite: the lockup on the woven grey ground, the group name and head count on a dark wool slab with a madder initial, four yarn threads weaving into a closed band, and "Unirme al grupo" in madder. Counts only, never member names.
 
 ## Do's and Don'ts
 
 ### Do:
-- **Do** give every person exactly one thread colour from the eight-colour wool palette in join order, and switch second-cycle members to double-ply.
+- **Do** give every person exactly one thread colour per group: their pick when it is free, otherwise the next free colour by join order; switch second-cycle members to double-ply.
+- **Do** draw threads and surfaces with the yarn and cloth textures; pass thread colours inline as `backgroundColor`.
+- **Do** express hover, pressed and panel states as translucent ink washes over the weave.
 - **Do** carry free, busy and unknown by shape: spun yarn on top, solid under-thread with dive ticks, loose dotted thread.
 - **Do** use madder red (#b8322a) for the one primary action per screen, in the sticky footer on phones.
 - **Do** use cloth corners (14px) for surfaces and controls and knot corners (6px) for chips, tags and woven bands.
@@ -343,6 +364,8 @@ The ink slab at the top of the group view: ink fill, surface display-decision te
 - **Don't** give madder red to a person's thread, or use thread colours for text, buttons or panels.
 - **Don't** draw unknown time as anything that could read as free; never solid, never coloured.
 - **Don't** draw the busy under-thread dotted or dashed; at 2–3px it would read as the "no schedule" thread.
-- **Don't** add box-shadows, elevation or a dark theme; the ground is daylight grey wool.
+- **Don't** add box-shadows, elevation or a dark theme; the ground is daylight grey wool, and only threads cast a shadow.
+- **Don't** put white text on plain yarn; use the labelled yarn wash.
+- **Don't** let a newcomer's pick change the colour of someone already in the group.
 - **Don't** build availability as a green heatmap grid or as transit-line signage.
 - **Don't** cap a screen at phone width on desktop.

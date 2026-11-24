@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-11-24T00:00:00Z",
-  "title": "Design System: AmigOrganizador",
+  "generatedAt": "2026-11-24T23:45:41.420734+00:00",
+  "title": "Design System: Knot",
   "extensions": {
     "colorMeta": {
       "ground": {
@@ -36,8 +36,8 @@
       },
       "panel": {
         "role": "neutral",
-        "displayName": "Fold Shadow",
-        "canonical": "oklch(96.0% 0.004 121.6)",
+        "displayName": "Fold Wash",
+        "canonical": "rgba(35, 38, 58, 0.06)",
         "tonalRamp": [
           "#0b0b0a",
           "#242422",
@@ -370,7 +370,13 @@
         "purpose": "Secondary button label."
       }
     },
-    "shadows": [],
+    "shadows": [
+      {
+        "name": "thread-lift",
+        "value": "drop-shadow(0 1px 1px rgb(20 22 34 / 0.28))",
+        "purpose": "The only lift in the system: spun yarn lying on the weave (CSS filter on .yarn). Labelled yarn drops it."
+      }
+    ],
     "patterns": [
       {
         "name": "yarn",
@@ -506,13 +512,14 @@
   ],
   "narrative": {
     "northStar": "Telar",
-    "overview": "The app is a loom. Each person in a group is one dyed-wool thread running across the hours of a day. Where a person is free their thread rides on top of the cloth in their colour, spun so its twist shows; where they are busy the thread dives under the cloth and only a thin grey under-thread runs between two coloured ticks; where nobody knows their schedule the thread hangs loose and dotted. Where every thread rides on top at once, the cloth closes into a band, and that band is the day the group meets. The whole interface exists to make that band visible and to propose it in one tap.\n\nThe ground is undyed grey wool, the ink is indigo-black, and the only saturated colour that is not a person is madder red, reserved for the one action that ends the screen. Surfaces are flat folded cloth with soft 14px blanket-edge corners; there are no shadows anywhere. Density is phone-first and generous at the target level (44px minimum) but tight in the woven diagrams, which grow denser, never taller, as groups grow. The app is light only on purpose: it is read on phones outdoors, in daylight.\n\nThe world refuses the scheduling category's green heatmap grid and the replaced \"Línea de Metro\" signage. The weave is one form at every scale: the full day cloth, the small woven band beside each option, the day strip, the member chips, the plan marks, the app icon and the link preview all draw the same thread language.",
+    "overview": "The app is a loom. Each person in a group is one dyed-wool thread running across the hours of a day. Where a person is free their thread rides on top of the cloth in their colour, spun so its twist shows; where they are busy the thread dives under the cloth and only a thin grey under-thread runs between two coloured ticks; where nobody knows their schedule the thread hangs loose and dotted. Where every thread rides on top at once, the cloth closes into a band, and that band is the day the group meets. The whole interface exists to make that band visible and to propose it in one tap.\n\nThe material is real: every free thread is drawn with a twisted-wool texture (raster strips generated in `scripts/yarn/` from the brand's yarn generator), and every surface is a woven tile, never a flat fill. The ground is undyed grey wool, the ink is indigo-black, and the only saturated colour that is not a person is madder red, reserved for the one action that ends the screen. Surfaces are folded cloth with soft 14px blanket-edge corners and no box-shadows; the single lift in the system is the soft shadow a thread casts on the weave beneath it. Density is phone-first and generous at the target level (44px minimum) but tight in the woven diagrams, which grow denser, never taller, as groups grow. The app is light only on purpose: it is read on phones outdoors, in daylight.\n\nThe world refuses the scheduling category's green heatmap grid and the replaced \"Línea de Metro\" signage. The weave is one form at every scale: the full day cloth, the small woven band beside each option, the day strip, the member chips, the plan marks, the app icon and the link preview all draw the same thread language.",
     "keyCharacteristics": [
-      "One thread per person, coloured by join order; colour says *who*, shape says *state*.",
+      "One thread per person, in the colour they picked (or a free one by join order); colour says *who*, shape says *state*.",
+      "Real yarn on woven cloth: textured threads, woven grounds, cards and panels; states are translucent ink washes over the weave.",
       "Free = spun thread on top; busy = solid grey under-thread with coloured dive ticks; unknown = loose dotted thread. Unknown never reads as free.",
       "The closed band (an ink-outlined window with a faint warp-and-weft fill) is the decision.",
       "Madder red is the single primary action per screen and is never a person's colour.",
-      "Flat cloth surfaces, 14px and 6px corners, no shadows, light ground only.",
+      "Woven surfaces, 14px and 6px corners, no box-shadows, light ground only.",
       "Bricolage Grotesque for names and big numbers; Figtree for everything you operate."
     ],
     "rules": [
@@ -527,6 +534,16 @@
         "section": "colors"
       },
       {
+        "name": "The Measured On The Weave Rule",
+        "body": "Text contrast is measured against the textured tiles at text scale (the 2nd and 98th percentile fibres), not the flat hex. Ink stays above 10.8:1 and mute above 6:1 on every light weave; white on the dark wool stays above 7.6:1.",
+        "section": "colors"
+      },
+      {
+        "name": "The First To Join Keeps It Rule",
+        "body": "A member who joins later never changes anyone else's thread. Clashes resolve in join order, and only the person whose colour moved is told, in one line.",
+        "section": "colors"
+      },
+      {
         "name": "The Double-Ply Rule",
         "body": "When a group outgrows the eight colours, second-cycle members (`threadPly(index) === 2`) draw every thread, swatch and avatar border double-ply, so no member relies on colour alone.",
         "section": "colors"
@@ -538,12 +555,19 @@
       },
       {
         "name": "The Flat Cloth Rule",
-        "body": "Surfaces never cast shadows. To raise importance, thicken the ink border (1px rule, 1.5px ink, 2.5–3px ink) or invert to the ink panel.",
+        "body": "Surfaces never cast shadows; only threads do. To raise importance, thicken the ink border (1px rule, 1.5px ink, 2.5–3px ink) or invert to the ink panel.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Opaque Weave Rule",
+        "body": "The tiles are opaque, so a state is a translucent wash layered over the weave (`--cloth-wash`), never a flat colour that would either vanish under the tile or cover it with a flat patch. For the same reason, an inline style on a `.yarn` element sets `backgroundColor`, never the `background` shorthand, which resets the texture to none.",
         "section": "elevation"
       }
     ],
     "dos": [
-      "Do give every person exactly one thread colour from the eight-colour wool palette in join order, and switch second-cycle members to double-ply.",
+      "Do give every person exactly one thread colour per group: their pick when it is free, otherwise the next free colour by join order; switch second-cycle members to double-ply.",
+      "Do draw threads and surfaces with the yarn and cloth textures; pass thread colours inline as `backgroundColor`.",
+      "Do express hover, pressed and panel states as translucent ink washes over the weave.",
       "Do carry free, busy and unknown by shape: spun yarn on top, solid under-thread with dive ticks, loose dotted thread.",
       "Do use madder red (#b8322a) for the one primary action per screen, in the sticky footer on phones.",
       "Do use cloth corners (14px) for surfaces and controls and knot corners (6px) for chips, tags and woven bands.",
@@ -555,7 +579,9 @@
       "Don't give madder red to a person's thread, or use thread colours for text, buttons or panels.",
       "Don't draw unknown time as anything that could read as free; never solid, never coloured.",
       "Don't draw the busy under-thread dotted or dashed; at 2–3px it would read as the \"no schedule\" thread.",
-      "Don't add box-shadows, elevation or a dark theme; the ground is daylight grey wool.",
+      "Don't add box-shadows, elevation or a dark theme; the ground is daylight grey wool, and only threads cast a shadow.",
+      "Don't put white text on plain yarn; use the labelled yarn wash.",
+      "Don't let a newcomer's pick change the colour of someone already in the group.",
       "Don't build availability as a green heatmap grid or as transit-line signage.",
       "Don't cap a screen at phone width on desktop."
     ]
