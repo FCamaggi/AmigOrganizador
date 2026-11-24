@@ -16,8 +16,8 @@ export default function manifest(): MetadataRoute.Manifest {
     start_url: "/",
     scope: "/",
     display: "standalone",
-    background_color: "#ffffff",
-    theme_color: "#ffffff",
+    background_color: "#e9ebe8",
+    theme_color: "#e9ebe8",
     categories: ["social", "productivity"],
     // The art sits inside the maskable safe zone, so one file serves both.
     icons: [

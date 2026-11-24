@@ -14,7 +14,7 @@ export function TopBar({
     <nav className="flex items-center justify-between font-bold text-sm">
       <Link
         href={backHref}
-        className="-ml-2 flex min-h-11 items-center px-2 text-line-blue no-underline"
+        className="-ml-2 flex min-h-11 items-center px-2 text-indigo no-underline"
       >
         <svg aria-hidden="true" viewBox="0 0 16 16" className="mr-0.5 size-4">
           <path

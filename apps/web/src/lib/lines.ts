@@ -1,21 +1,21 @@
 /**
- * Santiago Metro line colours, one per person in join order. Yellow gets an
- * ink outline wherever it is drawn, because it fails 3:1 on white.
+ * Dyed-wool thread colours, one per person in join order. Each holds at least
+ * 3.9:1 against the grey-wool ground, so no thread needs an outline. Madder
+ * red is kept for the primary action and never given to a person.
  */
-export const LINE_COLORS = [
-  { name: "red", value: "var(--line-red)", outlined: false },
-  { name: "blue", value: "var(--line-blue)", outlined: false },
-  { name: "yellow", value: "var(--line-yellow)", outlined: true },
-  { name: "green", value: "var(--line-green)", outlined: false },
-  { name: "purple", value: "var(--line-purple)", outlined: false },
-  { name: "ink", value: "var(--ink)", outlined: false },
+export const THREAD_COLORS = [
+  { name: "indigo", value: "var(--color-thread-indigo)" },
+  { name: "ochre", value: "var(--color-thread-ochre)" },
+  { name: "moss", value: "var(--color-thread-moss)" },
+  { name: "plum", value: "var(--color-thread-plum)" },
+  { name: "teal", value: "var(--color-thread-teal)" },
+  { name: "rose", value: "var(--color-thread-rose)" },
+  { name: "walnut", value: "var(--color-thread-walnut)" },
+  { name: "ink", value: "var(--color-thread-ink)" },
 ] as const;
 
-/** Above this many people the diagram collapses free lines into a trunk. */
-export const MAX_SEPARATE_LINES = 6;
-
-export function lineColor(index: number) {
-  return LINE_COLORS[index % LINE_COLORS.length] ?? LINE_COLORS[0];
+export function threadColor(index: number) {
+  return THREAD_COLORS[index % THREAD_COLORS.length] ?? THREAD_COLORS[0];
 }
 
 /**

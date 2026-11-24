@@ -20,7 +20,7 @@ export default function NewGroupPage() {
         fallback={
           <div
             aria-hidden="true"
-            className="mt-4 h-64 animate-pulse rounded-sign bg-panel"
+            className="mt-4 h-64 animate-pulse rounded-cloth bg-panel"
           />
         }
       >

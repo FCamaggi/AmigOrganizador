@@ -1,108 +1,30 @@
-<!doctype html>
-<html lang="es-CL">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=390">
-<title>Estándar de la categoría</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<!doctype html><html lang="es-CL"><head><meta charset="utf-8">
 <style>
-  :root{--ink:#0F172A;--mute:#475569;--line:#E2E8F0;--soft:#F8FAFC;--acc:#4F46E5;--acc-soft:#EEF2FF}
-  html,body{width:390px;height:844px;overflow:hidden;margin:0}
-  body{background:#FFFFFF;color:var(--ink);font-family:"Inter",system-ui,sans-serif;font-size:14px;line-height:1.4}
-  *{box-sizing:border-box}
-  .top{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid var(--line);font-size:14px;font-weight:500}
-  .top a{color:var(--acc);text-decoration:none}
-  .head{padding:14px 16px 0}
-  .head h1{margin:0;font-size:22px;font-weight:700;letter-spacing:-.01em}
-  .head p{margin:2px 0 0;color:var(--mute);font-size:13px}
-  .stat{margin:12px 16px 0;padding:10px 12px;border:1px solid var(--line);border-radius:8px;display:flex;justify-content:space-between;align-items:center;font-size:13px}
-  .stat b{font-weight:600}
-  .stat span{color:var(--mute)}
-  .bar{height:6px;border-radius:3px;background:var(--line);margin-top:6px;width:150px;overflow:hidden}
-  .bar i{display:block;height:100%;width:83%;background:var(--acc)}
-  h2{margin:16px 16px 8px;font-size:13px;font-weight:600;color:var(--mute);text-transform:uppercase;letter-spacing:.04em}
-  table{margin:0 16px;width:calc(100% - 32px);border-collapse:collapse;font-size:13px}
-  th,td{border-bottom:1px solid var(--line);padding:8px 0;text-align:center}
-  th{font-weight:600;color:var(--mute);font-size:12px}
-  th:first-child,td:first-child{text-align:left;padding-right:6px}
-  .opt b{display:block;font-weight:600;font-size:14px}
-  .opt span{color:var(--mute);font-size:12px}
-  tr.best td{background:var(--acc-soft)}
-  tr.best td:first-child{box-shadow:inset 3px 0 0 var(--acc);padding-left:8px}
-  .m{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;font-size:12px;font-weight:700;line-height:1}
-  .y{background:var(--ink);color:#fff}
-  .n{border:1.5px solid var(--ink);color:var(--ink)}
-  .u{border:1.5px dashed var(--mute);color:var(--mute)}
-  .tot{font-weight:700;color:var(--ink)}
-  .reasons{padding:0 16px;margin-top:10px;display:flex;flex-direction:column;gap:6px}
-  .reason{display:flex;justify-content:space-between;align-items:center;font-size:13px}
-  .reason .k{font-weight:600}
-  .chips{display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end}
-  .chip{font-size:12px;font-weight:500;background:var(--soft);border:1px solid var(--line);border-radius:999px;padding:1px 8px;color:var(--ink)}
-  .legend{display:flex;gap:14px;padding:10px 16px 0;font-size:12px;color:var(--mute)}
-  .legend span{display:flex;gap:5px;align-items:center}
-  .legend .m{width:16px;height:16px;font-size:10px}
-  .actions{position:absolute;left:0;right:0;bottom:0;padding:12px 16px 20px;border-top:1px solid var(--line);background:#fff}
-  .primary{width:100%;height:48px;border:0;border-radius:8px;background:var(--acc);color:#fff;font:600 16px "Inter",sans-serif}
-  .secondary{display:flex;gap:8px;margin-top:8px}
-  .btn2{flex:1;height:42px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink);font:500 14px "Inter",sans-serif}
-</style>
-</head>
-<body>
-  <div class="top"><a href="#">‹ Planes</a><span>Organiza Ana</span></div>
-  <div class="head">
-    <h1>Asado de fin de año</h1>
-    <p>Próximas 2 semanas · duración 3 h · 6 invitados</p>
-  </div>
-  <div class="stat">
-    <div><b>5 de 6 respondieron</b><div class="bar"><i></i></div></div>
-    <span>Caro todavía no responde</span>
-  </div>
-
-  <h2>Mejores opciones</h2>
-  <table>
-    <thead>
-      <tr><th>Opción</th><th>A</th><th>B</th><th>C</th><th>D</th><th>E</th><th>F</th><th>Total</th></tr>
-    </thead>
-    <tbody>
-      <tr class="best">
-        <td class="opt"><b>Vie 19 dic</b><span>19:00–22:00</span></td>
-        <td><span class="m y" aria-label="puede">✓</span></td><td><span class="m y">✓</span></td>
-        <td><span class="m u" aria-label="sin responder">?</span></td><td><span class="m y">✓</span></td>
-        <td><span class="m y">✓</span></td><td><span class="m y">✓</span></td>
-        <td class="tot">5/6</td>
-      </tr>
-      <tr>
-        <td class="opt"><b>Sáb 20 dic</b><span>13:00–16:00</span></td>
-        <td><span class="m y">✓</span></td><td><span class="m n" aria-label="no puede">✕</span></td>
-        <td><span class="m u">?</span></td><td><span class="m y">✓</span></td>
-        <td><span class="m y">✓</span></td><td><span class="m y">✓</span></td>
-        <td class="tot">4/6</td>
-      </tr>
-      <tr>
-        <td class="opt"><b>Jue 18 dic</b><span>19:30–22:30</span></td>
-        <td><span class="m y">✓</span></td><td><span class="m y">✓</span></td>
-        <td><span class="m u">?</span></td><td><span class="m y">✓</span></td>
-        <td><span class="m y">✓</span></td><td><span class="m n">✕</span></td>
-        <td class="tot">4/6</td>
-      </tr>
-    </tbody>
-  </table>
-  <div class="legend">
-    <span><i class="m y">✓</i>Puede</span><span><i class="m n">✕</i>No puede</span><span><i class="m u">?</i>Sin responder</span>
-  </div>
-
-  <h2>Por qué</h2>
-  <div class="reasons">
-    <div class="reason"><span class="k">Vie 19</span><span class="chips"><span class="chip">Bloque largo</span><span class="chip">Tarde/noche</span><span class="chip">Buen día</span></span></div>
-    <div class="reason"><span class="k">Sáb 20</span><span class="chips"><span class="chip">Buen día</span><span class="chip">Beto no puede</span></span></div>
-    <div class="reason"><span class="k">Jue 18</span><span class="chips"><span class="chip">Tarde/noche</span></span></div>
-  </div>
-
-  <footer class="actions">
-    <button class="primary">Confirmar viernes 19</button>
-    <div class="secondary"><button class="btn2">Invitar a Caro</button><button class="btn2">Compartir link</button></div>
-  </footer>
-</body>
-</html>
+*{box-sizing:border-box;margin:0}
+body{width:390px;height:844px;overflow:hidden;background:#fff;color:#111827;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+.top{padding:16px 16px 0;display:flex;justify-content:space-between;font-size:15px;color:#2563eb}
+h1{font-size:26px;font-weight:700;padding:12px 16px 2px}
+.meta{padding:0 16px;font-size:14px;color:#6b7280}
+.grid{margin:18px 16px 0;display:grid;grid-template-columns:40px repeat(7,1fr);gap:3px;font-size:11px;color:#6b7280}
+.grid i{font-style:normal;text-align:center}
+.c{height:26px;border-radius:4px}
+h2{font-size:16px;padding:20px 16px 8px}
+.it{margin:0 16px;padding:12px;border:1px solid #e5e7eb;border-radius:10px;display:flex;justify-content:space-between;margin-bottom:8px;font-size:15px}
+.it span{color:#16a34a;font-weight:600}
+.cta{position:absolute;left:16px;right:16px;bottom:22px;height:50px;border-radius:10px;background:#2563eb;color:#fff;font-weight:600;font-size:16px;display:flex;align-items:center;justify-content:center}
+</style></head><body>
+<div class="top"><span>‹ Grupos</span><span>Invitar</span></div>
+<h1>Pichanga de los jueves</h1>
+<p class="meta">7 personas · 6 con horario</p>
+<div class="grid">
+<i></i><i>Ju</i><i>Vi</i><i>Sá</i><i>Do</i><i>Lu</i><i>Ma</i><i>Mi</i>
+<i>Mañ</i><div class="c" style="background:#dcfce7"></div><div class="c" style="background:#bbf7d0"></div><div class="c" style="background:#86efac"></div><div class="c" style="background:#bbf7d0"></div><div class="c" style="background:#f3f4f6"></div><div class="c" style="background:#f3f4f6"></div><div class="c" style="background:#dcfce7"></div>
+<i>Tar</i><div class="c" style="background:#bbf7d0"></div><div class="c" style="background:#86efac"></div><div class="c" style="background:#4ade80"></div><div class="c" style="background:#86efac"></div><div class="c" style="background:#dcfce7"></div><div class="c" style="background:#dcfce7"></div><div class="c" style="background:#bbf7d0"></div>
+<i>Noc</i><div class="c" style="background:#86efac"></div><div class="c" style="background:#4ade80"></div><div class="c" style="background:#16a34a"></div><div class="c" style="background:#4ade80"></div><div class="c" style="background:#bbf7d0"></div><div class="c" style="background:#86efac"></div><div class="c" style="background:#86efac"></div>
+</div>
+<h2>Mejores horarios</h2>
+<div class="it"><b>Sáb 12 · 19:00</b><span>6 de 7</span></div>
+<div class="it"><b>Vie 18 · 20:00</b><span>5 de 7</span></div>
+<div class="it"><b>Dom 13 · 13:00</b><span>5 de 7</span></div>
+<div class="cta">Proponer el sábado 12</div>
+</body></html>

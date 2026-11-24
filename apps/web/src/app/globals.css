@@ -1,35 +1,48 @@
 @import "tailwindcss";
 
-/* Línea de Metro: white enamel ground, ink signage, Santiago Metro line
-   colours. Flat: no shadows, no gradients. Light only by design (signage). */
+/* Telar: an undyed grey-wool ground, indigo-black ink, and one dyed-wool
+   thread colour per person. Free time is a thread on top, busy time a thread
+   that dives under the cloth, unknown a loose dotted thread. Flat: no
+   shadows. Light only: the app is read on phones outdoors, in daylight. */
+/* Thread colours are read from inline styles, not utility classes, so they
+   must always be emitted. */
+@theme static {
+  --color-thread-indigo: #2f4fa2;
+  --color-thread-ochre: #9a6a0a;
+  --color-thread-moss: #3e7d5a;
+  --color-thread-plum: #7a4b9c;
+  --color-thread-teal: #1f7a80;
+  --color-thread-rose: #a8406e;
+  --color-thread-walnut: #6b4a2b;
+  --color-thread-ink: #23263a;
+}
+
 @theme {
-  --color-ground: #ffffff;
-  --color-ink: #1d1d1b;
-  --color-mute: #555552;
-  --color-rule: #e4e4e1;
-  --color-rule-strong: #bdbdb9;
-  --color-panel: #f4f4f2;
-  --color-line-red: #e1251b;
-  --color-line-blue: #0065bd;
-  --color-line-yellow: #ffc20e;
-  --color-line-green: #00a651;
-  --color-line-purple: #8b2f8f;
-  --color-sign-sub: #d6d6d3;
-  --color-danger: #b3140c;
+  --color-ground: #e9ebe8;
+  --color-surface: #fbfbfa;
+  --color-ink: #23263a;
+  --color-ink-sub: #c9ccd8;
+  --color-mute: #4a4d60;
+  --color-rule: #d3d6d0;
+  --color-rule-strong: #6f7284;
+  --color-panel: #f1f2ef;
+  --color-madder: #b8322a;
+  --color-madder-pressed: #9c2a23;
+  --color-madder-active: #85231d;
+  --color-indigo: #2f4fa2;
+  --color-danger: #a3221a;
 
-  --font-sign: var(--font-roboto-condensed), "Arial Narrow", sans-serif;
+  --font-ui: var(--font-figtree), system-ui, sans-serif;
+  --font-display: var(--font-bricolage), var(--font-figtree), sans-serif;
 
-  --radius-sign: 6px;
-  --radius-chip: 3px;
+  --text-caption: 0.75rem;
+
+  --radius-cloth: 14px;
+  --radius-knot: 6px;
 }
 
 :root {
   --ink: var(--color-ink);
-  --line-red: var(--color-line-red);
-  --line-blue: var(--color-line-blue);
-  --line-yellow: var(--color-line-yellow);
-  --line-green: var(--color-line-green);
-  --line-purple: var(--color-line-purple);
   color-scheme: light;
 }
 
@@ -50,22 +63,33 @@
   body {
     background: var(--color-ground);
     color: var(--color-ink);
-    font-family: var(--font-sign);
+    font-family: var(--font-ui);
     font-size: 1rem;
     line-height: 1.35;
     font-variant-numeric: tabular-nums;
     -webkit-tap-highlight-color: transparent;
   }
 
+  h1,
+  h2 {
+    font-family: var(--font-display);
+    letter-spacing: -0.015em;
+  }
+
   ::selection {
-    background: var(--color-line-yellow);
-    color: var(--color-ink);
+    background: var(--color-thread-ochre);
+    color: #ffffff;
   }
 
   :focus-visible {
-    outline: 3px solid var(--color-line-blue);
+    outline: 3px solid var(--color-indigo);
     outline-offset: 2px;
-    border-radius: 4px;
+    border-radius: var(--radius-knot);
+  }
+
+  /* Sticky action footers must never hide the control that has focus. */
+  html:has(.sticky-footer) {
+    scroll-padding-bottom: 6.5rem;
   }
 
   input,
@@ -84,7 +108,8 @@
   }
 }
 
-/* Out-of-service hatch for busy time: shape, not only colour. */
+/* Busy time in an editor: the thread dives under the cloth, so the ground
+   shows through a woven texture. Shape, not only colour. */
 .hatch-busy {
   background-color: var(--color-ink);
   background-image: repeating-linear-gradient(
@@ -94,21 +119,29 @@
   );
 }
 
-/* Dashed track for people who haven't answered. */
+/* Spun yarn: a free thread shows its twist, so the cloth reads as woven
+   rather than as plotted lines. */
+.yarn {
+  background-image: repeating-linear-gradient(
+    -60deg,
+    rgb(255 255 255 / 0.2) 0 2px,
+    transparent 2px 5px
+  );
+}
+
+/* A loose, unspun thread: someone without a schedule. Never reads as free. */
+.thread-loose,
 .track-unknown {
   background-image: repeating-linear-gradient(
     90deg,
-    var(--color-mute) 0 5px,
-    transparent 5px 10px
+    var(--color-mute) 0 3px,
+    transparent 3px 7px
   );
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .move-station {
-    transition:
-      left 220ms cubic-bezier(0.16, 1, 0.3, 1),
-      width 220ms cubic-bezier(0.16, 1, 0.3, 1);
-  }
+  .weave-move,
+  .move-station,
   .move-line {
     transition:
       left 220ms cubic-bezier(0.16, 1, 0.3, 1),

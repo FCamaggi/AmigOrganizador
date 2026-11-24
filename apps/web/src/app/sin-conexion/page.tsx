@@ -17,7 +17,7 @@ export default function Offline() {
       <p className="font-extrabold text-lg">{t("app.name")}</p>
       <div className="mt-10 flex items-center gap-2" aria-hidden="true">
         <span className="h-1.5 w-16 rounded-full bg-line-red" />
-        <span className="size-4 rounded-full border-[4px] border-ink bg-white" />
+        <span className="size-4 rounded-full border-[4px] border-ink bg-surface" />
         <span className="h-1.5 w-16 rounded-full border border-rule-strong border-dashed" />
       </div>
       <h1 className="mt-6 font-extrabold text-[2rem] leading-tight">

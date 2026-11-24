@@ -24,7 +24,7 @@ export function SignInForm({ next }: { readonly next: string }) {
         autoComplete="given-name"
         aria-invalid={state.error}
         aria-describedby={state.error ? "name-error" : undefined}
-        className="mt-1 block min-h-12 w-full rounded-sign border-[1.5px] border-ink bg-white px-3 text-lg"
+        className="mt-1 block min-h-12 w-full rounded-cloth border-[1.5px] border-ink bg-surface px-3 text-lg"
       />
       {state.error ? (
         <p id="name-error" className="mt-1 font-bold text-danger text-sm">

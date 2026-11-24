@@ -73,9 +73,9 @@ function GroupSkeleton() {
   return (
     <div aria-hidden="true" className="animate-pulse">
       <div className="h-11" />
-      <div className="h-[3.75rem] rounded-sign bg-panel" />
+      <div className="h-[3.75rem] rounded-cloth bg-panel" />
       <div className="mt-4 h-20 rounded bg-panel" />
-      <div className="mt-3 h-52 rounded-sign bg-panel" />
+      <div className="mt-3 h-52 rounded-cloth bg-panel" />
     </div>
   );
 }
@@ -146,7 +146,7 @@ async function GroupScreen({
           {group.members.map((m) => (
             <li
               key={m.accountId}
-              className={`rounded-chip border px-2 py-0.5 font-bold text-sm ${
+              className={`rounded-knot border px-2 py-0.5 font-bold text-sm ${
                 withProfile.has(m.accountId)
                   ? "border-ink"
                   : "border-rule-strong border-dashed text-mute"
@@ -224,7 +224,7 @@ async function GroupScreen({
               <div className="flex items-start gap-2.5">
                 <span
                   aria-hidden="true"
-                  className={`mt-1 h-3.5 w-7 flex-none rounded-full border-2 bg-white ${
+                  className={`mt-1 h-3.5 w-7 flex-none rounded-full border-2 bg-surface ${
                     plan.status === "confirmed"
                       ? "border-ink"
                       : "border-mute border-dashed"
@@ -320,7 +320,7 @@ async function GroupScreen({
       {header}
       {!withProfile.has(viewerId) ? (
         <section
-          className="mt-3 rounded-sign border-2 border-ink px-3 py-3"
+          className="mt-3 rounded-cloth border-2 border-ink px-3 py-3"
           aria-labelledby="no-profile"
         >
           <h2 id="no-profile" className="font-extrabold">
@@ -352,7 +352,7 @@ async function GroupScreen({
         propose={proposePlanAction.bind(null, group.inviteCode)}
       >
         {plansSection}
-        <section className="mt-5 rounded-sign border border-rule p-3 text-sm">
+        <section className="mt-5 rounded-cloth border border-rule p-3 text-sm">
           {viewerSchedules.length > 1 ? (
             <form
               action={chooseGroupScheduleAction.bind(null, group.inviteCode)}
@@ -370,7 +370,7 @@ async function GroupScreen({
                   name="scheduleId"
                   key={chosenScheduleId}
                   defaultValue={chosenScheduleId}
-                  className="min-h-11 min-w-0 flex-1 rounded-sign border-[1.5px] border-rule-strong bg-white px-3 font-bold"
+                  className="min-h-11 min-w-0 flex-1 rounded-cloth border-[1.5px] border-rule-strong bg-surface px-3 font-bold"
                 >
                   {viewerSchedules.map((sched) => {
                     const id = scheduleId(sched);
@@ -396,7 +396,7 @@ async function GroupScreen({
               </p>
               <Link
                 href={profileHref}
-                className="flex min-h-11 items-center font-bold text-line-blue underline"
+                className="flex min-h-11 items-center font-bold text-indigo underline"
               >
                 {t("group.schedule.createAnother")}
               </Link>
@@ -408,7 +408,7 @@ async function GroupScreen({
           {group.members.map((m) => (
             <li
               key={m.accountId}
-              className={`rounded-chip border px-2 py-0.5 font-bold text-sm ${
+              className={`rounded-knot border px-2 py-0.5 font-bold text-sm ${
                 withProfile.has(m.accountId)
                   ? "border-ink"
                   : "border-rule-strong border-dashed text-mute"
@@ -422,7 +422,7 @@ async function GroupScreen({
         <section className="mt-6 space-y-1 text-sm">
           <a
             href={feedUrl}
-            className="flex min-h-11 items-center font-bold text-line-blue underline"
+            className="flex min-h-11 items-center font-bold text-indigo underline"
           >
             {t("group.feed")}
           </a>

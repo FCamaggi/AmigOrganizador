@@ -1,13 +1,19 @@
 import type { Metadata, Viewport } from "next";
-import { Roboto_Condensed } from "next/font/google";
+import { Bricolage_Grotesque, Figtree } from "next/font/google";
 import { ServiceWorker } from "@/components/service-worker";
 import { t } from "@/i18n/t";
 import "./globals.css";
 
-const robotoCondensed = Roboto_Condensed({
+// Figtree carries the interface; Bricolage Grotesque sets names and big
+// numbers, where the woven world speaks loudest.
+const figtree = Figtree({
   subsets: ["latin"],
-  weight: ["400", "500", "700", "800"],
-  variable: "--font-roboto-condensed",
+  variable: "--font-figtree",
+  display: "swap",
+});
+const bricolage = Bricolage_Grotesque({
+  subsets: ["latin"],
+  variable: "--font-bricolage",
   display: "swap",
 });
 
@@ -29,14 +35,14 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#ffffff",
+  themeColor: "#e9ebe8",
   width: "device-width",
   initialScale: 1,
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="es-CL" className={robotoCondensed.variable}>
+    <html lang="es-CL" className={`${figtree.variable} ${bricolage.variable}`}>
       <body>
         {children}
         <ServiceWorker />

@@ -1,4 +1,4 @@
-import type { DiagramLine } from "@/components/line-diagram";
+import type { ClothThread } from "@/components/day-cloth";
 
 export type PersonState = "free" | "busy" | "unknown";
 
@@ -18,5 +18,5 @@ export interface OptionView {
   readonly people: readonly { name: string; state: PersonState }[];
   readonly note: string | null;
   readonly span: { start: number; end: number };
-  readonly lines: readonly DiagramLine[];
+  readonly lines: readonly ClothThread[];
 }

@@ -36,7 +36,7 @@ export function CreateGroupForm({
           placeholder={t("groupNew.field.name.placeholder")}
           defaultValue={state.values?.groupName}
           aria-invalid={state.error === "INVALID_NAME"}
-          className="mt-1.5 block min-h-12 w-full rounded-sign border-[1.5px] border-ink bg-white px-3 font-bold text-lg"
+          className="mt-1.5 block min-h-12 w-full rounded-cloth border-[1.5px] border-ink bg-surface px-3 font-bold text-lg"
         />
       </div>
       {needsName ? (
@@ -52,7 +52,7 @@ export function CreateGroupForm({
             autoComplete="given-name"
             defaultValue={state.values?.name}
             aria-describedby="name-hint"
-            className="mt-1.5 block min-h-12 w-full rounded-sign border-[1.5px] border-ink bg-white px-3 text-lg"
+            className="mt-1.5 block min-h-12 w-full rounded-cloth border-[1.5px] border-ink bg-surface px-3 text-lg"
           />
           <p id="name-hint" className="mt-1 text-mute text-sm">
             {t("create.field.name.hint")}
@@ -67,7 +67,7 @@ export function CreateGroupForm({
           id="timezone"
           name="timezone"
           defaultValue={state.values?.timezone ?? DEFAULT_TIMEZONE}
-          className="mt-1.5 block min-h-12 w-full rounded-sign border-[1.5px] border-rule-strong bg-white px-3"
+          className="mt-1.5 block min-h-12 w-full rounded-cloth border-[1.5px] border-rule-strong bg-surface px-3"
         >
           {TIMEZONES.map((zone) => (
             <option key={zone} value={zone}>

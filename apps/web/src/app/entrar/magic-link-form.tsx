@@ -6,7 +6,7 @@ import { buttonClasses } from "@/lib/ui";
 import { type MagicLinkState, sendMagicLink } from "@/server/actions";
 
 const field =
-  "mt-1 block min-h-12 w-full rounded-sign border-[1.5px] border-ink bg-white px-3 text-lg";
+  "mt-1 block min-h-12 w-full rounded-cloth border-[1.5px] border-ink bg-surface px-3 text-lg";
 
 export function MagicLinkForm({ next }: { readonly next: string }) {
   const [state, action, pending] = useActionState<MagicLinkState, FormData>(
@@ -19,7 +19,7 @@ export function MagicLinkForm({ next }: { readonly next: string }) {
     return (
       <section
         aria-live="polite"
-        className="mt-5 rounded-sign border-2 border-ink px-3 py-3"
+        className="mt-5 rounded-cloth border-2 border-ink px-3 py-3"
       >
         <h2 className="font-extrabold">{t("signin.sent.title")}</h2>
         <p className="mt-1 text-mute text-sm">

@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState, useEffect, useRef, useState } from "react";
-import { LineDiagram } from "@/components/line-diagram";
+import { DayCloth } from "@/components/day-cloth";
 import { OptionRow } from "@/components/option-row";
 import { ShareButton, WhatsAppLink } from "@/components/share-buttons";
 import { type MessageKey, t } from "@/i18n/t";
@@ -70,17 +70,17 @@ function Strip({
               ? "size-2 rounded-full bg-rule-strong"
               : day.allKnownFree
                 ? "size-5 rounded-full border-[3px] border-ink bg-ink"
-                : "size-5 rounded-full border-[3px] border-ink bg-white";
+                : "size-5 rounded-full border-[3px] border-ink bg-surface";
             const content = (
               <>
-                <span className="text-[0.6875rem] text-mute">
+                <span className="text-caption text-mute">
                   {day.weekday.slice(0, 2)}
                 </span>
                 <span className="relative grid h-6 place-items-center">
                   <span aria-hidden="true" className={marker} />
                 </span>
                 <span className="font-extrabold text-xs">{day.dayOfMonth}</span>
-                <span className="text-[0.6875rem] text-mute leading-none">
+                <span className="text-caption text-mute leading-none">
                   {day.hasOption ? `${day.free}/${day.total}` : "–"}
                 </span>
               </>
@@ -93,7 +93,7 @@ function Strip({
                     onClick={() => day.optionKey && onSelect(day.optionKey)}
                     aria-pressed={selected}
                     aria-label={day.label}
-                    className={`flex min-h-11 w-10 flex-col items-center gap-0.5 rounded-sign py-1 ${
+                    className={`flex min-h-11 w-10 flex-col items-center gap-0.5 rounded-cloth py-1 ${
                       selected ? "bg-panel outline-2 outline-ink" : ""
                     }`}
                   >
@@ -149,7 +149,7 @@ function ProposeForm({
     <form
       ref={formRef}
       action={action}
-      className="mt-3 scroll-mt-4 space-y-3 rounded-sign border-2 border-ink px-3 py-3"
+      className="mt-3 scroll-mt-4 space-y-3 rounded-cloth border-2 border-ink px-3 py-3"
       aria-labelledby="propose-title"
     >
       <h2 id="propose-title" className="font-extrabold text-lg">
@@ -167,7 +167,7 @@ function ProposeForm({
           required
           maxLength={80}
           placeholder={t("propose.field.title.placeholder")}
-          className="mt-1 block min-h-12 w-full rounded-sign border-[1.5px] border-ink bg-white px-3 font-bold text-lg"
+          className="mt-1 block min-h-12 w-full rounded-cloth border-[1.5px] border-ink bg-surface px-3 font-bold text-lg"
         />
       </div>
       <fieldset>
@@ -179,10 +179,10 @@ function ProposeForm({
               type="button"
               aria-pressed={duration === minutes}
               onClick={() => setDuration(minutes)}
-              className={`min-h-11 rounded-sign border-[1.5px] font-bold ${
+              className={`min-h-11 rounded-cloth border-[1.5px] font-bold ${
                 duration === minutes
                   ? "border-ink bg-ink text-white"
-                  : "border-rule-strong bg-white"
+                  : "border-rule-strong bg-surface"
               }`}
             >
               {formatDuration(minutes)}
@@ -199,7 +199,7 @@ function ProposeForm({
           name="start"
           key={`${option.key}-${duration}`}
           defaultValue={defaultStart}
-          className="mt-1 block min-h-12 w-full rounded-sign border-[1.5px] border-rule-strong bg-white px-3"
+          className="mt-1 block min-h-12 w-full rounded-cloth border-[1.5px] border-rule-strong bg-surface px-3"
         >
           {times.map((m) => (
             <option key={m} value={m}>
@@ -262,7 +262,7 @@ export function GroupBoard({
       <>
         <section
           aria-labelledby="alone-title"
-          className="mt-5 rounded-sign border-2 border-ink px-3 py-4"
+          className="mt-5 rounded-cloth border-2 border-ink px-3 py-4"
         >
           <h2 id="alone-title" className="font-extrabold text-lg">
             {t("group.alone.title")}
@@ -292,11 +292,11 @@ export function GroupBoard({
 
         {selected ? (
           <div className="mt-3">
-            <LineDiagram
+            <DayCloth
               dayLabel={selected.dayLabel}
               span={selected.span}
-              station={{ start: selected.start, end: selected.end }}
-              lines={selected.lines}
+              band={{ start: selected.start, end: selected.end }}
+              threads={selected.lines}
             />
           </div>
         ) : null}
@@ -326,7 +326,7 @@ export function GroupBoard({
               ))}
             </ul>
           ) : (
-            <div className="mt-2 rounded-sign border border-rule border-dashed px-3 py-4">
+            <div className="mt-2 rounded-cloth border border-rule border-dashed px-3 py-4">
               <p className="font-extrabold">{t("group.empty.title")}</p>
               <p className="mt-1 text-mute text-sm">{t("group.empty.body")}</p>
             </div>

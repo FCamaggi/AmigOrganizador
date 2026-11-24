@@ -64,7 +64,7 @@ export function PersonSchedules({
 
   return (
     <div className="mt-4 grid gap-5 lg:grid-cols-2 lg:items-stretch lg:gap-x-10">
-      <div className="rounded-sign border border-rule p-3">
+      <div className="rounded-cloth border border-rule p-3">
         <form action={nameAction} noValidate>
           <label htmlFor="person-display-name" className={legend}>
             {t("profileEdit.name.label")}
@@ -80,7 +80,7 @@ export function PersonSchedules({
               required
               maxLength={60}
               aria-invalid={nameState.error !== null}
-              className="min-h-12 min-w-0 flex-1 rounded-sign border-[1.5px] border-ink bg-white px-3 font-bold text-lg"
+              className="min-h-12 min-w-0 flex-1 rounded-cloth border-[1.5px] border-ink bg-surface px-3 font-bold text-lg"
             />
             <button
               type="submit"
@@ -105,7 +105,7 @@ export function PersonSchedules({
 
       <section
         aria-labelledby="schedules-heading"
-        className="rounded-sign border border-rule p-3"
+        className="rounded-cloth border border-rule p-3"
       >
         <h2 id="schedules-heading" className={legend}>
           {t("profileEdit.schedules.title")}
@@ -132,7 +132,7 @@ export function PersonSchedules({
                         {item.name}
                       </span>
                       {item.isDefault ? (
-                        <span className="rounded-chip border border-ink bg-white px-1.5 py-px font-bold text-[0.6875rem] uppercase">
+                        <span className="rounded-knot border border-ink bg-surface px-1.5 py-px font-bold text-caption uppercase">
                           {t("profileEdit.schedules.defaultBadge")}
                         </span>
                       ) : null}
@@ -164,7 +164,7 @@ export function PersonSchedules({
               defaultValue={activeScheduleName}
               required
               maxLength={40}
-              className="min-h-11 min-w-0 flex-1 rounded-sign border-[1.5px] border-rule-strong bg-white px-3 font-bold"
+              className="min-h-11 min-w-0 flex-1 rounded-cloth border-[1.5px] border-rule-strong bg-surface px-3 font-bold"
             />
             <button
               type="submit"
@@ -236,7 +236,7 @@ export function PersonSchedules({
               required
               maxLength={40}
               placeholder={t("profileEdit.schedules.new.placeholder")}
-              className="min-h-11 min-w-0 flex-1 rounded-sign border-[1.5px] border-ink bg-white px-3"
+              className="min-h-11 min-w-0 flex-1 rounded-cloth border-[1.5px] border-ink bg-surface px-3"
             />
             <button
               type="submit"

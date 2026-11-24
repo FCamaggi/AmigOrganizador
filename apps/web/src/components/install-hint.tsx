@@ -72,7 +72,7 @@ export function InstallHint() {
   return (
     <section
       aria-labelledby="install-hint-title"
-      className="mt-3 rounded-sign bg-panel px-3 pt-3 pb-1"
+      className="mt-3 rounded-cloth bg-panel px-3 pt-3 pb-1"
     >
       <div className="flex items-start gap-3">
         <Image
@@ -96,7 +96,7 @@ export function InstallHint() {
           <button
             type="button"
             onClick={install}
-            className="flex min-h-11 flex-1 items-center justify-center rounded-sign bg-line-blue px-3 font-bold text-[0.9375rem] text-white hover:bg-[#00539c] active:bg-[#004a8b]"
+            className="flex min-h-11 flex-1 items-center justify-center rounded-cloth bg-madder px-3 font-bold text-[0.9375rem] text-white hover:bg-madder-pressed active:bg-madder-active"
           >
             {t("pwa.install.action")}
           </button>
@@ -104,7 +104,7 @@ export function InstallHint() {
         <button
           type="button"
           onClick={dismiss}
-          className="flex min-h-11 items-center justify-center px-1 font-bold text-line-blue text-sm underline"
+          className="flex min-h-11 items-center justify-center px-1 font-bold text-indigo text-sm underline"
         >
           {t("pwa.install.dismiss")}
         </button>

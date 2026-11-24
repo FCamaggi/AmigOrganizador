@@ -32,7 +32,7 @@ export function ImportForm({
           required
           maxLength={40}
           placeholder={t("profileEdit.import.name.placeholder")}
-          className="mt-1 block min-h-12 w-full rounded-sign border-[1.5px] border-ink bg-white px-3"
+          className="mt-1 block min-h-12 w-full rounded-cloth border-[1.5px] border-ink bg-surface px-3"
         />
       </div>
       <div>
@@ -50,7 +50,7 @@ export function ImportForm({
           placeholder="https://calendar.google.com/…/basic.ics"
           aria-invalid={state.error !== null}
           aria-describedby={state.error ? "import-error" : undefined}
-          className="mt-1 block min-h-12 w-full rounded-sign border-[1.5px] border-ink bg-white px-3"
+          className="mt-1 block min-h-12 w-full rounded-cloth border-[1.5px] border-ink bg-surface px-3"
         />
       </div>
       {state.error ? (

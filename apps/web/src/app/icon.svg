@@ -1,10 +1,26 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <!-- Three metro lines meeting at a station. Full-bleed and drawn inside the
-       maskable safe zone (a centred circle of radius 204), so the same art
-       serves as favicon, home screen icon and Android adaptive icon. -->
-  <rect width="512" height="512" fill="#1d1d1b"/>
-  <rect x="104" y="166" width="304" height="36" rx="18" fill="#e1251b"/>
-  <rect x="104" y="238" width="304" height="36" rx="18" fill="#0065bd"/>
-  <rect x="104" y="310" width="304" height="36" rx="18" fill="#ffc20e"/>
-  <rect x="214" y="134" width="84" height="244" rx="42" fill="#ffffff" stroke="#1d1d1b" stroke-width="14"/>
+  <!-- Telar: four threads cross five days; where a thread is free it rides on
+       top, where it is busy it dives (a thin under-thread). The middle column,
+       where every thread is on top, is the closed band: the day the group meets.
+       Drawn inside the maskable safe zone (radius 204 around the centre). -->
+  <rect width="512" height="512" fill="#23263a"/>
+  <rect x="100" y="160" width="312" height="10" rx="5" fill="#40455f"/>
+  <rect x="100" y="147" width="56" height="36" rx="18" fill="#5b7fd6"/>
+  <rect x="228" y="147" width="56" height="36" rx="18" fill="#5b7fd6"/>
+  <rect x="292" y="147" width="56" height="36" rx="18" fill="#5b7fd6"/>
+  <rect x="100" y="214" width="312" height="10" rx="5" fill="#40455f"/>
+  <rect x="164" y="201" width="56" height="36" rx="18" fill="#d9a12a"/>
+  <rect x="228" y="201" width="56" height="36" rx="18" fill="#d9a12a"/>
+  <rect x="356" y="201" width="56" height="36" rx="18" fill="#d9a12a"/>
+  <rect x="100" y="268" width="312" height="10" rx="5" fill="#40455f"/>
+  <rect x="100" y="255" width="56" height="36" rx="18" fill="#5fae84"/>
+  <rect x="164" y="255" width="56" height="36" rx="18" fill="#5fae84"/>
+  <rect x="228" y="255" width="56" height="36" rx="18" fill="#5fae84"/>
+  <rect x="356" y="255" width="56" height="36" rx="18" fill="#5fae84"/>
+  <rect x="100" y="322" width="312" height="10" rx="5" fill="#40455f"/>
+  <rect x="100" y="309" width="56" height="36" rx="18" fill="#d46a98"/>
+  <rect x="228" y="309" width="56" height="36" rx="18" fill="#d46a98"/>
+  <rect x="292" y="309" width="56" height="36" rx="18" fill="#d46a98"/>
+  <rect x="356" y="309" width="56" height="36" rx="18" fill="#d46a98"/>
+  <rect x="216" y="131" width="80" height="230" rx="26" fill="none" stroke="#fbfbfa" stroke-width="12"/>
 </svg>

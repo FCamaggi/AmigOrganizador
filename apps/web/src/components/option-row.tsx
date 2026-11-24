@@ -20,7 +20,7 @@ function Avatar({
   readonly state: PersonState;
 }) {
   const base =
-    "relative grid size-6 flex-none place-items-center overflow-hidden rounded-full border-[1.5px] font-extrabold text-[0.6875rem]";
+    "relative grid size-6 flex-none place-items-center overflow-hidden rounded-full border-[1.5px] font-extrabold text-caption";
   if (state === "free") {
     return (
       <span className={`${base} border-ink bg-ink text-white`}>
@@ -30,13 +30,15 @@ function Avatar({
   }
   if (state === "unknown") {
     return (
-      <span className={`${base} border-dashed border-mute bg-white text-mute`}>
+      <span
+        className={`${base} border-dashed border-mute bg-surface text-mute`}
+      >
         {initialOf(name)}
       </span>
     );
   }
   return (
-    <span className={`${base} border-ink bg-white text-ink`}>
+    <span className={`${base} border-ink bg-surface text-ink`}>
       {initialOf(name)}
       <span
         aria-hidden="true"
@@ -94,7 +96,7 @@ export function OptionRow({
         />
         <span
           aria-hidden="true"
-          className="mt-0.5 ml-0.5 size-[1.375rem] rounded-full border-[5px] bg-white peer-focus-visible:outline-3 peer-focus-visible:outline-line-blue peer-focus-visible:outline-offset-2"
+          className="mt-0.5 ml-0.5 size-[1.375rem] rounded-full border-[5px] bg-surface peer-focus-visible:outline-3 peer-focus-visible:outline-indigo peer-focus-visible:outline-offset-2"
           style={{ borderColor: RANK_COLORS[rank] }}
         />
         <span className="min-w-0">
@@ -122,7 +124,7 @@ export function OptionRow({
               {option.reasons.map((reason) => (
                 <span
                   key={reason}
-                  className="rounded-chip border border-rule-strong px-1.5 py-px font-bold text-[0.6875rem]"
+                  className="rounded-knot border border-rule-strong px-1.5 py-px font-bold text-caption"
                 >
                   {reason}
                 </span>
@@ -140,7 +142,7 @@ export function OptionRow({
                 />
               ))}
               {extra > 0 ? (
-                <span className="grid h-6 place-items-center px-1 font-bold text-[0.6875rem] text-mute">
+                <span className="grid h-6 place-items-center px-1 font-bold text-caption text-mute">
                   +{extra}
                 </span>
               ) : null}
@@ -159,11 +161,11 @@ export function OptionRow({
               total: option.memberCount,
             })}
           </span>
-          <span className="block font-medium text-[0.6875rem] text-mute">
+          <span className="block font-medium text-caption text-mute">
             {t("options.can")}
           </span>
           {rank === 0 ? (
-            <span className="mt-2 inline-block rounded-chip bg-line-red px-1.5 py-0.5 font-extrabold text-[0.6875rem] text-white">
+            <span className="mt-2 inline-block rounded-knot bg-line-red px-1.5 py-0.5 font-extrabold text-caption text-white">
               {t("options.best")}
             </span>
           ) : null}

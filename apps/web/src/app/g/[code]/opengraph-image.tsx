@@ -10,24 +10,34 @@ export const alt = t("app.tagline");
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
-const INK = "#1d1d1b";
-const MUTE = "#555552";
-const RULE = "#e4e4e1";
-const LINES = [
-  { color: "#e1251b", outlined: false },
-  { color: "#0065bd", outlined: false },
-  { color: "#ffc20e", outlined: true },
+const GROUND = "#e9ebe8";
+const SURFACE = "#fbfbfa";
+const INK = "#23263a";
+const INK_SUB = "#c9ccd8";
+const MADDER = "#b8322a";
+const UNDER = "#c4c7c1";
+
+/**
+ * Decorative cloth: four threads over twelve columns. 1 = the thread rides on
+ * top (free), 0 = it dives under (busy). Column 7 is on top for everyone, the
+ * closed band. Illustrative only: it never encodes real members' time.
+ */
+const THREADS = [
+  { color: "#2f4fa2", weave: [1, 1, 0, 1, 0, 1, 1, 1, 0, 1, 1, 0] },
+  { color: "#9a6a0a", weave: [0, 1, 1, 0, 1, 1, 1, 0, 1, 1, 0, 1] },
+  { color: "#3e7d5a", weave: [1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1] },
+  { color: "#a8406e", weave: [1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 0] },
 ];
-/** Where the decorative station sits on the lines, in px from the left. */
-const STATION = { left: 640, width: 260 };
+const BAND = 6;
+const CELL = 88;
 
 const fontsDir = join(process.cwd(), "src/assets/fonts");
 
 /**
  * The link preview WhatsApp shows when a group invite is shared (S6): the
- * group's sign with its head count, three metro lines meeting at a station,
- * and the next step. Counts only, never member names: chat apps cache the
- * image and show it to everyone in the chat.
+ * group's name with its head count, a woven cloth whose threads close into a
+ * band, and the next step. Counts only, never member names: chat apps cache
+ * the image and show it to everyone in the chat.
  */
 export default async function Image({
   params,
@@ -36,10 +46,10 @@ export default async function Image({
 }) {
   await connection();
   const { code } = await params;
-  const [group, medium, heavy] = await Promise.all([
+  const [group, ui, display] = await Promise.all([
     groups().findByInviteCode(code),
-    readFile(join(fontsDir, "RobotoCondensed-500.ttf")),
-    readFile(join(fontsDir, "RobotoCondensed-800.ttf")),
+    readFile(join(fontsDir, "Figtree-600.ttf")),
+    readFile(join(fontsDir, "BricolageGrotesque-800.ttf")),
   ]);
   const withProfile = group ? (await memberSchedules(group)).length : 0;
   const preview = group
@@ -55,7 +65,7 @@ export default async function Image({
       }
     : null;
   const title = preview?.title ?? t("app.name");
-  const titleSize = title.length > 34 ? 60 : 76;
+  const titleSize = title.length > 30 ? 58 : 72;
 
   return new ImageResponse(
     <div
@@ -64,45 +74,25 @@ export default async function Image({
         height: "100%",
         display: "flex",
         flexDirection: "column",
-        background: "#ffffff",
+        background: GROUND,
         color: INK,
-        fontFamily: "Roboto Condensed",
-        padding: "56px 64px",
+        fontFamily: "Figtree",
+        padding: "48px 64px",
       }}
     >
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 14,
-          fontSize: 30,
-          fontWeight: 800,
-        }}
-      >
+      <div style={{ display: "flex", fontSize: 30, fontFamily: "Bricolage" }}>
         {t("app.name")}
-        <span
-          style={{
-            border: `2px solid ${INK}`,
-            borderRadius: 4,
-            padding: "0 8px",
-            fontSize: 20,
-            textTransform: "uppercase",
-          }}
-        >
-          {t("app.beta")}
-        </span>
       </div>
-
       <div
         style={{
-          marginTop: 28,
+          marginTop: 24,
           display: "flex",
           alignItems: "center",
           gap: 28,
           background: INK,
-          color: "#ffffff",
-          borderRadius: 14,
-          padding: "28px 34px",
+          color: SURFACE,
+          borderRadius: 24,
+          padding: "26px 32px",
         }}
       >
         <div
@@ -111,12 +101,12 @@ export default async function Image({
             height: 88,
             flex: "none",
             borderRadius: 44,
-            background: "#e1251b",
+            background: MADDER,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
             fontSize: 48,
-            fontWeight: 800,
+            fontFamily: "Bricolage",
           }}
         >
           {initialOf(title)}
@@ -125,22 +115,15 @@ export default async function Image({
           <div
             style={{
               fontSize: titleSize,
-              fontWeight: 800,
-              lineHeight: 1.05,
+              fontFamily: "Bricolage",
+              lineHeight: 1.02,
               display: "flex",
             }}
           >
             {title}
           </div>
           {preview ? (
-            <div
-              style={{
-                marginTop: 8,
-                fontSize: 30,
-                fontWeight: 500,
-                color: "#d6d6d3",
-              }}
-            >
+            <div style={{ marginTop: 8, fontSize: 30, color: INK_SUB }}>
               {preview.meta}
             </div>
           ) : null}
@@ -151,43 +134,68 @@ export default async function Image({
         style={{
           flex: 1,
           display: "flex",
-          flexDirection: "column",
+          alignItems: "center",
           justifyContent: "center",
-          gap: titleSize > 60 ? 22 : 16,
         }}
       >
-        {LINES.map((line) => (
-          <div
-            key={line.color}
-            style={{
-              position: "relative",
-              height: 22,
-              display: "flex",
-              alignItems: "center",
-            }}
-          >
+        <div
+          style={{
+            position: "relative",
+            display: "flex",
+            flexDirection: "column",
+            gap: 14,
+          }}
+        >
+          {THREADS.map((thread) => (
             <div
+              key={thread.color}
               style={{
-                width: "100%",
-                height: 12,
-                borderRadius: 6,
-                background: line.color,
-                border: line.outlined ? `2px solid ${INK}` : "none",
-              }}
-            />
-            <div
-              style={{
-                position: "absolute",
-                left: STATION.left,
-                width: STATION.width,
+                position: "relative",
+                display: "flex",
+                alignItems: "center",
                 height: 26,
-                borderRadius: 13,
-                background: "#ffffff",
-                border: `4px solid ${INK}`,
+                width: CELL * thread.weave.length,
               }}
-            />
-          </div>
-        ))}
+            >
+              <div
+                style={{
+                  position: "absolute",
+                  left: 0,
+                  right: 0,
+                  top: 10,
+                  height: 6,
+                  borderRadius: 3,
+                  background: UNDER,
+                }}
+              />
+              {thread.weave.map((on, i) => (
+                <div
+                  // biome-ignore lint/suspicious/noArrayIndexKey: fixed decorative pattern
+                  key={i}
+                  style={{
+                    position: "absolute",
+                    left: i * CELL + 4,
+                    width: CELL - 8,
+                    height: 26,
+                    borderRadius: 13,
+                    background: on ? thread.color : "transparent",
+                  }}
+                />
+              ))}
+            </div>
+          ))}
+          <div
+            style={{
+              position: "absolute",
+              left: BAND * CELL - 8,
+              top: -16,
+              width: CELL + 16,
+              height: 4 * 26 + 3 * 14 + 32,
+              borderRadius: 22,
+              border: `6px solid ${INK}`,
+            }}
+          />
+        </div>
       </div>
 
       <div
@@ -195,42 +203,32 @@ export default async function Image({
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          borderTop: `2px solid ${RULE}`,
-          paddingTop: 22,
         }}
       >
-        <div style={{ fontSize: 32, fontWeight: 800, display: "flex" }}>
+        <div style={{ fontSize: 32, display: "flex" }}>
           {preview ? t("og.invite") : t("app.tagline")}
         </div>
         {preview ? (
           <div
             style={{
               display: "flex",
-              background: "#0065bd",
+              background: MADDER,
               color: "#ffffff",
-              borderRadius: 10,
-              padding: "12px 26px",
+              borderRadius: 18,
+              padding: "14px 28px",
               fontSize: 32,
-              fontWeight: 800,
             }}
           >
             {t("group.invite.join")}
           </div>
-        ) : (
-          <div style={{ fontSize: 28, color: MUTE, display: "flex" }} />
-        )}
+        ) : null}
       </div>
     </div>,
     {
       ...size,
       fonts: [
-        {
-          name: "Roboto Condensed",
-          data: medium,
-          weight: 500,
-          style: "normal",
-        },
-        { name: "Roboto Condensed", data: heavy, weight: 800, style: "normal" },
+        { name: "Figtree", data: ui, weight: 600, style: "normal" },
+        { name: "Bricolage", data: display, weight: 800, style: "normal" },
       ],
     },
   );

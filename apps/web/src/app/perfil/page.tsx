@@ -18,7 +18,7 @@ import { Suspense } from "react";
 import { TopBar } from "@/components/top-bar";
 import { t } from "@/i18n/t";
 import { formatDay, formatTime } from "@/lib/format";
-import { lineColor } from "@/lib/lines";
+import { threadColor } from "@/lib/lines";
 import { buttonClasses, shellClasses } from "@/lib/ui";
 import { safeNext } from "@/server/auth/config";
 import {
@@ -54,7 +54,7 @@ export default function ProfilePage({ searchParams }: PageProps<"/perfil">) {
         fallback={
           <div
             aria-hidden="true"
-            className="mt-12 h-96 animate-pulse rounded-sign bg-panel"
+            className="mt-12 h-96 animate-pulse rounded-cloth bg-panel"
           />
         }
       >
@@ -163,7 +163,7 @@ async function ProfileScreen({
         today={today}
         timeZone={timeZone}
         days={days}
-        lineColor={lineColor(0).value}
+        lineColor={threadColor(0).value}
         next={next}
         save={saveProfileAction}
       >

@@ -263,10 +263,10 @@ function Chip({
       type="button"
       aria-pressed={selected}
       onClick={onClick}
-      className={`min-h-11 rounded-sign border-[1.5px] px-3 font-bold text-[0.9375rem] ${
+      className={`min-h-11 rounded-cloth border-[1.5px] px-3 font-bold text-[0.9375rem] ${
         selected
           ? "border-ink bg-ink text-white"
-          : "border-rule-strong bg-white text-ink"
+          : "border-rule-strong bg-surface text-ink"
       }`}
     >
       {children}
@@ -498,7 +498,7 @@ export function ProfileEditor({
           </h2>
 
           {routines.length === 0 ? (
-            <p className="mt-2 rounded-sign border border-rule border-dashed px-3 py-3 text-mute text-sm">
+            <p className="mt-2 rounded-cloth border border-rule border-dashed px-3 py-3 text-mute text-sm">
               {t("profileEdit.routine.empty")}
             </p>
           ) : (
@@ -508,7 +508,7 @@ export function ProfileEditor({
                 return (
                   <article
                     key={routine.uiId}
-                    className="rounded-sign border-[1.5px] border-ink bg-white p-3"
+                    className="rounded-cloth border-[1.5px] border-ink bg-surface p-3"
                   >
                     <div className="flex flex-wrap items-start justify-between gap-2">
                       <div className="min-w-0 flex-1">
@@ -529,7 +529,7 @@ export function ProfileEditor({
                               label: e.target.value,
                             })
                           }
-                          className="mt-1 block min-h-11 w-full rounded-sign border-[1.5px] border-rule-strong bg-white px-2.5 font-extrabold"
+                          className="mt-1 block min-h-11 w-full rounded-cloth border-[1.5px] border-rule-strong bg-surface px-2.5 font-extrabold"
                         />
                         <p className="mt-1 font-bold text-mute text-xs">
                           {routine.kind === "shifts"
@@ -567,7 +567,7 @@ export function ProfileEditor({
                                       ),
                                     })
                                   }
-                                  className="min-h-11 rounded-sign border-[1.5px] border-rule-strong bg-white px-2.5 font-bold text-xs hover:bg-panel"
+                                  className="min-h-11 rounded-cloth border-[1.5px] border-rule-strong bg-surface px-2.5 font-bold text-xs hover:bg-panel"
                                 >
                                   {t(
                                     `profileEdit.routine.cycle.preset.${preset}` as MessageKey,
@@ -597,7 +597,7 @@ export function ProfileEditor({
                                 });
                               }
                             }}
-                            className="mt-1 block min-h-11 rounded-sign border-[1.5px] border-rule-strong bg-white px-2.5 font-bold"
+                            className="mt-1 block min-h-11 rounded-cloth border-[1.5px] border-rule-strong bg-surface px-2.5 font-bold"
                           />
                         </div>
 
@@ -674,7 +674,7 @@ export function ProfileEditor({
                                           ),
                                         });
                                       }}
-                                      className="min-h-11 rounded-sign border-[1.5px] border-rule-strong bg-white px-2 font-bold text-sm"
+                                      className="min-h-11 rounded-cloth border-[1.5px] border-rule-strong bg-surface px-2 font-bold text-sm"
                                     />
                                     <span aria-hidden="true">–</span>
                                     <input
@@ -704,7 +704,7 @@ export function ProfileEditor({
                                           ),
                                         });
                                       }}
-                                      className="min-h-11 rounded-sign border-[1.5px] border-rule-strong bg-white px-2 font-bold text-sm"
+                                      className="min-h-11 rounded-cloth border-[1.5px] border-rule-strong bg-surface px-2 font-bold text-sm"
                                     />
                                     {first.end > 1440 ? (
                                       <span className="font-bold text-mute text-xs">
@@ -726,7 +726,7 @@ export function ProfileEditor({
                                         ),
                                       })
                                     }
-                                    className="ml-auto min-h-11 rounded-sign border border-rule-strong px-2 font-bold text-xs hover:bg-panel"
+                                    className="ml-auto min-h-11 rounded-cloth border border-rule-strong px-2 font-bold text-xs hover:bg-panel"
                                   >
                                     {t("profileEdit.routine.cycle.removeStep")}
                                   </button>
@@ -833,7 +833,7 @@ export function ProfileEditor({
                                     uniformEnd: next.end,
                                   });
                                 }}
-                                className="mt-1 block min-h-11 rounded-sign border-[1.5px] border-rule-strong bg-white px-2.5 font-bold"
+                                className="mt-1 block min-h-11 rounded-cloth border-[1.5px] border-rule-strong bg-surface px-2.5 font-bold"
                               />
                             </div>
                             <div>
@@ -864,7 +864,7 @@ export function ProfileEditor({
                                       uniformEnd: next.end,
                                     });
                                   }}
-                                  className="min-h-11 rounded-sign border-[1.5px] border-rule-strong bg-white px-2.5 font-bold"
+                                  className="min-h-11 rounded-cloth border-[1.5px] border-rule-strong bg-surface px-2.5 font-bold"
                                 />
                                 {routine.uniformEnd > 1440 ? (
                                   <span className="font-bold text-mute text-xs">
@@ -913,7 +913,7 @@ export function ProfileEditor({
                                           },
                                         })
                                       }
-                                      className="min-h-11 rounded-sign border border-rule-strong px-2 font-bold text-xs hover:bg-panel"
+                                      className="min-h-11 rounded-cloth border border-rule-strong px-2 font-bold text-xs hover:bg-panel"
                                     >
                                       {t("profileEdit.routine.addBlock")}
                                     </button>
@@ -954,7 +954,7 @@ export function ProfileEditor({
                                               },
                                             });
                                           }}
-                                          className="min-h-11 rounded-sign border-[1.5px] border-rule-strong bg-white px-2 font-bold text-sm"
+                                          className="min-h-11 rounded-cloth border-[1.5px] border-rule-strong bg-surface px-2 font-bold text-sm"
                                         />
                                         <span aria-hidden="true">–</span>
                                         <input
@@ -987,7 +987,7 @@ export function ProfileEditor({
                                               },
                                             });
                                           }}
-                                          className="min-h-11 rounded-sign border-[1.5px] border-rule-strong bg-white px-2 font-bold text-sm"
+                                          className="min-h-11 rounded-cloth border-[1.5px] border-rule-strong bg-surface px-2 font-bold text-sm"
                                         />
                                         {block.end > 1440 ? (
                                           <span className="font-bold text-mute text-xs">
@@ -1008,7 +1008,7 @@ export function ProfileEditor({
                                                 },
                                               })
                                             }
-                                            className="min-h-11 rounded-sign border border-rule-strong px-2 font-bold text-xs hover:bg-panel"
+                                            className="min-h-11 rounded-cloth border border-rule-strong px-2 font-bold text-xs hover:bg-panel"
                                           >
                                             {t(
                                               "profileEdit.routine.removeBlock",
@@ -1055,7 +1055,7 @@ export function ProfileEditor({
                               });
                             }
                           }}
-                          className="min-h-11 font-bold text-line-blue text-sm underline"
+                          className="min-h-11 font-bold text-indigo text-sm underline"
                         >
                           {routine.perDay
                             ? t("profileEdit.routine.sameHoursToggle")
@@ -1064,7 +1064,7 @@ export function ProfileEditor({
                       </div>
                     )}
 
-                    <p className="mt-3 rounded-sign bg-panel px-2.5 py-2 font-bold text-sm">
+                    <p className="mt-3 rounded-cloth bg-panel px-2.5 py-2 font-bold text-sm">
                       {describeRoutine(previewTemplate)}
                     </p>
                   </article>
@@ -1103,7 +1103,7 @@ export function ProfileEditor({
                 setZone(e.target.value);
                 setStatus("idle");
               }}
-              className="mt-1.5 block min-h-12 w-full rounded-sign border-[1.5px] border-rule-strong bg-white px-3"
+              className="mt-1.5 block min-h-12 w-full rounded-cloth border-[1.5px] border-rule-strong bg-surface px-3"
             >
               {(TIMEZONES as readonly string[]).includes(zone) ? null : (
                 <option value={zone}>{zone}</option>
@@ -1151,7 +1151,7 @@ export function ProfileEditor({
 
           <div
             aria-hidden="true"
-            className="mt-2 flex pb-1 text-[0.6875rem] text-mute"
+            className="mt-2 flex pb-1 text-caption text-mute"
           >
             <span className="w-[4.25rem] flex-none" />
             <span className="relative h-4 flex-1">
@@ -1277,7 +1277,7 @@ export function ProfileEditor({
                                   ),
                                 );
                               }}
-                              className="min-h-11 rounded-sign border-[1.5px] border-rule-strong bg-white px-2 font-bold text-sm"
+                              className="min-h-11 rounded-cloth border-[1.5px] border-rule-strong bg-surface px-2 font-bold text-sm"
                             />
                             <span aria-hidden="true">–</span>
                             <input
@@ -1304,7 +1304,7 @@ export function ProfileEditor({
                                   ),
                                 );
                               }}
-                              className="min-h-11 rounded-sign border-[1.5px] border-rule-strong bg-white px-2 font-bold text-sm"
+                              className="min-h-11 rounded-cloth border-[1.5px] border-rule-strong bg-surface px-2 font-bold text-sm"
                             />
                             <button
                               type="button"
@@ -1315,7 +1315,7 @@ export function ProfileEditor({
                                   busy.filter((_, i) => i !== idx),
                                 )
                               }
-                              className="min-h-11 rounded-sign border border-rule-strong px-2 font-bold text-xs hover:bg-panel"
+                              className="min-h-11 rounded-cloth border border-rule-strong px-2 font-bold text-xs hover:bg-panel"
                             >
                               {t("profileEdit.days.hours.remove")}
                             </button>
@@ -1333,7 +1333,7 @@ export function ProfileEditor({
                           const end = Math.min(h(24), start + 60);
                           setDayIntervals(day.date, [...busy, { start, end }]);
                         }}
-                        className="mt-1 min-h-11 font-bold text-line-blue text-xs underline"
+                        className="mt-1 min-h-11 font-bold text-indigo text-xs underline"
                       >
                         {t("profileEdit.days.hours.add")}
                       </button>

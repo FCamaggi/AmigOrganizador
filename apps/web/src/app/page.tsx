@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { InstallHint } from "@/components/install-hint";
 import { t } from "@/i18n/t";
-import { lineColor } from "@/lib/lines";
+import { threadColor } from "@/lib/lines";
 import { buttonClasses, shellClasses } from "@/lib/ui";
 import { signOut } from "@/server/actions";
 import {
@@ -17,7 +17,7 @@ export default function Home() {
     <main className={`${shellClasses.wide} flex flex-col pt-4`}>
       <p className="flex items-baseline gap-2 font-extrabold text-lg">
         {t("app.name")}
-        <span className="rounded-chip border border-ink px-1 font-bold text-[0.6875rem] uppercase">
+        <span className="rounded-knot border border-ink px-1 font-bold text-caption uppercase">
           {t("app.beta")}
         </span>
       </p>
@@ -25,7 +25,7 @@ export default function Home() {
         fallback={
           <div
             aria-hidden="true"
-            className="mt-6 h-64 animate-pulse rounded-sign bg-panel"
+            className="mt-6 h-64 animate-pulse rounded-cloth bg-panel"
           />
         }
       >
@@ -81,7 +81,7 @@ async function HomeContent() {
           <form action={signOut}>
             <button
               type="submit"
-              className="min-h-11 px-1 font-bold text-line-blue text-sm underline"
+              className="min-h-11 px-1 font-bold text-indigo text-sm underline"
             >
               {t("signin.signOut")}
             </button>
@@ -93,14 +93,14 @@ async function HomeContent() {
 
         <Link
           href="/perfil"
-          className={`mt-4 flex items-center gap-3 rounded-sign px-3 py-3 no-underline ${
+          className={`mt-4 flex items-center gap-3 rounded-cloth px-3 py-3 no-underline ${
             profile ? "border border-rule" : "border-2 border-ink"
           }`}
         >
           <span
             aria-hidden="true"
             className="h-1.5 w-10 flex-none rounded-full"
-            style={{ background: lineColor(0).value }}
+            style={{ background: threadColor(0).value }}
           />
           <span className="min-w-0 flex-1">
             <span className="block font-extrabold">
@@ -113,7 +113,7 @@ async function HomeContent() {
           <svg
             aria-hidden="true"
             viewBox="0 0 16 16"
-            className="size-4 flex-none text-line-blue"
+            className="size-4 flex-none text-indigo"
           >
             <path
               d="M6 3l5 5-5 5"
@@ -131,7 +131,7 @@ async function HomeContent() {
 
       <div className="lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:mt-6">
         {mine.length === 0 ? (
-          <div className="mt-6 rounded-sign border border-rule border-dashed px-3 py-4 lg:mt-0">
+          <div className="mt-6 rounded-cloth border border-rule border-dashed px-3 py-4 lg:mt-0">
             <p className="font-extrabold">{t("groups.empty.title")}</p>
             <p className="mt-1 text-mute text-sm">{t("groups.empty.body")}</p>
           </div>
@@ -145,7 +145,7 @@ async function HomeContent() {
                 >
                   <span
                     aria-hidden="true"
-                    className="size-[1.375rem] flex-none rounded-full border-[5px] bg-white"
+                    className="size-[1.375rem] flex-none rounded-full border-[5px] bg-surface"
                     style={{ borderColor: "var(--ink)" }}
                   />
                   <span className="min-w-0 flex-1">
@@ -165,7 +165,7 @@ async function HomeContent() {
           </ul>
         )}
       </div>
-      <div className="sticky bottom-0 mt-auto bg-white pt-6 pb-[max(1.125rem,env(safe-area-inset-bottom))] lg:static lg:col-start-1 lg:row-start-2 lg:mt-0">
+      <div className="sticky-footer sticky bottom-0 mt-auto bg-ground pt-6 pb-[max(1.125rem,env(safe-area-inset-bottom))] lg:static lg:col-start-1 lg:row-start-2 lg:mt-0">
         <Link href="/grupos/nuevo" className={buttonClasses.primary}>
           {t("groups.create")}
         </Link>
@@ -204,10 +204,7 @@ function HomeLines() {
                     style={{
                       left: `${a}%`,
                       width: `${(b ?? 0) - (a ?? 0)}%`,
-                      background: lineColor(i).value,
-                      boxShadow: lineColor(i).outlined
-                        ? "inset 0 0 0 1px var(--ink)"
-                        : undefined,
+                      background: threadColor(i).value,
                     }}
                   />
                 ))}

@@ -64,7 +64,7 @@ async function SignInScreen({
         </div>
       ) : (
         <section
-          className="mt-5 rounded-sign border-2 border-ink px-3 py-3"
+          className="mt-5 rounded-cloth border-2 border-ink px-3 py-3"
           aria-labelledby="local-mode"
         >
           <h2

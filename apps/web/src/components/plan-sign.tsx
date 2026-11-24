@@ -11,7 +11,7 @@ export function PlanSign({
   readonly badgeColor?: string;
 }) {
   return (
-    <header className="flex items-center gap-2.5 rounded-sign bg-ink px-3 py-2.5 text-white">
+    <header className="flex items-center gap-2.5 rounded-cloth bg-ink px-3 py-2.5 text-white">
       <span
         aria-hidden="true"
         className="grid size-8 flex-none place-items-center rounded-full font-extrabold text-base"
@@ -23,7 +23,7 @@ export function PlanSign({
         <h1 className="text-balance font-extrabold text-xl leading-tight tracking-[0.01em]">
           {title}
         </h1>
-        <p className="mt-px text-sign-sub text-xs">{meta}</p>
+        <p className="mt-px text-ink-sub text-xs">{meta}</p>
       </div>
     </header>
   );

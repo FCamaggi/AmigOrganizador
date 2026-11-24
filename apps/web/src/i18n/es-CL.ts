@@ -75,15 +75,10 @@ export const esCL = {
   "plan.cancelled": "Este plan se canceló.",
 
   "diagram.title": "{day} · quién está libre",
-  "diagram.station": "Estación común · {time}",
-  "diagram.legend":
-    "Andén blanco: llega a la estación · rayado: ocupado · punteada: sin responder",
-  "diagram.legend.trunk":
-    "Línea gruesa: los libres juntos · abajo, quienes no pueden o no responden",
-  "diagram.trunkOf": "{free} de {total} personas",
-  "diagram.more": "+{count} más",
-  "diagram.showAll": "Ver a todos",
-  "diagram.hideAll": "Ocultar",
+  "cloth.closed": "Todos calzan · {time}",
+  "cloth.partial": "Calzan {free} de {total} · {time}",
+  "cloth.legend":
+    "Hilo arriba: libre · solo la base: ocupado · punteado: sin horario",
   "diagram.lane.free": "{name}: libre de {from} a {to}",
   "diagram.lane.busy": "{name}: ocupado de {from} a {to}",
   "diagram.lane.unknown": "{name}: sin responder de {from} a {to}",
