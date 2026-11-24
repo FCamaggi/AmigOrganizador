@@ -19,7 +19,7 @@ import {
   groupPlanViews,
   groupStrip,
 } from "@/lib/group-view-model";
-import { threadColor } from "@/lib/lines";
+import { threadColor, threadPly } from "@/lib/lines";
 import { buttonClasses, shellClasses } from "@/lib/ui";
 import {
   cancelPlanAction,
@@ -95,6 +95,8 @@ function MemberChips({
     <ul className="mt-4 flex flex-wrap gap-2" aria-label={label}>
       {members.map((member, index) => {
         const hasProfile = withProfile.has(member.accountId);
+        const color = threadColor(index).value;
+        const doublePly = threadPly(index) === 2;
         return (
           <li
             key={member.accountId}
@@ -104,11 +106,27 @@ function MemberChips({
                 : "border-rule-strong border-dotted bg-panel text-mute"
             }`}
           >
-            <span
-              aria-hidden="true"
-              className="yarn h-2 w-4 flex-none rounded-full"
-              style={{ background: threadColor(index).value }}
-            />
+            {doublePly ? (
+              <span
+                aria-hidden="true"
+                className="flex h-2.5 w-4 flex-none flex-col justify-between"
+              >
+                <span
+                  className="yarn block h-[3px] w-full rounded-full"
+                  style={{ backgroundColor: color }}
+                />
+                <span
+                  className="yarn block h-[3px] w-full rounded-full"
+                  style={{ backgroundColor: color }}
+                />
+              </span>
+            ) : (
+              <span
+                aria-hidden="true"
+                className="yarn h-2 w-4 flex-none rounded-full"
+                style={{ backgroundColor: color }}
+              />
+            )}
             <span>{member.displayName}</span>
             {!hasProfile ? (
               <span className="sr-only"> ({t("group.member.noSchedule")})</span>

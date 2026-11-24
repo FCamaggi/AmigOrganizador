@@ -19,6 +19,14 @@ export function threadColor(index: number) {
 }
 
 /**
+ * When a group outgrows the 8-colour wool palette, second-cycle threads carry
+ * a double-ply mark so no member relies on colour alone.
+ */
+export function threadPly(index: number): 1 | 2 {
+  return index >= THREAD_COLORS.length ? 2 : 1;
+}
+
+/**
  * The diagram shows the whole useful day, the same 08:00–24:00 track as the
  * busy editor, widened only if the slot falls outside it.
  */

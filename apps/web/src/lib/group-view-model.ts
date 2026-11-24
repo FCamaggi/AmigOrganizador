@@ -13,7 +13,7 @@ import {
 import { type MessageKey, t } from "@/i18n/t";
 import { formatDay, formatSpan } from "./format";
 import { diagramSpan } from "./lines";
-import type { OptionView, PersonState } from "./option-view";
+import type { OptionPerson, OptionView, PersonState } from "./option-view";
 
 /** The slot length suggested for a proposal (the form lets people change it). */
 export const SUGGESTED_MINUTES = 180;
@@ -35,6 +35,8 @@ export interface StripDay {
   readonly allKnownFree: boolean;
   readonly hasOption: boolean;
   readonly label: string;
+  /** Per-member state in join order for the day's best window (or day fallback). */
+  readonly people: readonly OptionPerson[];
   /** Index into the options list when this day has one of the shown options. */
   readonly optionKey: string | null;
 }
@@ -127,17 +129,37 @@ export function groupOptions(
 const weekdayKey = (date: string) =>
   `weekday.short.${new Date(`${date}T12:00:00Z`).getUTCDay()}` as MessageKey;
 
-/** Every day of the outlook as a small station: how many can meet. */
+/** Every day of the outlook as a woven swatch: how many can meet and each thread. */
 export function groupStrip(
   group: Group,
   outlook: GroupOutlook,
   options: readonly OptionView[],
 ): StripDay[] {
   const total = group.members.length;
-  const known = outlook.members.filter((m) => m.hasProfile).length;
+  const hasProfile = new Set(
+    outlook.members.filter((m) => m.hasProfile).map((m) => m.accountId),
+  );
+  const known = hasProfile.size;
   return outlook.days.map(({ date, best }) => {
     const free = best?.freeMemberIds.length ?? 0;
     const day = formatDay(date);
+    const people: OptionPerson[] = group.members.map((member, index) => {
+      const state: PersonState = best
+        ? best.freeMemberIds.includes(member.accountId)
+          ? "free"
+          : best.unknownMemberIds.includes(member.accountId)
+            ? "unknown"
+            : "busy"
+        : hasProfile.has(member.accountId)
+          ? "busy"
+          : "unknown";
+      return {
+        accountId: member.accountId,
+        name: member.displayName,
+        state,
+        colorIndex: index,
+      };
+    });
     return {
       date,
       weekday: t(weekdayKey(date)),
@@ -149,6 +171,7 @@ export function groupStrip(
       label: best
         ? t("group.strip.day", { day, free, total })
         : t("group.strip.none", { day }),
+      people,
       optionKey: options.find((o) => o.date === date)?.key ?? null,
     };
   });

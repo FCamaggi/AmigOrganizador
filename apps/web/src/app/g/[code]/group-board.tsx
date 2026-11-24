@@ -2,7 +2,7 @@
 
 import { useActionState, useEffect, useRef, useState } from "react";
 import { DayCloth } from "@/components/day-cloth";
-import { OptionRow } from "@/components/option-row";
+import { OptionRow, WovenBand } from "@/components/option-row";
 import { ShareButton, WhatsAppLink } from "@/components/share-buttons";
 import { type MessageKey, t } from "@/i18n/t";
 import { formatDuration, formatTime } from "@/lib/format";
@@ -109,27 +109,17 @@ function Strip({
         {t("group.strip.title")}
       </h2>
       <div className="-mx-4 mt-1.5 overflow-x-auto px-4 pb-1 sm:-mx-6 sm:px-6 lg:mx-0 lg:px-0">
-        <ol className="relative flex w-max gap-1">
-          <span
-            aria-hidden="true"
-            className="absolute top-[1.95rem] right-5 left-5 h-0.5 rounded-full bg-rule-strong"
-          />
+        <ol className="flex w-max gap-1">
           {days.map((day) => {
             const selected =
               day.optionKey !== null && day.optionKey === selectedKey;
-            const marker = !day.hasOption
-              ? "h-1.5 w-2 rounded-full bg-rule-strong"
-              : day.allKnownFree
-                ? "h-3 w-6 rounded-full bg-ink"
-                : "h-3 w-6 rounded-full border-2 border-ink bg-surface";
+            const rank = day.hasOption ? (day.allKnownFree ? 0 : 1) : 2;
             const content = (
               <>
                 <span className="text-caption text-mute">
                   {day.weekday.slice(0, 2)}
                 </span>
-                <span className="relative grid h-6 place-items-center">
-                  <span aria-hidden="true" className={marker} />
-                </span>
+                <WovenBand people={day.people} rank={rank} className="w-9" />
                 <span className="font-extrabold text-xs">{day.dayOfMonth}</span>
                 <span className="text-caption text-mute leading-none">
                   {day.hasOption ? `${day.free}/${day.total}` : "–"}
@@ -157,7 +147,7 @@ function Strip({
                   <span
                     role="img"
                     aria-label={day.label}
-                    className="flex min-h-11 w-11 flex-col items-center gap-0.5 py-1"
+                    className="flex min-h-11 w-11 flex-col items-center gap-0.5 rounded-cloth border-[1.5px] border-transparent py-1"
                   >
                     {content}
                   </span>
@@ -312,12 +302,35 @@ export function GroupBoard({
 }: GroupBoardProps) {
   const [selectedKey, setSelectedKey] = useState(options[0]?.key ?? null);
   const [proposing, setProposing] = useState(false);
+  const footerRef = useRef<HTMLElement>(null);
   const selected =
     options.find((o) => o.key === selectedKey) ?? options[0] ?? null;
   const select = (key: string) => {
     setSelectedKey(key);
     setProposing(false);
   };
+
+  useEffect(() => {
+    const el = footerRef.current;
+    if (!el) return;
+    const root = document.documentElement;
+    const update = () => {
+      const isSticky = !el.hidden && getComputedStyle(el).position === "sticky";
+      root.style.setProperty(
+        "--footer-h",
+        isSticky ? `${Math.ceil(el.getBoundingClientRect().height)}px` : "0px",
+      );
+    };
+    update();
+    const observer = new ResizeObserver(update);
+    observer.observe(el);
+    window.addEventListener("resize", update);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", update);
+      root.style.removeProperty("--footer-h");
+    };
+  }, []);
 
   if (alone) {
     return (
@@ -335,7 +348,7 @@ export function GroupBoard({
               <span className="h-0.5 w-full rounded-full bg-rule" />
               <span
                 className="yarn absolute left-0 h-2 w-24 rounded-full"
-                style={{ background: threadColor(0).value }}
+                style={{ backgroundColor: threadColor(0).value }}
               />
             </div>
             <div className="relative flex h-2 items-center">
@@ -475,6 +488,7 @@ export function GroupBoard({
         {children}
 
         <footer
+          ref={footerRef}
           hidden={proposing}
           className={`${shellClasses.footer} mt-5 lg:static lg:order-first lg:mx-0 lg:mt-4 lg:border-0 lg:px-0 lg:pt-0 lg:pb-0`}
         >

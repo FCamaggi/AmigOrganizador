@@ -1,8 +1,8 @@
 "use client";
 
 import { t } from "@/i18n/t";
-import { formatSpan, formatTime, initialOf } from "@/lib/format";
-import { threadColor } from "@/lib/lines";
+import { formatSpan, formatTime, initialsFor } from "@/lib/format";
+import { threadColor, threadPly } from "@/lib/lines";
 import type { OptionPerson, OptionView, PersonState } from "@/lib/option-view";
 
 const MAX_AVATARS = 8;
@@ -10,15 +10,17 @@ const DENSE_FROM = 7;
 
 /**
  * Small woven band showing one short segment per member: spun yarn in their
- * colour if free for the window, only the warp line if busy, loose dotted if
- * they have no schedule. Frame border weight carries the option's rank.
+ * colour if free for the window, hatched under-thread with dive ticks if busy,
+ * loose dotted if they have no schedule. Frame border weight carries rank.
  */
-function WovenBand({
+export function WovenBand({
   people,
   rank,
+  className = "mt-0.5 w-10",
 }: {
   readonly people: readonly OptionPerson[];
   readonly rank: number;
+  readonly className?: string;
 }) {
   const dense = people.length >= DENSE_FROM;
   const frameWeight =
@@ -31,71 +33,111 @@ function WovenBand({
   return (
     <span
       aria-hidden="true"
-      className={`mt-0.5 flex w-10 flex-col rounded-knot px-1.5 py-1.5 peer-focus-visible:outline-3 peer-focus-visible:outline-indigo peer-focus-visible:outline-offset-2 ${frameWeight} ${
+      className={`flex flex-col rounded-knot px-1.5 py-1.5 peer-focus-visible:outline-3 peer-focus-visible:outline-indigo peer-focus-visible:outline-offset-2 ${frameWeight} ${
         dense ? "gap-[2px]" : "gap-[3px]"
-      }`}
+      } ${className}`}
     >
       {people.map((person) => {
-        if (person.state === "free") {
-          return (
-            <span
-              key={person.accountId}
-              className={`yarn block w-full rounded-full ${
-                dense ? "h-[3px]" : "h-1.5"
-              }`}
-              style={{ background: threadColor(person.colorIndex).value }}
-            />
-          );
-        }
-        if (person.state === "unknown") {
-          return (
-            <span
-              key={person.accountId}
-              className="thread-loose block h-0.5 w-full"
-            />
-          );
-        }
+        const color = threadColor(person.colorIndex).value;
+        const ply = threadPly(person.colorIndex);
         return (
           <span
             key={person.accountId}
-            className="block h-0.5 w-full rounded-full bg-rule-strong"
-          />
+            className={`flex w-full items-center ${dense ? "h-[5px]" : "h-1.5"}`}
+          >
+            {person.state === "free" ? (
+              ply === 2 ? (
+                <span className="flex h-full w-full flex-col justify-between">
+                  <span
+                    className={`yarn block w-full rounded-full ${
+                      dense ? "h-[1.5px]" : "h-[2px]"
+                    }`}
+                    style={{ backgroundColor: color }}
+                  />
+                  <span
+                    className={`yarn block w-full rounded-full ${
+                      dense ? "h-[1.5px]" : "h-[2px]"
+                    }`}
+                    style={{ backgroundColor: color }}
+                  />
+                </span>
+              ) : (
+                <span
+                  className={`yarn block w-full rounded-full ${
+                    dense ? "h-[3px]" : "h-1.5"
+                  }`}
+                  style={{ backgroundColor: color }}
+                />
+              )
+            ) : person.state === "unknown" ? (
+              <span className="thread-loose block h-0.5 w-full" />
+            ) : (
+              <span className="flex w-full items-center">
+                <span
+                  className={`w-[2px] flex-none rounded-full ${
+                    dense ? "h-[4px]" : "h-[5px]"
+                  }`}
+                  style={{ backgroundColor: color }}
+                />
+                <span className="thread-dive h-0.5 flex-1" />
+                <span
+                  className={`w-[2px] flex-none rounded-full ${
+                    dense ? "h-[4px]" : "h-[5px]"
+                  }`}
+                  style={{ backgroundColor: color }}
+                />
+              </span>
+            )}
+          </span>
         );
       })}
     </span>
   );
 }
 
-function Avatar({ person }: { readonly person: OptionPerson }) {
+function Avatar({
+  person,
+  initial,
+}: {
+  readonly person: OptionPerson;
+  readonly initial: string;
+}) {
+  const doublePly = threadPly(person.colorIndex) === 2;
   const base =
-    "relative grid size-6 flex-none place-items-center overflow-hidden rounded-full border-[1.5px] font-extrabold text-caption";
+    "relative grid h-6 min-w-6 flex-none place-items-center overflow-hidden rounded-full px-0.5 font-extrabold text-caption";
   const color = threadColor(person.colorIndex).value;
 
   if (person.state === "free") {
     return (
       <span
-        className={`${base} border-transparent text-white`}
-        style={{ background: color }}
+        className={`${base} text-white ${
+          doublePly
+            ? "border-[3px] border-double border-surface"
+            : "border-[1.5px] border-transparent"
+        }`}
+        style={{ backgroundColor: color }}
       >
-        {initialOf(person.name)}
+        {initial}
       </span>
     );
   }
   if (person.state === "unknown") {
     return (
       <span
-        className={`${base} border-dashed border-mute bg-surface text-mute`}
+        className={`${base} border-[1.5px] border-dashed border-mute bg-surface text-mute`}
       >
-        {initialOf(person.name)}
+        {initial}
       </span>
     );
   }
   return (
     <span
-      className={`${base} bg-surface text-ink`}
+      className={`${base} bg-surface text-ink ${
+        doublePly ? "border-[3px] border-double" : "border-[1.5px]"
+      }`}
       style={{ borderColor: color }}
     >
-      {initialOf(person.name)}
+      {initial}
       <span
         aria-hidden="true"
         className="absolute inset-x-[-2px] top-1/2 h-[1.5px] -rotate-45 bg-ink"
@@ -136,6 +178,7 @@ export function OptionRow({
 }) {
   const shown = option.people.slice(0, MAX_AVATARS);
   const extra = option.people.length - shown.length;
+  const initials = initialsFor(option.people.map((person) => person.name));
   const countSize =
     rank === 0 ? "text-xl" : rank === 1 ? "text-lg" : "text-base text-ink/85";
 
@@ -149,7 +192,7 @@ export function OptionRow({
         <input
           type="radio"
           name="option"
-          className="peer sr-only"
+          className="peer absolute inset-0 h-full w-full cursor-pointer opacity-0"
           checked={selected}
           onChange={onSelect}
         />
@@ -189,8 +232,12 @@ export function OptionRow({
           <span className="mt-1.5 flex flex-wrap items-center gap-[3px]">
             <span className="sr-only">{peopleLabel(option.people)}</span>
             <span aria-hidden="true" className="flex flex-wrap gap-[3px]">
-              {shown.map((person) => (
-                <Avatar key={person.accountId} person={person} />
+              {shown.map((person, index) => (
+                <Avatar
+                  key={person.accountId}
+                  person={person}
+                  initial={initials[index] ?? "?"}
+                />
               ))}
               {extra > 0 ? (
                 <span className="grid h-6 place-items-center px-1 font-bold text-caption text-mute">

@@ -16,6 +16,7 @@ import {
   shiftCycle,
   slotFromOption,
   todayIn,
+  weekdayOf,
   workweek,
 } from "@amigo/core";
 
@@ -57,27 +58,79 @@ export function demoGroups(now: number): DemoData {
     pattern: ["day", "night", "off", "off"],
   });
 
+  const nextWeekday = (target: number) => {
+    for (let offset = 1; offset <= 7; offset++) {
+      const candidate = addDays(today, offset);
+      if (weekdayOf(candidate) === target) return candidate;
+    }
+    return addDays(today, 1);
+  };
+  const upcomingSaturday = nextWeekday(6);
+  const upcomingSunday = nextWeekday(0);
+
   const colegio: DemoPerson[] = [
-    { id: "acc_demo_ana", name: "Ana", templates: [workweek()] },
-    { id: "acc_demo_beto", name: "Beto", templates: [classes] },
+    {
+      id: "acc_demo_ana",
+      name: "Ana",
+      templates: [
+        workweek(),
+        workweek({ weekdays: [2, 4], start: h(19), end: h(21) }),
+        workweek({ weekdays: [6], start: h(10), end: h(13) }),
+      ],
+    },
+    {
+      id: "acc_demo_beto",
+      name: "Beto",
+      templates: [
+        classes,
+        workweek({ weekdays: [6], start: h(15), end: h(19) }),
+      ],
+    },
     { id: "acc_demo_caro", name: "Caro", templates: null },
     { id: "acc_demo_diego", name: "Diego", templates: [nurse] },
     {
       id: "acc_demo_eli",
       name: "Eli",
-      templates: [workweek({ start: h(10), end: h(20) })],
+      templates: [
+        workweek({ start: h(10), end: h(20) }),
+        workweek({ weekdays: [0], start: h(12), end: h(17) }),
+      ],
     },
-    { id: "acc_demo_fran", name: "Fran", templates: [workweek()] },
+    {
+      id: "acc_demo_fran",
+      name: "Fran",
+      templates: [
+        workweek(),
+        workweek({ weekdays: [1, 3], start: h(19), end: 21 * 60 + 30 }),
+      ],
+    },
   ];
   const padel: DemoPerson[] = [
     ...colegio,
-    { id: "acc_demo_gabi", name: "Gabi", templates: [workweek()] },
-    { id: "acc_demo_hugo", name: "Hugo", templates: [classes] },
+    {
+      id: "acc_demo_gabi",
+      name: "Gabi",
+      templates: [
+        workweek(),
+        workweek({ weekdays: [6], start: h(9), end: h(14) }),
+      ],
+    },
+    {
+      id: "acc_demo_hugo",
+      name: "Hugo",
+      templates: [
+        classes,
+        workweek({ weekdays: [0], start: h(18), end: h(21) }),
+      ],
+    },
     { id: "acc_demo_isi", name: "Isi", templates: null },
     {
       id: "acc_demo_javi",
       name: "Javi",
-      templates: [workweek({ start: h(8), end: h(17) })],
+      templates: [
+        workweek({ start: h(8), end: h(17) }),
+        workweek({ weekdays: [5], start: h(19), end: h(22) }),
+      ],
     },
   ];
 
@@ -88,10 +141,19 @@ export function demoGroups(now: number): DemoData {
       now,
     });
     if (person.id === "acc_demo_fran") {
-      // A one-off busy evening, to show it on top of a template.
+      // A one-off busy Saturday evening so a weekend day shows a partial window.
       profile = setDay(profile, {
-        date: addDays(today, 4),
-        busy: [{ start: h(19), end: h(23) }],
+        date: upcomingSaturday,
+        busy: [{ start: h(19), end: 22 * 60 + 30 }],
+        exceptions: [],
+        now,
+      });
+    }
+    if (person.id === "acc_demo_ana") {
+      // A Sunday evening conflict diving inside the best window.
+      profile = setDay(profile, {
+        date: upcomingSunday,
+        busy: [{ start: 17 * 60 + 30, end: 20 * 60 + 30 }],
         exceptions: [],
         now,
       });

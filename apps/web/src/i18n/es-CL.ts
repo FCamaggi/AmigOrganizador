@@ -78,7 +78,7 @@ export const esCL = {
   "cloth.closed": "Todos calzan · {time}",
   "cloth.partial": "Calzan {free} de {total} · {time}",
   "cloth.legend":
-    "Hilo arriba: libre · solo la base: ocupado · punteado: sin horario",
+    "Hilo arriba: libre · pasa por debajo: ocupado · punteado: sin horario",
   "diagram.lane.free": "{name}: libre de {from} a {to}",
   "diagram.lane.busy": "{name}: ocupado de {from} a {to}",
   "diagram.lane.unknown": "{name}: sin horario de {from} a {to}",

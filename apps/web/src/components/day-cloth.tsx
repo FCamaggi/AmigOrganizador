@@ -1,7 +1,7 @@
 import type { DayLine, LineSegment } from "@amigo/core";
 import { t } from "@/i18n/t";
-import { formatSpan, formatTime, initialOf } from "@/lib/format";
-import { threadColor } from "@/lib/lines";
+import { formatSpan, formatTime, initialsFor } from "@/lib/format";
+import { threadColor, threadPly } from "@/lib/lines";
 
 export interface ClothThread extends DayLine {
   /** Position in the group's join order; picks the thread colour. */
@@ -51,29 +51,34 @@ function threadLabel(thread: DayLine): string {
 }
 
 /**
- * One woven row: free time rides on top in the person's colour, busy time
- * dives under the cloth (only a thin under-thread shows), unknown time hangs
+ * One woven row: free time rides on top in the person's colour (double-ply for
+ * second-cycle members), busy time dives under the cloth with a hatched
+ * under-thread and coloured warp ticks at dive boundaries, unknown time hangs
  * loose and dotted. Shape carries the state; colour only says who.
  */
 function Thread({
   thread,
+  initial,
   span,
   dense,
 }: {
   readonly thread: ClothThread;
+  readonly initial: string;
   readonly span: Span;
   readonly dense: boolean;
 }) {
   const color = threadColor(thread.colorIndex).value;
+  const ply = threadPly(thread.colorIndex);
   return (
     <li className={`flex items-center ${dense ? "h-4" : "h-5"}`}>
       <span
         aria-hidden="true"
-        className={`w-6 flex-none font-bold leading-none ${
+        className={`w-8 flex-none truncate pr-2 font-bold leading-none lg:w-28 ${
           dense ? "text-caption" : "text-[0.8125rem]"
         }`}
       >
-        {initialOf(thread.displayName)}
+        <span className="lg:hidden">{initial}</span>
+        <span className="hidden lg:inline">{thread.displayName}</span>
       </span>
       <span className="sr-only">{threadLabel(thread)}</span>
       <span aria-hidden="true" className="relative h-full flex-1">
@@ -81,14 +86,63 @@ function Thread({
         {thread.segments.map((segment: LineSegment) => {
           const style = place(segment.start, segment.end, span);
           if (segment.state === "free") {
+            if (ply === 2) {
+              return (
+                <span
+                  key={segment.start}
+                  className={`weave-move absolute top-1/2 flex -translate-y-1/2 flex-col justify-between ${
+                    dense ? "h-2" : "h-2.5"
+                  }`}
+                  style={style}
+                >
+                  <span
+                    className={`yarn block w-full rounded-full ${
+                      dense ? "h-[3px]" : "h-1"
+                    }`}
+                    style={{ backgroundColor: color }}
+                  />
+                  <span
+                    className={`yarn block w-full rounded-full ${
+                      dense ? "h-[3px]" : "h-1"
+                    }`}
+                    style={{ backgroundColor: color }}
+                  />
+                </span>
+              );
+            }
             return (
               <span
                 key={segment.start}
                 className={`weave-move yarn absolute top-1/2 -translate-y-1/2 rounded-full ${
                   dense ? "h-1.5" : "h-2"
                 }`}
-                style={{ ...style, background: color }}
+                style={{ ...style, backgroundColor: color }}
               />
+            );
+          }
+          if (segment.state === "busy") {
+            const diveIn = segment.start > span.start;
+            const diveOut = segment.end < span.end;
+            return (
+              <span
+                key={segment.start}
+                className="weave-move absolute top-1/2 flex h-3 -translate-y-1/2 items-center"
+                style={style}
+              >
+                {diveIn ? (
+                  <span
+                    className="h-2.5 w-[2.5px] flex-none rounded-full"
+                    style={{ backgroundColor: color }}
+                  />
+                ) : null}
+                <span className="thread-dive h-[3px] flex-1" />
+                {diveOut ? (
+                  <span
+                    className="h-2.5 w-[2.5px] flex-none rounded-full"
+                    style={{ backgroundColor: color }}
+                  />
+                ) : null}
+              </span>
             );
           }
           if (segment.state === "unknown") {
@@ -116,7 +170,7 @@ function Axis({ span }: { readonly span: Span }) {
     ticks.push(minute);
   return (
     <div aria-hidden="true" className="mt-1 flex">
-      <span className="w-6 flex-none" />
+      <span className="w-8 flex-none lg:w-28" />
       <span className="relative h-4 flex-1 text-caption text-mute">
         {ticks.map((tick) => {
           const left = pct(tick, span);
@@ -152,6 +206,7 @@ export function DayCloth({
   const dense = threads.length >= DENSE_FROM;
   const onTop = threads.filter((thread) => onTopThroughout(thread, band));
   const closed = onTop.length === threads.length;
+  const initials = initialsFor(threads.map((thread) => thread.displayName));
 
   return (
     <figure className="rounded-cloth bg-surface px-3 pt-2.5 pb-2.5">
@@ -162,11 +217,11 @@ export function DayCloth({
       <div className="relative pt-7 pb-1">
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-y-0 right-0 left-6"
+          className="pointer-events-none absolute inset-y-0 right-0 left-8 lg:left-28"
         >
           <span
             className={`weave-move absolute top-5 -bottom-0.5 rounded-knot border-ink ${
-              closed ? "border-[3px]" : "border-2 border-dashed"
+              closed ? "cloth-closed border-[3px]" : "border-2 border-dashed"
             }`}
             style={place(band.start, band.end, span)}
           >
@@ -176,10 +231,11 @@ export function DayCloth({
           </span>
         </div>
         <ul className={`relative ${dense ? "space-y-0" : "space-y-0.5"}`}>
-          {threads.map((thread) => (
+          {threads.map((thread, index) => (
             <Thread
               key={thread.accountId}
               thread={thread}
+              initial={initials[index] ?? "?"}
               span={span}
               dense={dense}
             />
@@ -188,7 +244,7 @@ export function DayCloth({
       </div>
 
       <Axis span={span} />
-      <p className="mt-1.5 pl-6 font-bold text-sm">
+      <p className="mt-1.5 pl-8 font-bold text-sm lg:pl-28">
         {closed
           ? t("cloth.closed", { time: formatSpan(band.start, band.end) })
           : t("cloth.partial", {
@@ -197,7 +253,7 @@ export function DayCloth({
               time: formatSpan(band.start, band.end),
             })}
       </p>
-      <p className="mt-0.5 text-pretty pl-6 text-caption text-mute">
+      <p className="mt-0.5 text-pretty pl-8 text-caption text-mute lg:pl-28">
         {t("cloth.legend")}
       </p>
     </figure>
