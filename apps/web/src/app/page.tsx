@@ -108,7 +108,7 @@ async function HomeContent() {
           <span
             aria-hidden="true"
             className="yarn h-2 w-10 flex-none rounded-full"
-            style={{ background: threadColor(0).value }}
+            style={{ backgroundColor: threadColor(0).value }}
           />
           <span className="min-w-0 flex-1">
             <span className="block font-extrabold">
@@ -187,15 +187,15 @@ function WovenGroupGlyph({ offset }: { readonly offset: number }) {
     >
       <span
         className="yarn block h-[3px] w-full rounded-full"
-        style={{ background: threadColor(offset).value }}
+        style={{ backgroundColor: threadColor(offset).value }}
       />
       <span
         className="yarn block h-[3px] w-full rounded-full"
-        style={{ background: threadColor(offset + 1).value }}
+        style={{ backgroundColor: threadColor(offset + 1).value }}
       />
       <span
         className="yarn block h-[3px] w-full rounded-full"
-        style={{ background: threadColor(offset + 2).value }}
+        style={{ backgroundColor: threadColor(offset + 2).value }}
       />
     </span>
   );
@@ -221,20 +221,20 @@ function HomeCloth() {
     >
       <div className="relative py-1">
         <span className="absolute -inset-y-1 left-[calc(1.5rem+(100%-1.5rem)*0.44)] w-[calc((100%-1.5rem)*0.42)] rounded-knot border-[3px] border-ink" />
-        <ul className="relative space-y-2.5">
+        <ul className="relative space-y-3">
           {rows.map((row, i) => (
-            <li key={row.name} className="flex h-5 items-center">
+            <li key={row.name} className="flex h-7 items-center">
               <span className="w-6 font-extrabold text-sm">{row.name}</span>
-              <span className="relative h-5 flex-1">
-                <span className="absolute inset-x-0 top-1/2 h-0.5 -translate-y-1/2 rounded-full bg-rule" />
+              <span className="relative h-7 flex-1">
+                <span className="thread-dive absolute inset-x-0 top-1/2 h-[3px] -translate-y-1/2 rounded-full" />
                 {row.free.map(([a, b]) => (
                   <span
                     key={a}
-                    className="yarn absolute top-1/2 h-2 -translate-y-1/2 rounded-full"
+                    className="yarn absolute top-1/2 h-3.5 -translate-y-1/2 rounded-full"
                     style={{
                       left: `${a}%`,
                       width: `${(b ?? 0) - (a ?? 0)}%`,
-                      background: threadColor(i).value,
+                      backgroundColor: threadColor(i).value,
                     }}
                   />
                 ))}

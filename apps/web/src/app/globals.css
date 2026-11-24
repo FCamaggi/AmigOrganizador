@@ -25,7 +25,9 @@
   --color-mute: #4a4d60;
   --color-rule: #d3d6d0;
   --color-rule-strong: #6f7284;
-  --color-panel: #f1f2ef;
+  /* Translucent: over the opaque weave a hover or a panel is an ink wash,
+     never a flat patch that hides the cloth. */
+  --color-panel: rgb(35 38 58 / 0.06);
   --color-madder: #b8322a;
   --color-madder-pressed: #9c2a23;
   --color-madder-active: #85231d;
@@ -201,13 +203,44 @@ body:has(dialog[open]) {
     background-size: 96px 96px;
   }
 }
+/* The tiles are opaque, so a state colour alone (hover:bg-panel) would never
+   show: states and the panel tint are a translucent wash over the weave. */
 @layer utilities {
-  .bg-surface {
-    background-image: url("/yarn/cloth-surface.webp");
+  .bg-ground {
+    background-image: url("/yarn/cloth-ground.webp");
     background-size: 96px 96px;
+  }
+  .bg-surface {
+    --cloth-wash: linear-gradient(transparent, transparent);
+    background-image: var(--cloth-wash), url("/yarn/cloth-surface.webp");
+    background-size:
+      100% 100%,
+      96px 96px;
+  }
+  .bg-panel {
+    --cloth-wash: linear-gradient(rgb(35 38 58 / 0.035), rgb(35 38 58 / 0.035));
+    background-image: var(--cloth-wash), url("/yarn/cloth-surface.webp");
+    background-size:
+      100% 100%,
+      96px 96px;
+  }
+  .bg-surface[class*="hover:bg-panel"]:hover:not(:disabled) {
+    --cloth-wash: linear-gradient(rgb(35 38 58 / 0.05), rgb(35 38 58 / 0.05));
+  }
+  .bg-surface[class*="active:bg-rule"]:active:not(:disabled),
+  .bg-panel[class*="active:bg-rule"]:active:not(:disabled) {
+    --cloth-wash: linear-gradient(rgb(35 38 58 / 0.1), rgb(35 38 58 / 0.1));
   }
   .bg-ink {
     background-image: url("/yarn/cloth-ink.webp");
     background-size: 96px 96px;
   }
+}
+
+/* Yarn that carries a label (a member's initial): a uniform darker wash over
+   the strip keeps white text at 5.9:1 or more on its lightest fibres, where
+   the plain strip drops to 3:1 on ochre and moss. */
+.yarn.yarn-label {
+  --yarn-shade: linear-gradient(rgb(0 0 0 / 0.3), rgb(0 0 0 / 0.3));
+  filter: none;
 }

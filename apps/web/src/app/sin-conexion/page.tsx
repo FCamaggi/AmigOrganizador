@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import { t } from "@/i18n/t";
 import { threadColor } from "@/lib/lines";
 import { buttonClasses, shellClasses } from "@/lib/ui";
@@ -15,13 +16,22 @@ export const metadata: Metadata = {
 export default function Offline() {
   return (
     <main className={`${shellClasses.narrow} flex flex-col pt-4`}>
-      <p className="font-extrabold text-lg">{t("app.name")}</p>
+      {/* Unoptimized: a plain static file the service worker keeps for offline. */}
+      <Image
+        src="/brand/knot-lockup.webp"
+        alt={t("app.name")}
+        width={99}
+        height={40}
+        unoptimized
+        priority
+        className="h-10 w-auto self-start"
+      />
       <div className="mt-10 flex w-44 flex-col gap-1.5" aria-hidden="true">
         <div className="relative flex h-2 items-center">
           <span className="h-0.5 w-full rounded-full bg-rule" />
           <span
             className="yarn absolute left-0 h-2 w-16 rounded-full"
-            style={{ background: threadColor(0).value }}
+            style={{ backgroundColor: threadColor(0).value }}
           />
           <span className="thread-loose absolute right-0 left-[4.5rem] h-0.5" />
         </div>
@@ -29,7 +39,7 @@ export default function Offline() {
           <span className="h-0.5 w-full rounded-full bg-rule" />
           <span
             className="yarn absolute left-0 h-2 w-10 rounded-full"
-            style={{ background: threadColor(1).value }}
+            style={{ backgroundColor: threadColor(1).value }}
           />
           <span className="thread-loose absolute right-0 left-12 h-0.5" />
         </div>

@@ -23,15 +23,22 @@ const UNDER = "#c4c7c1";
  * closed band. Illustrative only: it never encodes real members' time.
  */
 const THREADS = [
-  { color: "#2f4fa2", weave: [1, 1, 0, 1, 0, 1, 1, 1, 0, 1, 1, 0] },
-  { color: "#9a6a0a", weave: [0, 1, 1, 0, 1, 1, 1, 0, 1, 1, 0, 1] },
-  { color: "#3e7d5a", weave: [1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1] },
-  { color: "#a8406e", weave: [1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 0] },
-];
+  { yarn: "indigo", weave: [1, 1, 0, 1, 0, 1, 1, 1, 0, 1, 1, 0] },
+  { yarn: "ochre", weave: [0, 1, 1, 0, 1, 1, 1, 0, 1, 1, 0, 1] },
+  { yarn: "moss", weave: [1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1] },
+  { yarn: "rose", weave: [1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 0] },
+] as const;
 const BAND = 6;
 const CELL = 88;
 
 const fontsDir = join(process.cwd(), "src/assets/fonts");
+/** Brand and cloth for the preview, made from public/ (scripts/yarn/README.md). */
+const ogDir = join(process.cwd(), "src/assets/og");
+
+async function dataUri(file: string, mime: string): Promise<string> {
+  const bytes = await readFile(join(ogDir, file));
+  return `data:${mime};base64,${bytes.toString("base64")}`;
+}
 
 /**
  * The link preview WhatsApp shows when a group invite is shared (S6): the
@@ -46,11 +53,18 @@ export default async function Image({
 }) {
   await connection();
   const { code } = await params;
-  const [group, ui, display] = await Promise.all([
-    groups().findByInviteCode(code),
-    readFile(join(fontsDir, "Figtree-600.ttf")),
-    readFile(join(fontsDir, "BricolageGrotesque-800.ttf")),
-  ]);
+  const [group, ui, display, ground, inkCloth, lockup, ...strips] =
+    await Promise.all([
+      groups().findByInviteCode(code),
+      readFile(join(fontsDir, "Figtree-600.ttf")),
+      readFile(join(fontsDir, "BricolageGrotesque-800.ttf")),
+      dataUri("cloth-ground.jpg", "image/jpeg"),
+      dataUri("cloth-ink.jpg", "image/jpeg"),
+      dataUri("knot-lockup.png", "image/png"),
+      ...THREADS.map((thread) =>
+        dataUri(`yarn-${thread.yarn}.png`, "image/png"),
+      ),
+    ]);
   const withProfile = group ? (await memberSchedules(group)).length : 0;
   const preview = group
     ? {
@@ -74,18 +88,27 @@ export default async function Image({
         height: "100%",
         display: "flex",
         flexDirection: "column",
+        position: "relative",
         background: GROUND,
         color: INK,
         fontFamily: "Figtree",
         padding: "48px 64px",
       }}
     >
-      <div style={{ display: "flex", fontSize: 30, fontFamily: "Bricolage" }}>
-        {t("app.name")}
-      </div>
+      {/* biome-ignore lint/performance/noImgElement: ImageResponse renders plain img */}
+      <img
+        src={ground}
+        alt=""
+        width={1200}
+        height={630}
+        style={{ position: "absolute", left: 0, top: 0 }}
+      />
+      {/* biome-ignore lint/performance/noImgElement: ImageResponse renders plain img */}
+      <img src={lockup} alt={t("app.name")} width={138} height={56} />
       <div
         style={{
-          marginTop: 24,
+          position: "relative",
+          marginTop: 20,
           display: "flex",
           alignItems: "center",
           gap: 28,
@@ -93,8 +116,17 @@ export default async function Image({
           color: SURFACE,
           borderRadius: 24,
           padding: "26px 32px",
+          overflow: "hidden",
         }}
       >
+        {/* biome-ignore lint/performance/noImgElement: ImageResponse renders plain img */}
+        <img
+          src={inkCloth}
+          alt=""
+          width={1200}
+          height={400}
+          style={{ position: "absolute", left: 0, top: 0 }}
+        />
         <div
           style={{
             width: 88,
@@ -146,9 +178,9 @@ export default async function Image({
             gap: 14,
           }}
         >
-          {THREADS.map((thread) => (
+          {THREADS.map((thread, threadIndex) => (
             <div
-              key={thread.color}
+              key={thread.yarn}
               style={{
                 position: "relative",
                 display: "flex",
@@ -168,20 +200,24 @@ export default async function Image({
                   background: UNDER,
                 }}
               />
-              {thread.weave.map((on, i) => (
-                <div
-                  // biome-ignore lint/suspicious/noArrayIndexKey: fixed decorative pattern
-                  key={i}
-                  style={{
-                    position: "absolute",
-                    left: i * CELL + 4,
-                    width: CELL - 8,
-                    height: 26,
-                    borderRadius: 13,
-                    background: on ? thread.color : "transparent",
-                  }}
-                />
-              ))}
+              {thread.weave.map((on, i) =>
+                on ? (
+                  // biome-ignore lint/performance/noImgElement: ImageResponse renders plain img
+                  <img
+                    // biome-ignore lint/suspicious/noArrayIndexKey: fixed decorative pattern
+                    key={i}
+                    src={strips[threadIndex]}
+                    alt=""
+                    width={CELL - 8}
+                    height={26}
+                    style={{
+                      position: "absolute",
+                      left: i * CELL + 4,
+                      borderRadius: 13,
+                    }}
+                  />
+                ) : null,
+              )}
             </div>
           ))}
           <div

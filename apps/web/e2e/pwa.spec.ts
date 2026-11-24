@@ -59,6 +59,17 @@ test("the service worker installs and shows the offline page without a network",
   await expect(
     page.getByRole("heading", { name: "Sin conexión" }),
   ).toBeVisible();
+  // Styled offline too: the worker kept the CSS, the cloth and the logo.
+  expect(
+    await page.evaluate(() => getComputedStyle(document.body).backgroundImage),
+  ).toContain("/yarn/cloth-ground.webp");
+  await expect
+    .poll(() =>
+      page
+        .getByRole("img", { name: "Knot" })
+        .evaluate((img: HTMLImageElement) => img.naturalWidth),
+    )
+    .toBeGreaterThan(0);
   await context.setOffline(false);
 });
 

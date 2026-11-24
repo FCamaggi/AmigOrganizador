@@ -110,7 +110,7 @@ function Avatar({
   if (person.state === "free") {
     return (
       <span
-        className={`${base} text-white ${
+        className={`${base} yarn yarn-label text-white ${
           doublePly
             ? "border-[3px] border-double border-surface"
             : "border-[1.5px] border-transparent"

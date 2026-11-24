@@ -13,7 +13,8 @@
       "!.next",
       "!dist",
       "!build",
-      "!**/.impeccable"
+      "!**/.impeccable",
+      "!Knot-Lana"
     ]
   },
   "formatter": {
