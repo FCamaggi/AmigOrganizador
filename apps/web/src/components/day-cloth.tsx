@@ -70,7 +70,7 @@ function Thread({
   const color = threadColor(thread.colorIndex).value;
   const ply = threadPly(thread.colorIndex);
   return (
-    <li className={`flex items-center ${dense ? "h-4" : "h-5"}`}>
+    <li className={`flex items-center ${dense ? "h-4" : "h-6"}`}>
       <span
         aria-hidden="true"
         className={`w-8 flex-none truncate pr-2 font-bold leading-none lg:w-28 ${
@@ -114,7 +114,7 @@ function Thread({
               <span
                 key={segment.start}
                 className={`weave-move yarn absolute top-1/2 -translate-y-1/2 rounded-full ${
-                  dense ? "h-1.5" : "h-2"
+                  dense ? "h-2.5" : "h-3.5"
                 }`}
                 style={{ ...style, backgroundColor: color }}
               />
