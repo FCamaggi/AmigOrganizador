@@ -141,4 +141,12 @@ export {
   type ResyncReport,
   resyncCalendars,
 } from "./profile/resync-calendars";
+export {
+  type GroupThread,
+  groupThreads,
+  isThreadColor,
+  setThreadColor,
+  THREAD_COLORS,
+  type ThreadColor,
+} from "./profile/thread-color";
 export { todayIn, utcToLocal, zonedTimeToUtc } from "./time/zoned";

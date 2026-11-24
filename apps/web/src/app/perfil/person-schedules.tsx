@@ -1,5 +1,6 @@
 "use client";
 
+import type { ThreadColor } from "@amigo/core";
 import Link from "next/link";
 import { useActionState, useEffect, useRef, useState } from "react";
 import { type MessageKey, t } from "@/i18n/t";
@@ -15,6 +16,7 @@ import {
   setDefaultScheduleAction,
 } from "@/server/group-actions";
 import { Sheet } from "./sheet";
+import { ThreadPicker } from "./thread-picker";
 
 const fieldLabel = "font-bold text-sm text-ink";
 
@@ -28,6 +30,7 @@ export interface ScheduleSummary {
 
 interface PersonSchedulesProps {
   readonly displayName: string;
+  readonly threadColor: ThreadColor | null;
   readonly schedules: readonly ScheduleSummary[];
   readonly activeScheduleId: string;
   readonly activeScheduleName: string;
@@ -41,6 +44,7 @@ interface LocalNameState extends PersonNameState {
 
 export function PersonSchedules({
   displayName,
+  threadColor,
   schedules,
   activeScheduleId,
   activeScheduleName,
@@ -185,6 +189,7 @@ export function PersonSchedules({
               ) : null}
             </div>
           )}
+          <ThreadPicker chosen={threadColor} />
         </div>
 
         <button

@@ -1,21 +1,28 @@
+import {
+  THREAD_COLORS as CORE_THREAD_COLORS,
+  type ThreadColor,
+} from "@amigo/core";
+
 /**
- * Dyed-wool thread colours, one per person in join order. Each holds at least
- * 3.9:1 against the grey-wool ground, so no thread needs an outline. Madder
- * red is kept for the primary action and never given to a person.
+ * Dyed-wool thread colours, the palette of `@amigo/core` in hand-out order.
+ * Each holds at least 3.9:1 against the grey-wool ground, so no thread needs
+ * an outline. Madder red is kept for the primary action and never given to a
+ * person.
  */
-export const THREAD_COLORS = [
-  { name: "indigo", value: "var(--color-thread-indigo)" },
-  { name: "ochre", value: "var(--color-thread-ochre)" },
-  { name: "moss", value: "var(--color-thread-moss)" },
-  { name: "plum", value: "var(--color-thread-plum)" },
-  { name: "teal", value: "var(--color-thread-teal)" },
-  { name: "rose", value: "var(--color-thread-rose)" },
-  { name: "walnut", value: "var(--color-thread-walnut)" },
-  { name: "ink", value: "var(--color-thread-ink)" },
-] as const;
+export const THREAD_COLORS = CORE_THREAD_COLORS.map((name) => ({
+  name,
+  value: `var(--color-thread-${name})`,
+}));
+
+/** The palette slot of a colour a person picked. */
+export function threadSlot(name: ThreadColor): number {
+  return CORE_THREAD_COLORS.indexOf(name);
+}
 
 export function threadColor(index: number) {
-  return THREAD_COLORS[index % THREAD_COLORS.length] ?? THREAD_COLORS[0];
+  const name =
+    CORE_THREAD_COLORS[index % CORE_THREAD_COLORS.length] ?? "indigo";
+  return { name, value: `var(--color-thread-${name})` };
 }
 
 /**

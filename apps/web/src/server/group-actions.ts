@@ -17,6 +17,7 @@ import {
   GroupPlanError,
   type GroupPlanErrorCode,
   type Interval,
+  isThreadColor,
   joinGroup,
   leaveGroup,
   type Person,
@@ -40,6 +41,7 @@ import {
   setDefaultSchedule,
   setImportedCalendar,
   setTemplates,
+  setThreadColor,
   setTimezone,
 } from "@amigo/core";
 import { refresh } from "next/cache";
@@ -339,6 +341,37 @@ export async function savePersonNameAction(
       }),
     );
   }
+  refresh();
+  return { error: null, saved: true };
+}
+
+export interface ThreadColorState {
+  readonly error: PersonErrorCode | null;
+  readonly saved: boolean;
+}
+
+/** Saves the thread colour picked in the profile; an empty value is automatic. */
+export async function saveThreadColorAction(
+  _prev: ThreadColorState,
+  formData: FormData,
+): Promise<ThreadColorState> {
+  const session = await requireSession("/perfil");
+  const now = Date.now();
+  const value = text(formData, "threadColor");
+  if (value !== "" && !isThreadColor(value)) {
+    return { error: "INVALID_COLOR", saved: false };
+  }
+  const stored = await people().findByAccount(session.accountId);
+  const base =
+    stored ??
+    createPerson({
+      accountId: session.accountId,
+      displayName: session.displayName || t("profileEdit.name.title"),
+      now,
+    });
+  await people().save(
+    setThreadColor(base, { color: value === "" ? null : value, now }),
+  );
   refresh();
   return { error: null, saved: true };
 }

@@ -18,6 +18,7 @@ import {
   groupOptions,
   groupPlanViews,
   groupStrip,
+  type ThreadSlots,
 } from "@/lib/group-view-model";
 import { threadColor, threadPly } from "@/lib/lines";
 import { buttonClasses, shellClasses } from "@/lib/ui";
@@ -31,9 +32,9 @@ import {
 } from "@/server/group-actions";
 import { requestOrigin } from "@/server/origin";
 import {
+  groupMemberData,
   groupPlans,
   groups,
-  memberSchedules,
   people,
   profiles,
 } from "@/server/repository";
@@ -85,18 +86,21 @@ function GroupSkeleton() {
 function MemberChips({
   members,
   withProfile,
+  threads,
   label,
 }: {
   readonly members: readonly { accountId: string; displayName: string }[];
   readonly withProfile: ReadonlySet<string>;
+  readonly threads: ThreadSlots;
   readonly label: string;
 }) {
   return (
     <ul className="mt-4 flex flex-wrap gap-2" aria-label={label}>
       {members.map((member, index) => {
         const hasProfile = withProfile.has(member.accountId);
-        const color = threadColor(index).value;
-        const doublePly = threadPly(index) === 2;
+        const slot = threads[index] ?? index;
+        const color = threadColor(slot).value;
+        const doublePly = threadPly(slot) === 2;
         return (
           <li
             key={member.accountId}
@@ -163,7 +167,9 @@ async function GroupScreen({
     );
   }
 
-  const memberProfiles = await memberSchedules(group);
+  const { schedules: memberProfiles, threads: memberThreads } =
+    await groupMemberData(group);
+  const threadSlots = memberThreads.map((thread) => thread.index);
   const withProfile = new Set(memberProfiles.map((p) => p.accountId));
   const isMember = session
     ? group.members.some((m) => m.accountId === session.accountId)
@@ -195,6 +201,7 @@ async function GroupScreen({
           <MemberChips
             members={group.members}
             withProfile={withProfile}
+            threads={threadSlots}
             label={meta}
           />
         </section>
@@ -245,8 +252,15 @@ async function GroupScreen({
   const plannedDates = new Set(
     allPlans.filter((p) => p.status === "confirmed").map((p) => p.date),
   );
-  const options = groupOptions(group, memberProfiles, outlook, plannedDates);
-  const strip = groupStrip(group, outlook, options);
+  const options = groupOptions(
+    group,
+    memberProfiles,
+    outlook,
+    plannedDates,
+    threadSlots,
+  );
+  const strip = groupStrip(group, outlook, options, threadSlots);
+  const viewerThread = memberThreads.find((m) => m.accountId === viewerId);
   const plans = groupPlanViews(group, allPlans, viewerId, origin);
   const missing = group.members
     .filter((m) => !withProfile.has(m.accountId))
@@ -443,8 +457,20 @@ async function GroupScreen({
         <MemberChips
           members={group.members}
           withProfile={withProfile}
+          threads={threadSlots}
           label={meta}
         />
+        {viewerThread?.changed ? (
+          <p className="mt-2 text-mute text-sm">
+            {t("group.thread.changed", {
+              color: t(`thread.${viewerThread.color}`),
+              chosen: t(`thread.${viewerThread.chosen ?? viewerThread.color}`),
+              name:
+                group.members.find((m) => m.accountId === viewerThread.takenBy)
+                  ?.displayName ?? "",
+            })}
+          </p>
+        ) : null}
 
         <section className="mt-6 space-y-1 text-sm">
           <a

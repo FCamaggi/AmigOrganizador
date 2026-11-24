@@ -52,11 +52,21 @@ export interface PlanView {
   readonly icsPath: string | null;
 }
 
+/**
+ * Thread slot per member position, from `groupThreads` (S9). Without one a
+ * member keeps the slot of their join position.
+ */
+export type ThreadSlots = readonly number[];
+
+const slotOf = (threads: ThreadSlots, position: number) =>
+  threads[position] ?? position;
+
 function optionFromWindow(
   window: AvailabilityWindow,
   group: Group,
   profiles: readonly Profile[],
   sooner: boolean,
+  threads: ThreadSlots,
 ): OptionView {
   const start = slotFromOption(window, SUGGESTED_MINUTES).start;
   const slot = { start, end: start + SUGGESTED_MINUTES };
@@ -92,12 +102,12 @@ function optionFromWindow(
       accountId: m.accountId,
       name: m.displayName,
       state: state(m.accountId),
-      colorIndex: index,
+      colorIndex: slotOf(threads, index),
     })),
     note,
     span,
     lines: groupDayLines({ group, profiles, date: window.date, span }).map(
-      (line, index) => ({ ...line, colorIndex: index }),
+      (line, index) => ({ ...line, colorIndex: slotOf(threads, index) }),
     ),
   };
 }
@@ -109,6 +119,7 @@ export function groupOptions(
   outlook: GroupOutlook,
   /** Dates that already hold a confirmed plan are not suggested again. */
   plannedDates: ReadonlySet<string> = new Set(),
+  threads: ThreadSlots = [],
 ): OptionView[] {
   // One option per date: a group asks "which day", not "which window".
   const open = outlook.windows.filter((w) => !plannedDates.has(w.date));
@@ -122,7 +133,7 @@ export function groupOptions(
       next !== undefined &&
       next.score === window.score &&
       next.freeMemberIds.length === window.freeMemberIds.length;
-    return optionFromWindow(window, group, profiles, sooner);
+    return optionFromWindow(window, group, profiles, sooner, threads);
   });
 }
 
@@ -134,6 +145,7 @@ export function groupStrip(
   group: Group,
   outlook: GroupOutlook,
   options: readonly OptionView[],
+  threads: ThreadSlots = [],
 ): StripDay[] {
   const total = group.members.length;
   const hasProfile = new Set(
@@ -157,7 +169,7 @@ export function groupStrip(
         accountId: member.accountId,
         name: member.displayName,
         state,
-        colorIndex: index,
+        colorIndex: slotOf(threads, index),
       };
     });
     return {

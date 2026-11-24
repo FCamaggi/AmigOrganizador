@@ -12,7 +12,9 @@ import {
   type Group,
   type GroupPlanRepository,
   type GroupRepository,
+  type GroupThread,
   groupSchedules,
+  groupThreads,
   type PersonRepository,
   type ProductEventRepository,
   type Profile,
@@ -111,10 +113,20 @@ export async function myDefaultSchedule(
 
 /** One schedule per member, the one each reads for this group (unknown = left out). */
 export async function memberSchedules(group: Group): Promise<Profile[]> {
+  return (await groupMemberData(group)).schedules;
+}
+
+/** Each member's schedule for this group and their thread colour in it. */
+export async function groupMemberData(
+  group: Group,
+): Promise<{ schedules: Profile[]; threads: GroupThread[] }> {
   const ids = group.members.map((m) => m.accountId);
   const [members, schedules] = await Promise.all([
     people().findByAccounts(ids),
     profiles().listForAccounts(ids),
   ]);
-  return groupSchedules(group, members, schedules);
+  return {
+    schedules: groupSchedules(group, members, schedules),
+    threads: groupThreads(group, members),
+  };
 }

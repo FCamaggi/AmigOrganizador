@@ -18,7 +18,7 @@ import { Suspense } from "react";
 import { TopBar } from "@/components/top-bar";
 import { t } from "@/i18n/t";
 import { formatDay, formatTime } from "@/lib/format";
-import { threadColor } from "@/lib/lines";
+import { threadColor, threadSlot } from "@/lib/lines";
 import { buttonClasses, shellClasses } from "@/lib/ui";
 import { safeNext } from "@/server/auth/config";
 import {
@@ -146,6 +146,7 @@ async function ProfileScreen({
 
       <PersonSchedules
         displayName={person?.displayName ?? session.displayName}
+        threadColor={person?.threadColor ?? null}
         schedules={scheduleSummaries}
         activeScheduleId={activeId}
         activeScheduleName={activeName}
@@ -160,7 +161,10 @@ async function ProfileScreen({
         today={today}
         timeZone={timeZone}
         days={days}
-        lineColor={threadColor(0).value}
+        lineColor={
+          threadColor(person?.threadColor ? threadSlot(person.threadColor) : 0)
+            .value
+        }
         next={next}
         save={saveProfileAction}
       >

@@ -1,5 +1,6 @@
 import type { Group } from "../group/group";
 import { createProfile, type Profile } from "./profile";
+import type { ThreadColor } from "./thread-color";
 
 /** The id of the schedule every account starts with, and of legacy profiles. */
 export const DEFAULT_SCHEDULE_ID = "default";
@@ -19,6 +20,8 @@ export interface Person {
   readonly defaultScheduleId: string;
   /** Group id -> schedule id, only for groups with an explicit choice. */
   readonly groupSchedules: Readonly<Record<string, string>>;
+  /** The thread colour picked in the profile (S9); none means automatic. */
+  readonly threadColor?: ThreadColor;
   readonly createdAt: number;
   readonly updatedAt: number;
 }
@@ -26,7 +29,8 @@ export interface Person {
 export type PersonErrorCode =
   | "INVALID_NAME"
   | "UNKNOWN_SCHEDULE"
-  | "DEFAULT_SCHEDULE";
+  | "DEFAULT_SCHEDULE"
+  | "INVALID_COLOR";
 
 /** A rule of the person or their schedules was broken; the UI maps `code`. */
 export class PersonError extends Error {

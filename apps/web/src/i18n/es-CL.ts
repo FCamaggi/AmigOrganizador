@@ -274,6 +274,16 @@ export const esCL = {
   "group.missing.many": "Faltan {count} horarios.",
   "group.missing.none": "Todos tienen horario.",
   "group.member.noSchedule": "sin horario",
+  "group.thread.changed":
+    "En este grupo tu hilo se ve {color}: {name} llegó antes con {chosen}.",
+  "thread.indigo": "índigo",
+  "thread.ochre": "ocre",
+  "thread.moss": "musgo",
+  "thread.plum": "ciruela",
+  "thread.teal": "turquesa",
+  "thread.rose": "rosa",
+  "thread.walnut": "nogal",
+  "thread.ink": "tinta",
   "group.decision.all": "Pueden {free} de {total} · calzan todos",
   "group.decision.missingOne":
     "Pueden {free} de {total} · falta el horario de {name}",
@@ -332,6 +342,14 @@ export const esCL = {
   "profileEdit.intro":
     "Anota cuándo estás ocupado: trabajo, clases, turnos. Las rutinas son ayudas opcionales; lo que no marques cuenta como libre.",
   "profileEdit.name.title": "Tu nombre",
+  "profileEdit.thread.label": "Tu hilo",
+  "profileEdit.thread.trigger": "Cambiar el color de tu hilo: {color}",
+  "profileEdit.thread.title": "Color de tu hilo",
+  "profileEdit.thread.hint":
+    "Así se ve tu hilo en tus grupos. Si alguien que llegó antes a un grupo ya tiene ese color, ahí tu hilo toma otro libre.",
+  "profileEdit.thread.auto": "Automático",
+  "profileEdit.thread.save": "Guardar color",
+  "profileEdit.thread.error": "Ese color no está en la paleta.",
   "profileEdit.name.label": "Tu nombre",
   "profileEdit.name.edit": "Editar tu nombre: {name}",
   "profileEdit.name.cancel": "Cancelar",
