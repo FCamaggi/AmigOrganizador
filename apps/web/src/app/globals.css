@@ -140,17 +140,17 @@
 /* Closed band: a subtle woven warp-and-weft fill behind the threads when
    every member fits, keeping thread colours legible. */
 .cloth-closed {
-  background-color: var(--color-panel);
+  background-color: rgb(35 38 58 / 0.08);
   background-image:
     repeating-linear-gradient(
       90deg,
-      rgb(35 38 58 / 0.06) 0 1px,
-      transparent 1px 6px
+      rgb(35 38 58 / 0.16) 0 1px,
+      transparent 1px 5px
     ),
     repeating-linear-gradient(
       0deg,
-      rgb(35 38 58 / 0.04) 0 1px,
-      transparent 1px 6px
+      rgb(35 38 58 / 0.12) 0 1px,
+      transparent 1px 5px
     );
 }
 
