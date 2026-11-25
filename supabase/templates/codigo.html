@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light" />
+    <title>Tu código para entrar a Knot</title>
+  </head>
+  <body style="margin:0;padding:0;background:#e9ebe8;">
+    <div style="display:none;max-height:0;overflow:hidden;opacity:0;">
+      Tu código es {{ .Token }}. Escríbelo en Knot para entrar.
+    </div>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#e9ebe8;padding:32px 12px;">
+      <tr>
+        <td align="center">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:480px;">
+            <tr>
+              <td style="padding:0 4px 18px;">
+                <img src="https://getknot.vercel.app/brand/knot-lockup.png" width="118" height="48" alt="Knot" style="display:block;border:0;height:48px;width:118px;" />
+              </td>
+            </tr>
+            <tr>
+              <td style="background:#fbfbfa;border:1px solid #d3d6d0;border-radius:14px;padding:28px 24px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#23263a;">
+                <p style="margin:0 0 6px;font-size:22px;line-height:1.25;font-weight:800;color:#6b4a2b;">
+                  Tu código para entrar
+                </p>
+                <p style="margin:0 0 22px;font-size:16px;line-height:1.45;color:#4a4d60;">
+                  Escríbelo en Knot y listo. Vence en 10 minutos.
+                </p>
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td align="center" style="background:#23263a;border-radius:10px;padding:18px 8px;">
+                      <span style="font-family:'SF Mono',Menlo,Consolas,'Courier New',monospace;font-size:36px;line-height:1;font-weight:700;letter-spacing:10px;color:#fbfbfa;">{{ .Token }}</span>
+                    </td>
+                  </tr>
+                </table>
+                <p style="margin:22px 0 0;font-size:14px;line-height:1.45;color:#4a4d60;">
+                  Si no pediste este código, ignora este correo: nadie puede entrar sin él.
+                </p>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:18px 4px 0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:12px;line-height:1.45;color:#4a4d60;">
+                Knot · los días en que tu grupo puede juntarse.
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

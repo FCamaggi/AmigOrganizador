@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { t } from "@/i18n/t";
+import { buttonClasses } from "@/lib/ui";
 
 const DISMISSED_KEY = "amigo.installHint.dismissed";
 
@@ -96,7 +97,7 @@ export function InstallHint() {
           <button
             type="button"
             onClick={install}
-            className="flex min-h-11 min-w-fit flex-1 items-center justify-center rounded-cloth bg-madder px-3 font-bold text-[0.9375rem] text-white hover:bg-madder-pressed active:bg-madder-active"
+            className={`${buttonClasses.primary} min-h-11 min-w-fit flex-1 text-lg`}
           >
             {t("pwa.install.action")}
           </button>

@@ -250,42 +250,14 @@ body:has(dialog[open]) {
     background-image: url("/yarn/cloth-ink.webp");
     background-size: 96px 96px;
   }
-  /* Madder action buttons are dyed cloth too (white text holds 4.98:1 on
-     the lightest fibres); hover and press darken the weave with a wash. */
-  .bg-madder {
-    --cloth-wash: linear-gradient(transparent, transparent);
-    background-image: var(--cloth-wash), url("/yarn/cloth-madder.webp");
-    background-size:
-      100% 100%,
-      96px 96px;
-  }
-  .bg-madder:hover:not(:disabled) {
-    --cloth-wash: linear-gradient(rgb(0 0 0 / 0.12), rgb(0 0 0 / 0.12));
-  }
-  .bg-madder:active:not(:disabled) {
-    --cloth-wash: linear-gradient(rgb(0 0 0 / 0.24), rgb(0 0 0 / 0.24));
-  }
-  .bg-madder:disabled {
-    background-image: none;
-  }
-  /* Light text on dyed wool: the weave's light fibres run through the
-     letters, so text on madder and ink cloth (and labelled yarn) gets a dark
-     outline drawn in eight directions plus a soft halo. Inherited, so every
-     label on these surfaces carries it. Lives in this layer: Tailwind drops
-     unlayered rules whose selector is one of its own utilities. */
-  .bg-madder,
-  .bg-ink,
+  /* Initials on labelled yarn: a thin dark outline keeps them legible on
+     the light fibres of every thread colour. */
   .yarn-label {
     text-shadow:
-      1px 0 0 rgb(0 0 0 / 0.85),
-      -1px 0 0 rgb(0 0 0 / 0.85),
-      0 1px 0 rgb(0 0 0 / 0.85),
-      0 -1px 0 rgb(0 0 0 / 0.85),
-      1px 1px 0 rgb(0 0 0 / 0.7),
-      -1px 1px 0 rgb(0 0 0 / 0.7),
-      1px -1px 0 rgb(0 0 0 / 0.7),
-      -1px -1px 0 rgb(0 0 0 / 0.7),
-      0 0 5px rgb(0 0 0 / 0.55);
+      1px 0 0 rgb(0 0 0 / 0.55),
+      -1px 0 0 rgb(0 0 0 / 0.55),
+      0 1px 0 rgb(0 0 0 / 0.55),
+      0 -1px 0 rgb(0 0 0 / 0.55);
   }
 }
 
@@ -295,4 +267,51 @@ body:has(dialog[open]) {
 .yarn.yarn-label {
   --yarn-shade: linear-gradient(rgb(0 0 0 / 0.3), rgb(0 0 0 / 0.3));
   filter: none;
+}
+
+/* Sewn label buttons: a label of light cloth stitched onto the page, its
+   border and an inner running stitch in the thread colour, the label in that
+   colour too. Primary is madder with the rope face; secondary and sheet
+   confirmations are ink. Hover and press tint the cloth with the same
+   colour. Madder on the light weave holds 5.1:1, ink 12.8:1. */
+@layer components {
+  .btn-sewn {
+    --sewn: var(--color-madder);
+    --cloth-wash: linear-gradient(transparent, transparent);
+    position: relative;
+    border: 2px solid var(--sewn);
+    color: var(--sewn);
+    background-image: var(--cloth-wash), url("/yarn/cloth-surface.webp");
+    background-size:
+      100% 100%,
+      96px 96px;
+  }
+  .btn-sewn::after {
+    content: "";
+    position: absolute;
+    inset: 4px;
+    border: 1.5px dashed color-mix(in srgb, var(--sewn) 70%, transparent);
+    border-radius: calc(var(--radius-cloth) - 5px);
+    pointer-events: none;
+  }
+  .btn-sewn:hover:not(:disabled) {
+    --cloth-wash: linear-gradient(
+      color-mix(in srgb, var(--sewn) 8%, transparent),
+      color-mix(in srgb, var(--sewn) 8%, transparent)
+    );
+  }
+  .btn-sewn:active:not(:disabled) {
+    --cloth-wash: linear-gradient(
+      color-mix(in srgb, var(--sewn) 16%, transparent),
+      color-mix(in srgb, var(--sewn) 16%, transparent)
+    );
+  }
+  .btn-sewn:disabled {
+    --sewn: var(--color-rule-strong);
+    color: var(--color-mute);
+    cursor: default;
+  }
+  .btn-sewn-ink {
+    --sewn: var(--color-ink);
+  }
 }

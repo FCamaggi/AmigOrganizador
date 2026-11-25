@@ -296,11 +296,13 @@ Borders carry meaning by weight and dash: a solid ink outline is chosen or close
 ## Components
 
 ### Buttons
-Tactile and plain: one primary and one secondary shape everywhere (`buttonClasses`).
-- **Shape:** folded-cloth corners (14px).
-- **Primary:** madder-dyed cloth (`cloth-madder` tile; white 800-weight 1.0625rem text holds 4.98:1 on its lightest fibres), 50px tall, full width. Hover lays a 12% dark wash over the weave, pressed 24%; disabled drops the weave to flat hairline grey with mute text. One per screen.
-- **Secondary:** bleached cloth weave with a 1.5px ink border, 700-weight 0.9375rem ink text, at least 44px tall, flexing to share a row (Invitar / Compartir). Hover lays a 5% ink wash over the weave, pressed a 10% wash.
-- **Toggle (duration picker):** 44px cloth-cornered cells with a 1.5px strong-rule border; the pressed one inverts to ink with surface text.
+Sewn labels: every button is a label of light cloth stitched onto the page (`btn-sewn`), with a 2px border and an inner dashed running stitch 4px in, both in the thread colour, and the label in that colour too.
+- **Shape:** folded-cloth corners (14px), stitch inset at 9px corners.
+- **Primary:** madder sewn label, Knot Rope 1.375rem in madder (5.1:1 on the light weave), 50px tall, full width. One per screen.
+- **Secondary:** ink sewn label, 700-weight 0.9375rem Figtree in ink (12.8:1), at least 44px tall, flexing to share a row (Invitar / Compartir).
+- **Confirm (sheets):** ink sewn label in 800 weight ("Listo", "Guardar color").
+- **States:** hover tints the cloth with the label colour at 8%, pressed at 16%; disabled turns border, stitch and label to strong-rule and mute. No dark text outlines: the label colour carries contrast on its own.
+- **Toggle (duration picker, days):** 44px cloth-cornered cells with a 1.5px strong-rule border; the pressed one inverts to ink with surface text.
 - **Text links:** indigo, bold, underlined with a 3px offset, inside a 44px tall hit area.
 
 ### Chips

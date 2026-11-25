@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { authMode, googleEnabled, safeNext } from "./auth/config";
 import { supabaseServer } from "./auth/supabase";
 import { requestOrigin } from "./origin";
+import { profiles } from "./repository";
 import { endSession, startSession } from "./session";
 
 const MAX_NAME = 60;
@@ -36,32 +37,63 @@ export async function signIn(
   redirect(safeNext(text(formData, "next")));
 }
 
-export interface MagicLinkState {
-  readonly status: "idle" | "sent" | "invalid" | "failed";
+export interface EmailCodeState {
+  readonly status: "idle" | "sent" | "invalid" | "failed" | "badCode";
+  readonly email: string;
 }
 
+const CODE = /^\d{6}$/;
+
 /**
- * Emails a one-tap sign-in link (ADR 0003). The name is stored on the new
+ * Emails a 6-digit sign-in code (ADR 0003: no passwords). A code typed into
+ * the app works in any mail client and on any device, where a link would
+ * open in whatever browser the mail app picks. The name is stored on a new
  * account, so the person shows up by name in their groups.
  */
-export async function sendMagicLink(
-  _prev: MagicLinkState,
+export async function sendSignInCode(
+  _prev: EmailCodeState,
   formData: FormData,
-): Promise<MagicLinkState> {
-  if (authMode() !== "supabase") return { status: "failed" };
+): Promise<EmailCodeState> {
   const name = text(formData, "name");
   const email = text(formData, "email").toLowerCase();
+  if (authMode() !== "supabase") return { status: "failed", email };
   if (name.length > MAX_NAME || !EMAIL.test(email) || email.length > 254)
-    return { status: "invalid" };
+    return { status: "invalid", email };
   const supabase = await supabaseServer();
   const { error } = await supabase.auth.signInWithOtp({
     email,
     options: {
-      emailRedirectTo: await callbackUrl(safeNext(text(formData, "next"))),
+      shouldCreateUser: true,
       data: name ? { display_name: name } : undefined,
     },
   });
-  return { status: error ? "failed" : "sent" };
+  return { status: error ? "failed" : "sent", email };
+}
+
+/** Trades the emailed code for a session, then continues like the callback. */
+export async function verifySignInCode(
+  _prev: EmailCodeState,
+  formData: FormData,
+): Promise<EmailCodeState> {
+  const email = text(formData, "email").toLowerCase();
+  const token = text(formData, "code").replace(/\s+/g, "");
+  const next = safeNext(text(formData, "next"));
+  if (authMode() !== "supabase") return { status: "failed", email };
+  if (!EMAIL.test(email) || !CODE.test(token))
+    return { status: "badCode", email };
+  const supabase = await supabaseServer();
+  const { data, error } = await supabase.auth.verifyOtp({
+    email,
+    token,
+    type: "email",
+  });
+  if (error || !data.user) return { status: "badCode", email };
+  // First stop for someone with no profile yet, unless they came from an
+  // invite: the group asks for the profile once they've joined.
+  const needsProfile =
+    next === "/" &&
+    (await profiles().listForAccount(data.user.id)).length === 0;
+  redirect(needsProfile ? "/perfil" : next);
 }
 
 export async function signInWithGoogle(formData: FormData): Promise<void> {

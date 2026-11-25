@@ -4,6 +4,7 @@ import { THREAD_COLORS, type ThreadColor } from "@amigo/core";
 import { useActionState, useEffect, useRef, useState } from "react";
 import { t } from "@/i18n/t";
 import { threadColor, threadSlot } from "@/lib/lines";
+import { buttonClasses } from "@/lib/ui";
 import {
   saveThreadColorAction,
   type ThreadColorState,
@@ -76,7 +77,7 @@ export function ThreadPicker({
             type="submit"
             form="thread-color-form"
             disabled={pending}
-            className="flex min-h-11 flex-1 items-center justify-center rounded-cloth bg-ink px-4 font-extrabold text-[0.9375rem] text-surface hover:opacity-90 disabled:opacity-60"
+            className={buttonClasses.confirm}
           >
             {t("profileEdit.thread.save")}
           </button>

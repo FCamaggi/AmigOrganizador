@@ -1,9 +1,13 @@
 /** Shared button styles: one primary and one secondary shape everywhere. */
 export const buttonClasses = {
+  /** The screen's one action: a madder sewn label in the rope face. */
   primary:
-    "flex h-[3.125rem] w-full items-center justify-center rounded-cloth bg-madder px-4 font-extrabold text-[1.0625rem] text-white no-underline hover:bg-madder-pressed active:bg-madder-active disabled:bg-rule disabled:text-mute",
+    "btn-sewn flex h-[3.125rem] w-full items-center justify-center rounded-cloth px-4 font-rope text-[1.375rem] leading-none no-underline",
   secondary:
-    "flex min-h-11 flex-1 items-center justify-center rounded-cloth border-[1.5px] border-ink bg-surface px-3 text-center font-bold text-[0.9375rem] text-ink no-underline hover:bg-panel active:bg-rule disabled:border-rule-strong disabled:text-mute",
+    "btn-sewn btn-sewn-ink flex min-h-11 flex-1 items-center justify-center rounded-cloth px-3 text-center font-bold text-[0.9375rem] no-underline",
+  /** Done / save inside a sheet. */
+  confirm:
+    "btn-sewn btn-sewn-ink flex min-h-11 flex-1 items-center justify-center rounded-cloth px-4 font-extrabold text-[0.9375rem]",
 } as const;
 
 /**

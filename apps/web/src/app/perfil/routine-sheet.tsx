@@ -360,7 +360,7 @@ export function RoutineSheet({
           <button
             type="button"
             onClick={onDone}
-            className="flex min-h-11 flex-1 items-center justify-center rounded-cloth bg-ink px-4 font-extrabold text-[0.9375rem] text-surface hover:opacity-90"
+            className={buttonClasses.confirm}
           >
             {t("profileEdit.sheet.done")}
           </button>

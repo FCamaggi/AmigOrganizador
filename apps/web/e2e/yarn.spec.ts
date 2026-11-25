@@ -42,13 +42,27 @@ test("titles speak in Knot Rope and section headings in Bricolage", async ({
   expect(families.ropeLoaded).toBe(true);
 });
 
-test("labels on wool buttons carry a dark outline", async ({ page }) => {
+test("the primary action is a madder sewn label in the rope face", async ({
+  page,
+}) => {
   await page.goto("/");
   const button = page.getByRole("link", { name: "Crear un grupo" });
-  const style = await button.evaluate((node) => ({
-    shadow: getComputedStyle(node).textShadow,
-    weave: getComputedStyle(node).backgroundImage,
-  }));
-  expect(style.weave).toContain("/yarn/cloth-madder.webp");
-  expect(style.shadow).not.toBe("none");
+  const style = await button.evaluate((node) => {
+    const css = getComputedStyle(node);
+    const stitch = getComputedStyle(node, "::after");
+    return {
+      font: css.fontFamily.toLowerCase(),
+      color: css.color,
+      border: css.borderTopColor,
+      weave: css.backgroundImage,
+      stitch: stitch.borderTopStyle,
+      shadow: css.textShadow,
+    };
+  });
+  expect(style.font).toContain("rope");
+  expect(style.color).toBe("rgb(184, 50, 42)");
+  expect(style.border).toBe("rgb(184, 50, 42)");
+  expect(style.weave).toContain("/yarn/cloth-surface.webp");
+  expect(style.stitch).toBe("dashed");
+  expect(style.shadow).toBe("none");
 });

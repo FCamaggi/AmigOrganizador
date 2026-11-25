@@ -227,7 +227,7 @@ export function PersonSchedules({
           <button
             type="button"
             onClick={() => setSchedulesOpen(false)}
-            className="flex min-h-11 flex-1 items-center justify-center rounded-cloth bg-ink px-4 font-extrabold text-[0.9375rem] text-surface hover:opacity-90"
+            className={buttonClasses.confirm}
           >
             {t("profileEdit.sheet.done")}
           </button>
