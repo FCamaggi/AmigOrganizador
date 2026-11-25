@@ -41,3 +41,14 @@ test("titles speak in Knot Rope and section headings in Bricolage", async ({
   expect(families.h1.toLowerCase()).toContain("rope");
   expect(families.ropeLoaded).toBe(true);
 });
+
+test("labels on wool buttons carry a dark outline", async ({ page }) => {
+  await page.goto("/");
+  const button = page.getByRole("link", { name: "Crear un grupo" });
+  const style = await button.evaluate((node) => ({
+    shadow: getComputedStyle(node).textShadow,
+    weave: getComputedStyle(node).backgroundImage,
+  }));
+  expect(style.weave).toContain("/yarn/cloth-madder.webp");
+  expect(style.shadow).not.toBe("none");
+});

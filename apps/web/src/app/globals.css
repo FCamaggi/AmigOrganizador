@@ -268,6 +268,25 @@ body:has(dialog[open]) {
   .bg-madder:disabled {
     background-image: none;
   }
+  /* Light text on dyed wool: the weave's light fibres run through the
+     letters, so text on madder and ink cloth (and labelled yarn) gets a dark
+     outline drawn in eight directions plus a soft halo. Inherited, so every
+     label on these surfaces carries it. Lives in this layer: Tailwind drops
+     unlayered rules whose selector is one of its own utilities. */
+  .bg-madder,
+  .bg-ink,
+  .yarn-label {
+    text-shadow:
+      1px 0 0 rgb(0 0 0 / 0.85),
+      -1px 0 0 rgb(0 0 0 / 0.85),
+      0 1px 0 rgb(0 0 0 / 0.85),
+      0 -1px 0 rgb(0 0 0 / 0.85),
+      1px 1px 0 rgb(0 0 0 / 0.7),
+      -1px 1px 0 rgb(0 0 0 / 0.7),
+      1px -1px 0 rgb(0 0 0 / 0.7),
+      -1px -1px 0 rgb(0 0 0 / 0.7),
+      0 0 5px rgb(0 0 0 / 0.55);
+  }
 }
 
 /* Yarn that carries a label (a member's initial): a uniform darker wash over
