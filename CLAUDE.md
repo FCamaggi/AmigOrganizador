@@ -6,8 +6,8 @@ per week.
 
 ## Product rules (non-negotiable)
 
-- Everyone has an account, but sign-in is one tap (Google or magic link, never
-  passwords) and a group invite link shows the group before asking to sign in (ADR 0003).
+- Everyone has an account, but sign-in is one step (an emailed code; Google
+  is off for now; never passwords) and a group invite link shows the group before asking to sign in (ADR 0003).
 - The product is groups + one saved availability profile per person (ADR 0004),
   not one-off plans that everyone answers.
 - `unknown` availability is never treated as `free`.

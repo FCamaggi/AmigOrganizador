@@ -27,3 +27,9 @@ decided that every participant, organizer included, must have an account.
 - Google sign-in can later request calendar free/busy scope (Phase 2).
 - Risk: lower response rate than guest mode. Track the share of link
   visitors who sign in and answer; revisit this ADR if it falls below 60%.
+
+## Amendment (2026-11-25)
+
+The magic link was replaced by a one-time code sent by email, typed into the
+sign-in screen, because the emailed link did not work reliably.
+Google sign-in is turned off until it works reliably. No passwords still holds.

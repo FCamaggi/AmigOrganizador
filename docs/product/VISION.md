@@ -29,7 +29,8 @@ everyone gets the invite    ->  .ics / Google / Outlook, or a calendar feed
 
 1. **Value before sign-in, sign-in in one tap.** Everyone has an account
    (ADR 0003), but a group invite link shows the group before asking to sign in, and
-   signing in is Google or a magic link: no passwords, no usernames.
+   signing in is a code sent by email (Google is off for now): no passwords,
+   no usernames.
 2. **Read, don't replace.** Calendars are the source of truth; we read free/busy
    and write back invites. We never store event titles we don't need.
 3. **Unknown is not free.** Show who hasn't set up their profile; nudge them,

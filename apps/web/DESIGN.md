@@ -90,6 +90,11 @@ typography:
     fontSize: "0.9375rem"
     fontWeight: 700
     lineHeight: 1.35
+  button-rope:
+    fontFamily: "Knot Rope, Bricolage Grotesque, sans-serif"
+    fontSize: "1.375rem"
+    fontWeight: 800
+    lineHeight: 1.1
 rounded:
   knot: "6px"
   cloth: "14px"
@@ -105,31 +110,33 @@ spacing:
   target: "44px"
 components:
   button-primary:
-    backgroundColor: "{colors.madder}"
-    textColor: "#ffffff"
-    typography: "{typography.button}"
+    backgroundColor: "{colors.surface}"
+    textColor: "{colors.madder}"
+    borderColor: "{colors.madder}"
+    typography: "{typography.button-rope}"
     rounded: "{rounded.cloth}"
     padding: "0 16px"
     height: "50px"
     width: "100%"
   button-primary-hover:
-    backgroundColor: "{colors.madder-pressed}"
+    backgroundColor: "color-mix(in srgb, {colors.madder} 8%, {colors.surface})"
   button-primary-active:
-    backgroundColor: "{colors.madder-active}"
+    backgroundColor: "color-mix(in srgb, {colors.madder} 16%, {colors.surface})"
   button-primary-disabled:
-    backgroundColor: "{colors.rule}"
+    borderColor: "{colors.rule-strong}"
     textColor: "{colors.mute}"
   button-secondary:
     backgroundColor: "{colors.surface}"
     textColor: "{colors.ink}"
+    borderColor: "{colors.ink}"
     typography: "{typography.button-small}"
     rounded: "{rounded.cloth}"
     padding: "0 12px"
     height: "44px"
   button-secondary-hover:
-    backgroundColor: "{colors.panel}"
+    backgroundColor: "color-mix(in srgb, {colors.ink} 8%, {colors.surface})"
   button-secondary-active:
-    backgroundColor: "{colors.rule}"
+    backgroundColor: "color-mix(in srgb, {colors.ink} 16%, {colors.surface})"
   toggle-selected:
     backgroundColor: "{colors.ink}"
     textColor: "{colors.surface}"
@@ -206,7 +213,7 @@ The world refuses the scheduling category's green heatmap grid and the replaced 
 An undyed, slightly green-grey wool ground with indigo-black ink, eight dyed-wool thread colours for people, and one madder red for action.
 
 ### Primary
-- **Madder Red** (madder): the primary action only: the sticky "Proponer…" button, "Crear grupo", the install hint. Darkens to **Pressed Madder** (madder-pressed) on hover and **Deep Madder** (madder-active) while pressed. White text on it holds 5.9:1.
+- **Madder Red** (madder): the primary action only: the sticky "Proponer…" button, "Crear grupo", the install hint. It is the border, stitch and label of a sewn label on light cloth, never a fill: hover tints the cloth with madder at 8%, pressed at 16%. Madder text holds 5.1:1 on the light weave. **Pressed Madder** (madder-pressed) and **Deep Madder** (madder-active) remain defined as tokens but no component uses them.
 
 ### Secondary
 - **Loom Indigo** (indigo): links, back navigation, "Ver más días" disclosure text, and the focus ring. It shares its value with the first thread colour; as a link it is always underlined or paired with a chevron, never colour alone.

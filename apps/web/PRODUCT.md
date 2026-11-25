@@ -43,8 +43,8 @@ a profile is shown as unknown, never assumed free.
 - Entry point is a group invite link shared in a WhatsApp group; the link
   preview matters as much as the first screen.
 - Used on a phone, often in short bursts (in transit, between classes).
-- Every member signs in with one tap (Google or email magic link); the group
-  is visible before sign-in (ADR 0003).
+- Every member signs in with a code sent by email (Google sign-in is off for
+  now); the group is visible before sign-in (ADR 0003).
 - Profiles are set up once and touched up later (a new shift roster, exams
   week); groups are opened often to check "when can we meet".
 - A confirmed plan leaves the app as an `.ics` file, an "add to Google

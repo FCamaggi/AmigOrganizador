@@ -51,3 +51,6 @@ supabase/.branches/
 # Playwright
 test-results/
 playwright-report/
+
+# Personal research notes (not part of the product)
+docs/personal/
