@@ -34,6 +34,8 @@ export interface StripDay {
   /** Everyone who has a profile can come. */
   readonly allKnownFree: boolean;
   readonly hasOption: boolean;
+  /** Hours the best window lasts, shown when everyone can (counts would all read N/N). */
+  readonly hours: number | null;
   readonly label: string;
   /** Per-member state in join order for the day's best window (or day fallback). */
   readonly people: readonly OptionPerson[];
@@ -127,7 +129,7 @@ export function groupOptions(
     (w, i) => open.findIndex((x) => x.date === w.date) === i,
   );
   const shown = perDay.slice(0, MAX_OPTIONS);
-  return shown.map((window, index) => {
+  const views = shown.map((window, index) => {
     const next = shown[index + 1];
     const sooner =
       next !== undefined &&
@@ -135,6 +137,22 @@ export function groupOptions(
       next.freeMemberIds.length === window.freeMemberIds.length;
     return optionFromWindow(window, group, profiles, sooner, threads);
   });
+  // A tag every option carries tells days apart from nothing: keep only the
+  // ones that differ between rows.
+  if (views.length < 2) return views;
+  const shared = (views[0]?.reasons ?? []).filter((reason) =>
+    views.every((view) => view.reasons.includes(reason)),
+  );
+  return views.map((view) => ({
+    ...view,
+    reasons: view.reasons.filter((reason) => !shared.includes(reason)),
+  }));
+}
+
+/** "4 h" or "2,5 h": hours as people say them, half-hour steps. */
+export function formatHours(hours: number): string {
+  const half = Math.round(hours * 2) / 2;
+  return `${String(half).replace(".", ",")} h`;
 }
 
 const weekdayKey = (date: string) =>
@@ -180,9 +198,15 @@ export function groupStrip(
       total,
       allKnownFree: best !== null && free >= known,
       hasOption: best !== null,
-      label: best
-        ? t("group.strip.day", { day, free, total })
-        : t("group.strip.none", { day }),
+      hours: best ? Math.round(((best.end - best.start) / 60) * 2) / 2 : null,
+      label: !best
+        ? t("group.strip.none", { day })
+        : free === total
+          ? t("group.strip.dayAll", {
+              day,
+              hours: formatHours((best.end - best.start) / 60),
+            })
+          : t("group.strip.day", { day, free, total }),
       people,
       optionKey: options.find((o) => o.date === date)?.key ?? null,
     };

@@ -15,9 +15,10 @@ Tests: `pnpm check`, `pnpm --filter @amigo/web e2e`.
 ## Tasks
 
 - [x] T1 (S1, S2) inline: invite preview, distinct confirmation, land on group; solo group primary invite.
-- [ ] T2 (S3, S4, S5) inline: group page clarity.
+- [x] T2 (S3, S4, S5) inline: group page clarity.
 
 ## Log
 
 - L1 (2026-11-24): owner request verbatim: "dale con todo" (after choosing "Entrada por invitación" as the first area of the critique).
 - L2 (2026-11-24): T1 done. Invite view shows "Mejor día hasta ahora: … · pueden N de M" (or "Cuando armen sus perfiles…"), counts only; signed-in visitors see "¿Te unes a {name}?" with what is shared; join lands on the group. Kept the confirmation tap on purpose: auto-joining after the sign-in redirect would let a third-party link add someone to a group and share their availability without consent. Solo group: madder "Invitar por WhatsApp" + quiet "Copiar link", before the profile notice. Tests were written before the code but not run RED separately. `pnpm check` green, e2e 19/19 (2 new in invite.spec; footer-focus follows the new landing).
+- L3 (2026-11-24): T2 done. One canonical time: the free window (decision panel, option rows, cloth band, invite preview); the suggested start lives only in the propose form, and the "Libres de … a …" line is gone. Strip: when everyone can, the caption shows the window length ("4 h", "2,5 h"; label "pueden todos, 4 h libres") instead of N/N. Tags every option shares are dropped ("Más pronto" stays: it breaks ties). RED observed: 3 of 4 new unit tests fail on the old view model. `pnpm check` green, e2e 19/19, capture of a two-member group reviewed.

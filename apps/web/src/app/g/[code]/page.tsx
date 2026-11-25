@@ -14,7 +14,7 @@ import { Suspense } from "react";
 import { PlanSign } from "@/components/plan-sign";
 import { TopBar } from "@/components/top-bar";
 import { t } from "@/i18n/t";
-import { formatTime } from "@/lib/format";
+import { formatSpan } from "@/lib/format";
 import {
   groupOptions,
   groupPlanViews,
@@ -219,7 +219,7 @@ async function GroupScreen({
             {best
               ? t("group.invite.previewBest", {
                   day: best.dayLabel,
-                  time: formatTime(best.start),
+                  time: formatSpan(best.windowStart, best.windowEnd),
                   free: best.freeCount,
                   total: best.memberCount,
                 })

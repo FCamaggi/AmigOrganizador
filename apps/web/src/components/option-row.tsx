@@ -1,7 +1,7 @@
 "use client";
 
 import { t } from "@/i18n/t";
-import { formatSpan, formatTime, initialsFor } from "@/lib/format";
+import { formatSpan, initialsFor } from "@/lib/format";
 import { threadColor, threadPly } from "@/lib/lines";
 import type { OptionPerson, OptionView, PersonState } from "@/lib/option-view";
 
@@ -201,22 +201,9 @@ export function OptionRow({
           <span className="block font-extrabold text-[1.0625rem] leading-tight">
             {option.dayLabel}{" "}
             <span className="font-medium text-[0.9375rem] text-mute">
-              {formatSpan(option.start, option.end)}
+              {formatSpan(option.windowStart, option.windowEnd)}
             </span>
           </span>
-          {option.windowEnd - option.windowStart > option.end - option.start ? (
-            <span className="mt-0.5 block text-[0.8125rem] text-mute">
-              {t(
-                option.start > option.windowStart + 15
-                  ? "options.window.evening"
-                  : "options.window",
-                {
-                  from: formatTime(option.windowStart),
-                  to: formatTime(option.windowEnd),
-                },
-              )}
-            </span>
-          ) : null}
           {option.reasons.length > 0 ? (
             <span className="mt-1 flex flex-wrap gap-1">
               {option.reasons.map((reason) => (

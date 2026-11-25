@@ -109,8 +109,6 @@ export const esCL = {
   "reason.GOOD_WEEKDAY": "Buen día",
   "reason.MISSING_DATA": "Falta gente",
   "reason.SOONER": "Más pronto",
-  "options.window": "Libres de {from} a {to}",
-  "options.window.evening": "Libres de {from} a {to} · elegimos la tarde-noche",
 
   "actions.confirm": "Confirmar {day}",
   "actions.confirm.pick": "Elige una opción",
@@ -303,6 +301,7 @@ export const esCL = {
   "group.decision.some": "Pueden {free} de {total}",
   "group.strip.title": "Próximas 4 semanas",
   "group.strip.day": "{day}: {free} de {total} pueden",
+  "group.strip.dayAll": "{day}: pueden todos, {hours} libres",
   "group.strip.none": "{day}: no hay horario que le sirva a casi todos",
   "group.days.title": "Mejores días",
   "group.days.more": "Ver más días",

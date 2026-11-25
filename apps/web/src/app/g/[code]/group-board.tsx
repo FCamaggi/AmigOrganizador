@@ -5,8 +5,8 @@ import { DayCloth } from "@/components/day-cloth";
 import { OptionRow, WovenBand } from "@/components/option-row";
 import { ShareButton, WhatsAppLink } from "@/components/share-buttons";
 import { type MessageKey, t } from "@/i18n/t";
-import { formatDuration, formatTime } from "@/lib/format";
-import type { StripDay } from "@/lib/group-view-model";
+import { formatDuration, formatSpan, formatTime } from "@/lib/format";
+import { formatHours, type StripDay } from "@/lib/group-view-model";
 import { threadColor } from "@/lib/lines";
 import type { OptionView } from "@/lib/option-view";
 import { DURATIONS } from "@/lib/plan-options";
@@ -122,7 +122,11 @@ function Strip({
                 <WovenBand people={day.people} rank={rank} className="w-9" />
                 <span className="font-extrabold text-xs">{day.dayOfMonth}</span>
                 <span className="text-caption text-mute leading-none">
-                  {day.hasOption ? `${day.free}/${day.total}` : "–"}
+                  {!day.hasOption
+                    ? "–"
+                    : day.free === day.total && day.hours !== null
+                      ? formatHours(day.hours)
+                      : `${day.free}/${day.total}`}
                 </span>
               </>
             );
@@ -387,7 +391,8 @@ export function GroupBoard({
               id="decision-heading"
               className="font-rope font-extrabold text-[1.625rem] leading-[1.08] tracking-[-0.02em] sm:text-[1.875rem]"
             >
-              {selected.dayLabel} · {formatTime(selected.start)}
+              {selected.dayLabel} ·{" "}
+              {formatSpan(selected.windowStart, selected.windowEnd)}
             </h2>
             <p className="mt-1 text-[0.9375rem] text-ink-sub">
               {decisionLine(selected, missing)}
@@ -408,7 +413,7 @@ export function GroupBoard({
             <DayCloth
               dayLabel={selected.dayLabel}
               span={selected.span}
-              band={{ start: selected.start, end: selected.end }}
+              band={{ start: selected.windowStart, end: selected.windowEnd }}
               threads={selected.lines}
             />
           </div>
