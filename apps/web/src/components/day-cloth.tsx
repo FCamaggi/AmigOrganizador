@@ -78,19 +78,19 @@ export function ThreadSegments({
               <span
                 key={segment.start}
                 className={`weave-move absolute top-1/2 flex -translate-y-1/2 flex-col justify-between ${
-                  dense ? "h-2" : "h-2.5"
+                  dense ? "h-3" : "h-4"
                 }`}
                 style={style}
               >
                 <span
                   className={`yarn block w-full rounded-full ${
-                    dense ? "h-[3px]" : "h-1"
+                    dense ? "h-1" : "h-1.5"
                   }`}
                   style={{ backgroundColor: color }}
                 />
                 <span
                   className={`yarn block w-full rounded-full ${
-                    dense ? "h-[3px]" : "h-1"
+                    dense ? "h-1" : "h-1.5"
                   }`}
                   style={{ backgroundColor: color }}
                 />
@@ -101,7 +101,7 @@ export function ThreadSegments({
             <span
               key={segment.start}
               className={`weave-move yarn absolute top-1/2 -translate-y-1/2 rounded-full ${
-                dense ? "h-2.5" : "h-3.5"
+                dense ? "h-3.5" : "h-5"
               }`}
               style={{ ...style, backgroundColor: color }}
             />
@@ -113,19 +113,19 @@ export function ThreadSegments({
           return (
             <span
               key={segment.start}
-              className="weave-move absolute top-1/2 flex h-3 -translate-y-1/2 items-center"
+              className="weave-move absolute top-1/2 flex h-4 -translate-y-1/2 items-center"
               style={style}
             >
               {diveIn ? (
                 <span
-                  className="h-2.5 w-[2.5px] flex-none rounded-full"
+                  className="h-4 w-[3px] flex-none rounded-full"
                   style={{ backgroundColor: color }}
                 />
               ) : null}
-              <span className="thread-dive h-[3px] flex-1" />
+              <span className="thread-dive h-1 flex-1" />
               {diveOut ? (
                 <span
-                  className="h-2.5 w-[2.5px] flex-none rounded-full"
+                  className="h-4 w-[3px] flex-none rounded-full"
                   style={{ backgroundColor: color }}
                 />
               ) : null}
@@ -136,7 +136,7 @@ export function ThreadSegments({
           return (
             <span
               key={segment.start}
-              className="weave-move thread-loose absolute top-1/2 h-0.5 -translate-y-1/2"
+              className="weave-move thread-loose absolute top-1/2 h-[3px] -translate-y-1/2"
               style={style}
             />
           );
@@ -167,11 +167,11 @@ function Thread({
   const color = threadColor(thread.colorIndex).value;
   const ply = threadPly(thread.colorIndex);
   return (
-    <li className={`flex items-center ${dense ? "h-4" : "h-6"}`}>
+    <li className={`flex items-center ${dense ? "h-7" : "h-10"}`}>
       <span
         aria-hidden="true"
         className={`w-8 flex-none truncate pr-2 font-bold leading-none lg:w-28 ${
-          dense ? "text-caption" : "text-[0.8125rem]"
+          dense ? "text-caption" : "text-sm"
         }`}
       >
         <span className="lg:hidden">{initial}</span>
@@ -264,7 +264,7 @@ export function DayCloth({
             </span>
           </span>
         </div>
-        <ul className={`relative ${dense ? "space-y-0" : "space-y-0.5"}`}>
+        <ul className={`relative ${dense ? "space-y-0.5" : "space-y-1.5"}`}>
           {threads.map((thread, index) => (
             <Thread
               key={thread.accountId}

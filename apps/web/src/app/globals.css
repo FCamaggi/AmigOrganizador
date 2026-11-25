@@ -83,10 +83,14 @@
     letter-spacing: -0.015em;
   }
 
-  /* Large titles speak in rope. Its glyphs carry their own spacing. */
+  /* Large titles are rope, dyed walnut like the logo's cord (5.6:1 on the
+     darkest fibres of the grey weave), lying on the cloth with the same soft
+     shadow as a thread. Its glyphs carry their own spacing. */
   h1 {
     font-family: var(--font-rope);
     letter-spacing: 0;
+    color: var(--color-thread-walnut);
+    filter: drop-shadow(0 1px 1px rgb(20 22 34 / 0.22));
   }
 
   ::selection {
@@ -245,6 +249,24 @@ body:has(dialog[open]) {
   .bg-ink {
     background-image: url("/yarn/cloth-ink.webp");
     background-size: 96px 96px;
+  }
+  /* Madder action buttons are dyed cloth too (white text holds 4.98:1 on
+     the lightest fibres); hover and press darken the weave with a wash. */
+  .bg-madder {
+    --cloth-wash: linear-gradient(transparent, transparent);
+    background-image: var(--cloth-wash), url("/yarn/cloth-madder.webp");
+    background-size:
+      100% 100%,
+      96px 96px;
+  }
+  .bg-madder:hover:not(:disabled) {
+    --cloth-wash: linear-gradient(rgb(0 0 0 / 0.12), rgb(0 0 0 / 0.12));
+  }
+  .bg-madder:active:not(:disabled) {
+    --cloth-wash: linear-gradient(rgb(0 0 0 / 0.24), rgb(0 0 0 / 0.24));
+  }
+  .bg-madder:disabled {
+    background-image: none;
   }
 }
 

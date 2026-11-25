@@ -11,15 +11,17 @@ export function WhatsAppLink({
   text,
   label,
   primary = false,
+  className = "",
 }: {
   readonly text: string;
   readonly label: string;
   /** The screen's one primary action (madder). */
   readonly primary?: boolean;
+  readonly className?: string;
 }) {
   return (
     <a
-      className={primary ? buttonClasses.primary : secondary}
+      className={`${primary ? buttonClasses.primary : secondary} ${className}`}
       href={`https://wa.me/?text=${encodeURIComponent(text)}`}
       target="_blank"
       rel="noopener noreferrer"

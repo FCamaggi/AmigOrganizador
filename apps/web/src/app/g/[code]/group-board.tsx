@@ -24,6 +24,9 @@ interface GroupBoardProps {
   readonly shareText: string;
   /** Optional prompt when the signed-in viewer still has no schedule. */
   readonly noProfileNotice?: React.ReactNode;
+  /** The viewer's thread slot in this group, for the solo illustration. */
+  readonly viewerSlot?: number;
+  readonly viewerHasProfile?: boolean;
   /** Rendered after the ranked days and before the sticky footer. */
   readonly children?: React.ReactNode;
   readonly propose: (
@@ -293,6 +296,51 @@ function ProposeForm({
   );
 }
 
+/**
+ * The cloth of a group of one: your thread (spun if you have a profile,
+ * loose if not) and two loose threads for the friends still to invite.
+ * Illustrative only; nobody's time is drawn.
+ */
+function AloneCloth({
+  youSlot,
+  youHaveProfile,
+}: {
+  readonly youSlot: number;
+  readonly youHaveProfile: boolean;
+}) {
+  const rows = [
+    { key: "you", label: t("group.alone.you"), you: true },
+    { key: "f1", label: "?", you: false },
+    { key: "f2", label: "?", you: false },
+  ];
+  return (
+    <figure aria-hidden="true" className="m-0">
+      <ul className="space-y-3">
+        {rows.map((row) => (
+          <li key={row.key} className="flex h-6 items-center gap-3">
+            <span className="w-8 flex-none font-extrabold text-mute text-sm">
+              {row.label}
+            </span>
+            <span className="relative flex h-6 flex-1 items-center">
+              {row.you && youHaveProfile ? (
+                <span
+                  className="yarn h-3.5 w-full rounded-full"
+                  style={{ backgroundColor: threadColor(youSlot).value }}
+                />
+              ) : (
+                <span className="thread-loose h-0.5 w-full" />
+              )}
+            </span>
+          </li>
+        ))}
+      </ul>
+      <figcaption className="mt-3 text-caption text-mute">
+        {t("group.alone.clothCaption")}
+      </figcaption>
+    </figure>
+  );
+}
+
 export function GroupBoard({
   children,
   alone,
@@ -302,6 +350,8 @@ export function GroupBoard({
   inviteUrl,
   shareText,
   noProfileNotice,
+  viewerSlot = 0,
+  viewerHasProfile = false,
   propose,
 }: GroupBoardProps) {
   const [selectedKey, setSelectedKey] = useState(options[0]?.key ?? null);
@@ -337,39 +387,37 @@ export function GroupBoard({
   }, []);
 
   if (alone) {
+    // Phone: one column. Desktop: the invite leads on the left, everything
+    // about you and the group sits in the aside, like the full board.
     return (
-      <>
+      <div className="contents lg:grid lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start lg:gap-x-10">
         <section
           aria-labelledby="alone-title"
-          className="mt-5 rounded-cloth border border-rule bg-surface p-4 sm:p-5"
+          className="mt-5 rounded-cloth border border-rule bg-surface p-4 sm:p-6 lg:min-w-0"
         >
-          <div
-            className="mb-3 flex max-w-52 flex-col gap-1.5"
-            aria-hidden="true"
+          <AloneCloth youSlot={viewerSlot} youHaveProfile={viewerHasProfile} />
+          <h2
+            id="alone-title"
+            className="mt-5 font-extrabold text-xl sm:text-2xl"
           >
-            <div className="relative flex h-2 items-center">
-              <span className="h-0.5 w-full rounded-full bg-rule" />
-              <span
-                className="yarn absolute left-0 h-2 w-24 rounded-full"
-                style={{ backgroundColor: threadColor(0).value }}
-              />
-            </div>
-            <div className="relative flex h-2 items-center">
-              <span className="thread-loose h-0.5 w-full" />
-            </div>
-          </div>
-          <h2 id="alone-title" className="font-extrabold text-xl">
             {t("group.alone.title")}
           </h2>
-          <p className="mt-1 text-mute text-sm">{t("group.alone.body")}</p>
-          <div className="mt-4 flex flex-col items-stretch gap-1 sm:max-w-sm">
-            <WhatsAppLink label={t("group.share")} text={shareText} primary />
+          <p className="mt-1 max-w-prose text-mute">{t("group.alone.body")}</p>
+          <div className="mt-5 flex flex-col items-stretch gap-1 sm:flex-row sm:items-center sm:gap-3">
+            <WhatsAppLink
+              label={t("group.share")}
+              text={shareText}
+              primary
+              className="sm:w-auto sm:px-8"
+            />
             <ShareButton url={inviteUrl} text={shareText} quiet />
           </div>
         </section>
-        {noProfileNotice}
-        {children}
-      </>
+        <aside className="lg:sticky lg:top-6 lg:mt-1">
+          {noProfileNotice}
+          {children}
+        </aside>
+      </div>
     );
   }
 

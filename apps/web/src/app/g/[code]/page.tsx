@@ -426,6 +426,8 @@ async function GroupScreen({
         inviteUrl={inviteUrl}
         shareText={t("group.shareText", { name: group.name, url: inviteUrl })}
         noProfileNotice={noProfileNotice}
+        viewerSlot={viewerThread?.index ?? 0}
+        viewerHasProfile={withProfile.has(viewerId)}
         propose={proposePlanAction.bind(null, group.inviteCode)}
       >
         {plansSection}

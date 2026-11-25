@@ -262,7 +262,7 @@ Eight dyed-wool colours, defined once in `@amigo/core` (`THREAD_COLORS`) and dra
 - **Counts** scale with rank in option rows: 1.25rem for the best option, 1.125rem for the second, 1rem at 85% ink for the rest.
 
 ### Named Rules
-**The Rope Is For Titles Rule.** Knot Rope appears at 1.625rem and up only (h1, the decided day); section headings stay Bricolage and anything you tap or read in a list is Figtree. Rope is drawn in flat ink: no yarn fill until a 2D wool tile exists.
+**The Rope Is For Titles Rule.** Knot Rope appears at 1.625rem and up only (h1, the decided day); section headings stay Bricolage and anything you tap or read in a list is Figtree. Titles are dyed walnut like the logo's cord (5.6:1 on the darkest grey-weave fibres) with the thread shadow; on the ink panel the rope is surface-white. The font is TrueType: a CFF build stacked every glyph on Windows.
 
 ## Layout
 
@@ -298,7 +298,7 @@ Borders carry meaning by weight and dash: a solid ink outline is chosen or close
 ### Buttons
 Tactile and plain: one primary and one secondary shape everywhere (`buttonClasses`).
 - **Shape:** folded-cloth corners (14px).
-- **Primary:** madder red, white 800-weight 1.0625rem text, 50px tall, full width. Hover darkens to pressed madder, active to deep madder; disabled is hairline grey with mute text. One per screen.
+- **Primary:** madder-dyed cloth (`cloth-madder` tile; white 800-weight 1.0625rem text holds 4.98:1 on its lightest fibres), 50px tall, full width. Hover lays a 12% dark wash over the weave, pressed 24%; disabled drops the weave to flat hairline grey with mute text. One per screen.
 - **Secondary:** bleached cloth weave with a 1.5px ink border, 700-weight 0.9375rem ink text, at least 44px tall, flexing to share a row (Invitar / Compartir). Hover lays a 5% ink wash over the weave, pressed a 10% wash.
 - **Toggle (duration picker):** 44px cloth-cornered cells with a 1.5px strong-rule border; the pressed one inverts to ink with surface text.
 - **Text links:** indigo, bold, underlined with a 3px offset, inside a 44px tall hit area.
@@ -325,7 +325,7 @@ Tactile and plain: one primary and one secondary shape everywhere (`buttonClasse
 - **Disclosures:** `details` rows with an indigo or ink bold label and a chevron that rotates 90° when open.
 
 ### Day Cloth (signature)
-The day as cloth: one row per member across the useful day (08:00–24:00, widened only if the option falls outside it). Each row has a bare hairline warp; free segments are spun yarn 8px tall in the member's colour (two 4px plies for second-cycle members), busy segments a 3px solid strong-rule under-thread with 2.5px coloured ticks where the thread dives and resurfaces, unknown segments a 2px dotted mute line. The option's window is outlined in ink with a round ink time label above: a 2px dashed outline while partial, a 3px solid outline with the warp-and-weft fill when everyone fits. From nine members rows thin from 20px to 16px; people are never collapsed together. Initials label rows on phones, full names (7rem column) from `lg`. A bold summary ("Calzan 10 de 12 · 19:00–22:00") and a caption legend sit below. Segment edges ease over 220ms (`cubic-bezier(0.16, 1, 0.3, 1)`) when motion is allowed.
+The day as cloth: one row per member across the useful day (08:00–24:00, widened only if the option falls outside it). Each row is 40px tall (28px from nine members) with a bare hairline warp; free segments are spun yarn 20px tall in the member's colour (two 4px plies for second-cycle members), busy segments a 3px solid strong-rule under-thread with 2.5px coloured ticks where the thread dives and resurfaces, unknown segments a 2px dotted mute line. The option's window is outlined in ink with a round ink time label above: a 2px dashed outline while partial, a 3px solid outline with the warp-and-weft fill when everyone fits. People are never collapsed together. Initials label rows on phones, full names (7rem column) from `lg`. A bold summary ("Calzan 10 de 12 · 19:00–22:00") and a caption legend sit below. Segment edges ease over 220ms (`cubic-bezier(0.16, 1, 0.3, 1)`) when motion is allowed.
 
 ### Woven Band (signature)
 The day cloth in miniature beside each ranked option and in each day-strip cell: one 6px row per member (5px from seven members), drawn with the same free/busy/unknown thread forms. The frame's border weight carries rank: 2.5px ink on surface for the best option, 1.5px ink for the second, 1px strong rule on panel for the rest. It takes the focus ring of its row's hidden radio.

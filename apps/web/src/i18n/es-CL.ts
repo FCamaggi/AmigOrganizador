@@ -306,6 +306,9 @@ export const esCL = {
   "group.days.title": "Mejores días",
   "group.days.more": "Ver más días",
   "group.alone.title": "Invita a tu grupo",
+  "group.alone.you": "Tú",
+  "group.alone.clothCaption":
+    "Cuando se sumen, sus hilos se tejen aquí con el tuyo.",
   "group.alone.body":
     "Por ahora estás solo. Manda el link por WhatsApp: cuando se unan y armen su perfil, aquí aparecen los días que les sirven a todos.",
   "group.empty.title": "Todavía no hay días que comparar",
