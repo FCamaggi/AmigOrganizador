@@ -1,6 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // e2e builds into its own folder so it never overwrites the files a running
+  // `next dev` is serving (that left the local server on stale CSS).
+  distDir: process.env.NEXT_DIST_DIR ?? ".next",
   transpilePackages: [
     "@amigo/core",
     "@amigo/adapter-memory",

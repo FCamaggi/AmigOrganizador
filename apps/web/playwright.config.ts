@@ -27,6 +27,7 @@ export default defineConfig({
     timeout: 300_000,
     env: {
       AMIGO_LOCAL_MODE: "true",
+      NEXT_DIST_DIR: ".next-e2e",
       NEXT_PUBLIC_SUPABASE_URL: "",
       NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: "",
       DATABASE_URL: "",
