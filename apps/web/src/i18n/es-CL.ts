@@ -120,6 +120,7 @@ export const esCL = {
   "actions.join": "Sumarme al plan",
   "actions.signInToAnswer": "Sumarme y responder",
   "actions.share": "Compartir link",
+  "actions.copyLink": "Copiar link",
   "actions.whatsapp": "Mandar por WhatsApp",
   "actions.copied": "Link copiado",
   "actions.nudge": "Avisarle a {name}",
@@ -238,6 +239,13 @@ export const esCL = {
   "group.invite.body":
     "Únete y arma tu perfil una vez: el grupo compara la disponibilidad de todos y muestra qué días pueden juntarse.",
   "group.invite.join": "Unirme al grupo",
+  "group.invite.confirmTitle": "¿Te unes a {name}?",
+  "group.invite.confirmBody":
+    "Tus amigos verán cuándo estás libre u ocupado, nunca qué haces.",
+  "group.invite.previewBest":
+    "Mejor día hasta ahora: {day} · {time} · pueden {free} de {total}",
+  "group.invite.previewNone":
+    "Cuando armen sus perfiles, acá verás qué días les sirven.",
   "og.invite": "Te invitaron a este grupo",
   "privacy.link": "Privacidad",
   "privacy.title": "Política de privacidad",
@@ -305,7 +313,7 @@ export const esCL = {
   "group.empty.body":
     "Cuando al menos dos personas tengan su perfil, aquí aparecen los días que le sirven al grupo.",
   "group.propose": "Proponer {day}",
-  "group.share": "Invitar al grupo",
+  "group.share": "Invitar por WhatsApp",
   "group.shareText":
     "Únete a {name} en Knot para ver qué días podemos juntarnos: {url}",
   "group.feed": "Suscribirme al calendario del grupo",

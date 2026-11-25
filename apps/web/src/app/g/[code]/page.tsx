@@ -14,6 +14,7 @@ import { Suspense } from "react";
 import { PlanSign } from "@/components/plan-sign";
 import { TopBar } from "@/components/top-bar";
 import { t } from "@/i18n/t";
+import { formatTime } from "@/lib/format";
 import {
   groupOptions,
   groupPlanViews,
@@ -190,14 +191,40 @@ async function GroupScreen({
   );
 
   if (!isMember) {
+    // Value before sign-in: the group's best day so far, counts only.
+    const range = outlookRange(group.timezone, Date.now());
+    const best = groupOptions(
+      group,
+      memberProfiles,
+      groupOutlook({ group, profiles: memberProfiles, ...range }),
+      new Set(),
+      threadSlots,
+    )[0];
+    const confirming = session !== null;
     return (
       <div className="mx-auto w-full max-w-2xl">
         {header}
         <section className="mt-5 rounded-cloth border border-rule bg-surface p-4 sm:p-5">
           <h2 className="font-extrabold text-xl leading-tight sm:text-2xl">
-            {t("group.invite.title", { name: group.name })}
+            {confirming
+              ? t("group.invite.confirmTitle", { name: group.name })
+              : t("group.invite.title", { name: group.name })}
           </h2>
-          <p className="mt-1.5 text-mute">{t("group.invite.body")}</p>
+          <p className="mt-1.5 text-mute">
+            {confirming
+              ? t("group.invite.confirmBody")
+              : t("group.invite.body")}
+          </p>
+          <p className="mt-3 rounded-knot bg-ink px-3 py-2 font-bold text-sm text-surface">
+            {best
+              ? t("group.invite.previewBest", {
+                  day: best.dayLabel,
+                  time: formatTime(best.start),
+                  free: best.freeCount,
+                  total: best.memberCount,
+                })
+              : t("group.invite.previewNone")}
+          </p>
           <MemberChips
             members={group.members}
             withProfile={withProfile}

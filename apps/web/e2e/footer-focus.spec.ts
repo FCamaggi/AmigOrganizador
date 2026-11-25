@@ -34,7 +34,8 @@ test("at 390x844, keyboard focus on the last option row is not covered by the st
   await member.getByRole("button", { name: "Entrar" }).click();
   await member.waitForURL(`**${groupPath}`);
   await member.getByRole("button", { name: "Unirme al grupo" }).click();
-  await member.waitForURL(/\/perfil/);
+  await member.waitForURL(`**${groupPath}`);
+  await member.goto(`/perfil?next=${encodeURIComponent(groupPath)}`);
   // Empty profile: pick "Trabajo" and close its sheet, so the profile has a routine.
   await member.getByRole("button", { name: "Trabajo" }).click();
   await member

@@ -10,13 +10,16 @@ const secondary = `${buttonClasses.secondary} min-w-fit`;
 export function WhatsAppLink({
   text,
   label,
+  primary = false,
 }: {
   readonly text: string;
   readonly label: string;
+  /** The screen's one primary action (madder). */
+  readonly primary?: boolean;
 }) {
   return (
     <a
-      className={secondary}
+      className={primary ? buttonClasses.primary : secondary}
       href={`https://wa.me/?text=${encodeURIComponent(text)}`}
       target="_blank"
       rel="noopener noreferrer"
@@ -30,9 +33,12 @@ export function WhatsAppLink({
 export function ShareButton({
   url,
   text,
+  quiet = false,
 }: {
   readonly url: string;
   readonly text: string;
+  /** A text-weight "Copiar link" beside a primary invite. */
+  readonly quiet?: boolean;
 }) {
   const [copied, setCopied] = useState(false);
   async function share() {
@@ -56,11 +62,17 @@ export function ShareButton({
   return (
     <button
       type="button"
-      className={secondary}
+      className={
+        quiet
+          ? "flex min-h-11 items-center justify-center px-3 font-bold text-indigo text-sm underline"
+          : secondary
+      }
       onClick={share}
       aria-live="polite"
     >
-      {copied ? t("actions.copied") : t("actions.share")}
+      {copied
+        ? t("actions.copied")
+        : t(quiet ? "actions.copyLink" : "actions.share")}
     </button>
   );
 }

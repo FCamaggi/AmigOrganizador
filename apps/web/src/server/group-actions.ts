@@ -56,7 +56,6 @@ import {
   calendarSources,
   groupPlans,
   groups,
-  myDefaultSchedule,
   people,
   profiles,
 } from "./repository";
@@ -150,10 +149,8 @@ export async function joinGroupAction(code: string): Promise<void> {
       now: Date.now(),
     }),
   );
-  const profile = await myDefaultSchedule(session.accountId);
-  redirect(
-    profile ? `/g/${code}` : `/perfil?next=${encodeURIComponent(`/g/${code}`)}`,
-  );
+  // Land on the group they came for; its notice asks for a profile if missing.
+  redirect(`/g/${code}`);
 }
 
 export async function leaveGroupAction(code: string): Promise<void> {

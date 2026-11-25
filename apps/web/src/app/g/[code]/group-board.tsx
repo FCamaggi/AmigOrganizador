@@ -335,7 +335,6 @@ export function GroupBoard({
   if (alone) {
     return (
       <>
-        {noProfileNotice}
         <section
           aria-labelledby="alone-title"
           className="mt-5 rounded-cloth border border-rule bg-surface p-4 sm:p-5"
@@ -359,11 +358,12 @@ export function GroupBoard({
             {t("group.alone.title")}
           </h2>
           <p className="mt-1 text-mute text-sm">{t("group.alone.body")}</p>
-          <div className="mt-4 flex flex-wrap gap-2">
-            <WhatsAppLink label={t("group.share")} text={shareText} />
-            <ShareButton url={inviteUrl} text={shareText} />
+          <div className="mt-4 flex flex-col items-stretch gap-1 sm:max-w-sm">
+            <WhatsAppLink label={t("group.share")} text={shareText} primary />
+            <ShareButton url={inviteUrl} text={shareText} quiet />
           </div>
         </section>
+        {noProfileNotice}
         {children}
       </>
     );
