@@ -3,7 +3,13 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "env": ["CONTACT_EMAIL"],
+      "env": [
+        "CONTACT_EMAIL",
+        "AMIGO_LOCAL_MODE",
+        "SITE_URL",
+        "AUTH_GOOGLE_ENABLED",
+        "NEXT_DIST_DIR"
+      ],
       "outputs": [".next/**", "!.next/cache/**", "dist/**"]
     },
     "typecheck": {
