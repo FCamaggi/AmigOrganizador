@@ -351,6 +351,13 @@ The ink slab at the top of the group view: dark wool weave, surface display-deci
 ### Thread Picker
 Beside the name on the profile, a 44px "Tu hilo" control led by the person's yarn swatch (or a loose dotted thread when the choice is automatic) opens a sheet: eight yarn swatches with their Spanish names in a two-column grid (three from `sm`), plus "Automático". Each choice is a 48px cloth-cornered radio card; the checked one takes an ink border and a 2px ink ring, so selection never relies on the swatch colour. The sheet's one line explains that a group may show another colour when someone who joined earlier already has it.
 
+### Waiting and Loading
+- **Warp skeleton:** while a screen's data loads, each person is a loose dotted thread (the "missing information" form) breathing softly, with "Tejiendo los horarios…" below. When the cloth arrives its threads weave in left to right (700ms, staggered 70ms per row). Never a grey pulsing block.
+- **Shuttle:** a button that waits shows a short spun strand passing over and under four warp ticks, in the button's own colour, beside a "…ndo" label. The button keeps its colour while busy (`aria-busy`); only a truly disabled button turns grey.
+- **Plan thread:** each plan in the group's list is marked by an ink yarn thread tied between two knots: dashed and slack while proposed, pulled taut when confirmed (460ms when motion is allowed).
+- **Active row:** in the day cloth, a person's name is a toggle: their thread lifts (scaled 1.4×) and everyone else dims to 40%, without changing any colour. The choice stays as the days change.
+- All of it is still under `prefers-reduced-motion: reduce`.
+
 ### Offline Page
 The page the service worker serves when a navigation fails: the Knot lockup, two short threads (one spun, one loose) above "Sin conexión", and a plain "Reintentar" link styled as the primary button. The worker keeps this page's CSS, fonts, logo and cloth tiles and serves them only when the network fails, so offline still looks like Knot.
 

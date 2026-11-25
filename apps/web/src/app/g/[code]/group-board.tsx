@@ -4,6 +4,7 @@ import { useActionState, useEffect, useRef, useState } from "react";
 import { DayCloth } from "@/components/day-cloth";
 import { OptionRow, WovenBand } from "@/components/option-row";
 import { ShareButton, WhatsAppLink } from "@/components/share-buttons";
+import { Shuttle } from "@/components/shuttle";
 import { type MessageKey, t } from "@/i18n/t";
 import { formatDuration, formatSpan, formatTime } from "@/lib/format";
 import { formatHours, type StripDay } from "@/lib/group-view-model";
@@ -287,8 +288,10 @@ function ProposeForm({
         <button
           type="submit"
           disabled={pending}
+          aria-busy={pending}
           className={`${buttonClasses.primary} min-w-40 flex-1`}
         >
+          {pending ? <Shuttle /> : null}
           {t("propose.submit")}
         </button>
       </div>
@@ -356,6 +359,8 @@ export function GroupBoard({
 }: GroupBoardProps) {
   const [selectedKey, setSelectedKey] = useState(options[0]?.key ?? null);
   const [proposing, setProposing] = useState(false);
+  // Active row: one person's thread stays lifted as the days change.
+  const [focused, setFocused] = useState<string | null>(null);
   const footerRef = useRef<HTMLElement>(null);
   const selected =
     options.find((o) => o.key === selectedKey) ?? options[0] ?? null;
@@ -463,6 +468,8 @@ export function GroupBoard({
               span={selected.span}
               band={{ start: selected.windowStart, end: selected.windowEnd }}
               threads={selected.lines}
+              focused={focused}
+              onFocus={setFocused}
             />
           </div>
         ) : null}

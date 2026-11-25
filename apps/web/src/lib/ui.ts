@@ -1,8 +1,11 @@
 /** Shared button styles: one primary and one secondary shape everywhere. */
 export const buttonClasses = {
-  /** The screen's one action: a madder sewn label in the rope face. */
+  /**
+   * The screen's one action: a madder sewn label in the rope face. The rope
+   * scales with narrow phones and the label may wrap, so it never spills out.
+   */
   primary:
-    "btn-sewn flex h-[3.125rem] w-full items-center justify-center rounded-cloth px-4 font-rope text-[1.375rem] leading-none no-underline",
+    "btn-sewn flex min-h-[3.125rem] w-full items-center justify-center rounded-cloth px-4 py-2 text-center font-rope text-[clamp(1.0625rem,5.2vw,1.375rem)] leading-[1.05] no-underline",
   secondary:
     "btn-sewn btn-sewn-ink flex min-h-11 flex-1 items-center justify-center rounded-cloth px-3 text-center font-bold text-[0.9375rem] no-underline",
   /** Done / save inside a sheet. */

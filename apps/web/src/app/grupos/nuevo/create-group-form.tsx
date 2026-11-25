@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
+import { Shuttle } from "@/components/shuttle";
 import { type MessageKey, t } from "@/i18n/t";
 import { DEFAULT_TIMEZONE, TIMEZONES } from "@/lib/plan-options";
 import { buttonClasses, shellClasses } from "@/lib/ui";
@@ -85,8 +86,10 @@ export function CreateGroupForm({
         <button
           type="submit"
           disabled={pending}
+          aria-busy={pending}
           className={buttonClasses.primary}
         >
+          {pending ? <Shuttle /> : null}
           {t("groupNew.submit")}
         </button>
       </div>

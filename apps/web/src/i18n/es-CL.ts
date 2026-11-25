@@ -13,6 +13,11 @@ export const esCL = {
   "pwa.install.action": "Agregar al inicio",
   "pwa.install.ios": "En Safari, toca Compartir y luego “Agregar a inicio”.",
   "pwa.install.dismiss": "Ahora no",
+  "loading.weaving": "Tejiendo los horarios…",
+  "error.title": "Algo se enredó",
+  "error.body":
+    "No pudimos cargar esto. Revisa tu conexión y vuelve a intentar; si sigue pasando, recarga la página.",
+  "error.retry": "Intentar de nuevo",
   "offline.title": "Sin conexión",
   "offline.body":
     "Necesitas internet para ver tus grupos. Revisa tu conexión y vuelve a intentar.",
@@ -76,6 +81,8 @@ export const esCL = {
 
   "diagram.title": "{day} · quién está libre",
   "cloth.closed": "Todos calzan · {time}",
+  "cloth.focus": "Destacar el hilo de {name}",
+  "cloth.focusHint": "toca un nombre para seguir su hilo",
   "cloth.partial": "Calzan {free} de {total} · {time}",
   "cloth.legend":
     "Hilo arriba: libre · pasa por debajo: ocupado · punteado: sin horario",
@@ -151,8 +158,20 @@ export const esCL = {
   "signin.title": "Entra a Knot",
   "signin.body":
     "Tu perfil y tus grupos quedan en tu cuenta, así los ves desde cualquier teléfono.",
+  "signin.create.title": "Primero, tu cuenta",
+  "signin.create.body":
+    "Para crear el grupo necesitas una cuenta. Te mandamos un código al correo, sin contraseñas, y vuelves directo a crear el grupo.",
+  "signin.join.title": "Entra para unirte",
+  "signin.join.body":
+    "Te mandamos un código al correo, sin contraseñas, y vuelves al grupo para unirte.",
   "signin.name": "Tu nombre (como te conocen tus amigos)",
-  "signin.invalid": "Revisa el correo (y que el nombre tenga hasta 60 letras).",
+  "signin.sending": "Mandando el código…",
+  "signin.verifying": "Entrando…",
+  "signin.rateLimited":
+    "Pediste varios códigos seguidos. Espera un minuto y vuelve a intentar.",
+  "signin.verifyFailed":
+    "No pudimos revisar el código. Revisa tu conexión y vuelve a intentar.",
+  "signin.invalid": "Escribe tu nombre (hasta 60 letras) y un correo válido.",
   "signin.failed": "No pudimos mandar el código. Intenta de nuevo en un rato.",
   "signin.code.title": "Revisa tu correo",
   "signin.code.body": "Te mandamos un código de 6 números a {email}.",

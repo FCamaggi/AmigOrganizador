@@ -13,6 +13,7 @@ import {
 } from "@amigo/core";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
+import { Shuttle } from "@/components/shuttle";
 import { WeekCloth } from "@/components/week-cloth";
 import { type MessageKey, t } from "@/i18n/t";
 import { TIMEZONES } from "@/lib/plan-options";
@@ -508,8 +509,10 @@ export function ProfileEditor({
           type="button"
           onClick={submit}
           disabled={pending}
+          aria-busy={pending}
           className={buttonClasses.primary}
         >
+          {pending ? <Shuttle /> : null}
           {t("profileEdit.save")}
         </button>
       </footer>

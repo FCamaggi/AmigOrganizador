@@ -2,10 +2,12 @@ import Image from "next/image";
 import Link from "next/link";
 import { Suspense } from "react";
 import { InstallHint } from "@/components/install-hint";
+import { WarpSkeleton } from "@/components/warp-skeleton";
 import { t } from "@/i18n/t";
 import { threadColor } from "@/lib/lines";
 import { buttonClasses, shellClasses } from "@/lib/ui";
 import { signOut } from "@/server/actions";
+import { authMode } from "@/server/auth/config";
 import {
   groups,
   memberSchedules,
@@ -29,14 +31,7 @@ export default function Home() {
           {t("app.beta")}
         </span>
       </p>
-      <Suspense
-        fallback={
-          <div
-            aria-hidden="true"
-            className="mt-6 h-64 animate-pulse rounded-cloth bg-panel"
-          />
-        }
-      >
+      <Suspense fallback={<WarpSkeleton rows={3} className="mt-6" />}>
         <HomeContent />
       </Suspense>
     </main>
@@ -58,7 +53,15 @@ async function HomeContent() {
           <HomeCloth />
         </div>
         <div className="mt-auto pt-8 pb-[max(1.125rem,env(safe-area-inset-bottom))] sm:max-w-sm lg:col-start-1 lg:row-start-3 lg:mt-0">
-          <Link href="/grupos/nuevo" className={buttonClasses.primary}>
+          {/* Straight to sign-in with the reason in hand, no redirect hop. */}
+          <Link
+            href={
+              authMode() === "supabase"
+                ? `/entrar?next=${encodeURIComponent("/grupos/nuevo")}`
+                : "/grupos/nuevo"
+            }
+            className={buttonClasses.primary}
+          >
             {t("groups.create")}
           </Link>
           <Link

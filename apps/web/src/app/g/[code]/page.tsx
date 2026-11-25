@@ -12,7 +12,9 @@ import Link from "next/link";
 import { connection } from "next/server";
 import { Suspense } from "react";
 import { PlanSign } from "@/components/plan-sign";
+import { PlanThread } from "@/components/plan-thread";
 import { TopBar } from "@/components/top-bar";
+import { WarpSkeleton } from "@/components/warp-skeleton";
 import { t } from "@/i18n/t";
 import { formatSpan } from "@/lib/format";
 import {
@@ -74,12 +76,14 @@ export default function GroupPage({ params }: PageProps<"/g/[code]">) {
 
 function GroupSkeleton() {
   return (
-    <div aria-hidden="true" className="animate-pulse">
-      <div className="h-11" />
-      <div className="mt-2 h-8 w-56 rounded-knot bg-panel" />
-      <div className="mt-2 h-4 w-36 rounded-knot bg-panel" />
-      <div className="mt-4 h-24 rounded-cloth bg-panel" />
-      <div className="mt-4 h-52 rounded-cloth bg-panel" />
+    <div>
+      <div aria-hidden="true">
+        <div className="h-11" />
+        <div className="mt-2 h-8 w-56 rounded-knot bg-panel" />
+        <div className="mt-2 h-4 w-36 rounded-knot bg-panel" />
+        <div className="mt-4 h-24 rounded-cloth bg-panel" />
+      </div>
+      <WarpSkeleton className="mt-4" />
     </div>
   );
 }
@@ -304,14 +308,7 @@ async function GroupScreen({
           {plans.map((plan) => (
             <li key={plan.id} className="border-rule border-b py-3">
               <div className="flex items-start gap-2.5">
-                <span
-                  aria-hidden="true"
-                  className={`mt-1 h-3 w-7 flex-none rounded-knot ${
-                    plan.status === "confirmed"
-                      ? "yarn bg-ink"
-                      : "border-2 border-mute border-dashed bg-surface"
-                  }`}
-                />
+                <PlanThread status={plan.status} />
                 <div className="min-w-0 flex-1">
                   <p className="font-extrabold text-[1.0625rem] leading-tight">
                     {plan.title}{" "}
@@ -324,7 +321,7 @@ async function GroupScreen({
                   </p>
                 </div>
               </div>
-              <div className="mt-2 flex flex-wrap gap-2 pl-9">
+              <div className="mt-2 flex flex-wrap gap-2 pl-[3.625rem]">
                 {plan.status === "proposed" && plan.canDecide ? (
                   <form
                     action={confirmPlanAction.bind(
@@ -360,7 +357,7 @@ async function GroupScreen({
                 ) : null}
               </div>
               {plan.canDecide ? (
-                <details className="group mt-1 pl-9 text-sm">
+                <details className="group mt-1 pl-[3.625rem] text-sm">
                   <summary className="flex min-h-11 cursor-pointer list-none items-center font-bold text-ink [&::-webkit-details-marker]:hidden">
                     <svg
                       aria-hidden="true"

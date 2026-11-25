@@ -16,6 +16,7 @@ import { redirect } from "next/navigation";
 import { connection } from "next/server";
 import { Suspense } from "react";
 import { TopBar } from "@/components/top-bar";
+import { WarpSkeleton } from "@/components/warp-skeleton";
 import { t } from "@/i18n/t";
 import { formatDay, formatTime } from "@/lib/format";
 import { threadColor, threadSlot } from "@/lib/lines";
@@ -50,14 +51,7 @@ function scheduleHref(id: string, next: string | null): string {
 export default function ProfilePage({ searchParams }: PageProps<"/perfil">) {
   return (
     <main className={shellClasses.wide}>
-      <Suspense
-        fallback={
-          <div
-            aria-hidden="true"
-            className="mt-12 h-96 animate-pulse rounded-cloth bg-panel"
-          />
-        }
-      >
+      <Suspense fallback={<WarpSkeleton rows={3} className="mt-12" />}>
         <ProfileScreen searchParams={searchParams} />
       </Suspense>
     </main>

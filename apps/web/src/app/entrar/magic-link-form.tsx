@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useEffect, useRef, useState } from "react";
+import { Shuttle } from "@/components/shuttle";
 import { t } from "@/i18n/t";
 import { buttonClasses } from "@/lib/ui";
 import {
@@ -36,6 +37,15 @@ export function MagicLinkForm({ next }: { readonly next: string }) {
     if (codeStep) codeRef.current?.focus();
   }, [codeStep]);
 
+  const verifyError =
+    verifyState.status === "badCode"
+      ? t("signin.code.bad")
+      : verifyState.status === "rateLimited"
+        ? t("signin.rateLimited")
+        : verifyState.status === "failed"
+          ? t("signin.verifyFailed")
+          : null;
+
   if (codeStep) {
     return (
       <section aria-live="polite" className="mt-1">
@@ -58,19 +68,17 @@ export function MagicLinkForm({ next }: { readonly next: string }) {
             pattern="[0-9 ]{6,7}"
             maxLength={7}
             ref={codeRef}
-            aria-invalid={verifyState.status === "badCode"}
-            aria-describedby={
-              verifyState.status === "badCode" ? "code-error" : "code-hint"
-            }
+            aria-invalid={verifyError !== null}
+            aria-describedby={verifyError ? "code-error" : "code-hint"}
             className={`${field} text-center font-extrabold text-2xl tracking-[0.4em]`}
           />
-          {verifyState.status === "badCode" ? (
+          {verifyError ? (
             <p
               id="code-error"
               role="alert"
               className="mt-1 font-bold text-danger text-sm"
             >
-              {t("signin.code.bad")}
+              {verifyError}
             </p>
           ) : (
             <p id="code-hint" className="mt-1 text-mute text-sm">
@@ -80,9 +88,11 @@ export function MagicLinkForm({ next }: { readonly next: string }) {
           <button
             type="submit"
             disabled={verifying}
+            aria-busy={verifying}
             className={`${buttonClasses.primary} mt-3`}
           >
-            {t("signin.code.submit")}
+            {verifying ? <Shuttle /> : null}
+            {verifying ? t("signin.verifying") : t("signin.code.submit")}
           </button>
         </form>
         <div className="mt-2 flex flex-wrap justify-center gap-x-4">
@@ -113,9 +123,11 @@ export function MagicLinkForm({ next }: { readonly next: string }) {
   const error =
     sendState.status === "invalid"
       ? t("signin.invalid")
-      : sendState.status === "failed"
-        ? t("signin.failed")
-        : null;
+      : sendState.status === "rateLimited"
+        ? t("signin.rateLimited")
+        : sendState.status === "failed"
+          ? t("signin.failed")
+          : null;
   return (
     <form
       action={(formData) => {
@@ -131,6 +143,7 @@ export function MagicLinkForm({ next }: { readonly next: string }) {
       <input
         id="name"
         name="name"
+        required
         maxLength={60}
         autoComplete="given-name"
         value={name}
@@ -155,16 +168,22 @@ export function MagicLinkForm({ next }: { readonly next: string }) {
         className={field}
       />
       {error ? (
-        <p id="email-error" className="mt-1 font-bold text-danger text-sm">
+        <p
+          id="email-error"
+          role="alert"
+          className="mt-1 font-bold text-danger text-sm"
+        >
           {error}
         </p>
       ) : null}
       <button
         type="submit"
         disabled={sending}
+        aria-busy={sending}
         className={`${buttonClasses.primary} mt-3`}
       >
-        {t("signin.magic")}
+        {sending ? <Shuttle /> : null}
+        {sending ? t("signin.sending") : t("signin.magic")}
       </button>
     </form>
   );

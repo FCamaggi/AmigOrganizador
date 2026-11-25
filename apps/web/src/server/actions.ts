@@ -1,6 +1,6 @@
 "use server";
 
-import { redirect } from "next/navigation";
+import { redirect, unstable_rethrow } from "next/navigation";
 import { authMode, googleEnabled, safeNext } from "./auth/config";
 import { supabaseServer } from "./auth/supabase";
 import { requestOrigin } from "./origin";
@@ -38,7 +38,13 @@ export async function signIn(
 }
 
 export interface EmailCodeState {
-  readonly status: "idle" | "sent" | "invalid" | "failed" | "badCode";
+  readonly status:
+    | "idle"
+    | "sent"
+    | "invalid"
+    | "failed"
+    | "rateLimited"
+    | "badCode";
   readonly email: string;
 }
 
@@ -57,17 +63,31 @@ export async function sendSignInCode(
   const name = text(formData, "name");
   const email = text(formData, "email").toLowerCase();
   if (authMode() !== "supabase") return { status: "failed", email };
-  if (name.length > MAX_NAME || !EMAIL.test(email) || email.length > 254)
+  // The name is required: a new account needs it to show up in its groups.
+  if (
+    name.length === 0 ||
+    name.length > MAX_NAME ||
+    !EMAIL.test(email) ||
+    email.length > 254
+  )
     return { status: "invalid", email };
-  const supabase = await supabaseServer();
-  const { error } = await supabase.auth.signInWithOtp({
-    email,
-    options: {
-      shouldCreateUser: true,
-      data: name ? { display_name: name } : undefined,
-    },
-  });
-  return { status: error ? "failed" : "sent", email };
+  try {
+    const supabase = await supabaseServer();
+    const { error } = await supabase.auth.signInWithOtp({
+      email,
+      options: { shouldCreateUser: true, data: { display_name: name } },
+    });
+    if (!error) return { status: "sent", email };
+    // Logged without the address, so a failure can be traced in the logs.
+    console.error("sign-in code not sent", error.code, error.status);
+    return {
+      status: error.status === 429 ? "rateLimited" : "failed",
+      email,
+    };
+  } catch (cause) {
+    console.error("sign-in code threw", cause);
+    return { status: "failed", email };
+  }
 }
 
 /** Trades the emailed code for a session, then continues like the callback. */
@@ -81,19 +101,32 @@ export async function verifySignInCode(
   if (authMode() !== "supabase") return { status: "failed", email };
   if (!EMAIL.test(email) || !CODE.test(token))
     return { status: "badCode", email };
-  const supabase = await supabaseServer();
-  const { data, error } = await supabase.auth.verifyOtp({
-    email,
-    token,
-    type: "email",
-  });
-  if (error || !data.user) return { status: "badCode", email };
-  // First stop for someone with no profile yet, unless they came from an
-  // invite: the group asks for the profile once they've joined.
-  const needsProfile =
-    next === "/" &&
-    (await profiles().listForAccount(data.user.id)).length === 0;
-  redirect(needsProfile ? "/perfil" : next);
+  try {
+    const supabase = await supabaseServer();
+    const { data, error } = await supabase.auth.verifyOtp({
+      email,
+      token,
+      type: "email",
+    });
+    if (error || !data.user) {
+      console.error("sign-in code rejected", error?.code, error?.status);
+      return {
+        status: error?.status === 429 ? "rateLimited" : "badCode",
+        email,
+      };
+    }
+    // First stop for someone with no profile yet, unless they came from an
+    // invite: the group asks for the profile once they've joined.
+    const needsProfile =
+      next === "/" &&
+      (await profiles().listForAccount(data.user.id)).length === 0;
+    redirect(needsProfile ? "/perfil" : next);
+  } catch (cause) {
+    // redirect() works by throwing; let it through.
+    unstable_rethrow(cause);
+    console.error("sign-in verify threw", cause);
+    return { status: "failed", email };
+  }
 }
 
 export async function signInWithGoogle(formData: FormData): Promise<void> {

@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
+import { Shuttle } from "@/components/shuttle";
 import { type MessageKey, t } from "@/i18n/t";
 import { buttonClasses } from "@/lib/ui";
 import { type ImportState, importCalendarAction } from "@/server/group-actions";
@@ -65,8 +66,10 @@ export function ImportForm({
       <button
         type="submit"
         disabled={pending}
+        aria-busy={pending}
         className={buttonClasses.secondary}
       >
+        {pending ? <Shuttle /> : null}
         {t("profileEdit.import.submit")}
       </button>
     </form>

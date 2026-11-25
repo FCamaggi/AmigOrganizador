@@ -18,6 +18,10 @@ interface DayClothProps {
   /** The option's window: the band the cloth closes into. */
   readonly band: ClothSpan;
   readonly threads: readonly ClothThread[];
+  /** The person whose thread is lifted, the others dimmed (active row). */
+  readonly focused?: string | null;
+  /** Makes each row's name a toggle that lifts that person's thread. */
+  readonly onFocus?: (accountId: string | null) => void;
 }
 
 /** Above this many people each thread gets thinner, so the cloth stays short. */
@@ -158,33 +162,71 @@ function Thread({
   initial,
   span,
   dense,
+  order,
+  focus,
+  onFocus,
 }: {
   readonly thread: ClothThread;
   readonly initial: string;
   readonly span: ClothSpan;
   readonly dense: boolean;
+  /** Row position: staggers the weave-in. */
+  readonly order: number;
+  /** Lifted, dimmed, or neither (no one focused). */
+  readonly focus: "lifted" | "dimmed" | null;
+  readonly onFocus?: (accountId: string | null) => void;
 }) {
   const color = threadColor(thread.colorIndex).value;
   const ply = threadPly(thread.colorIndex);
+  const name = (
+    <>
+      <span className="lg:hidden">{initial}</span>
+      <span className="hidden lg:inline">{thread.displayName}</span>
+    </>
+  );
+  const nameClass = `w-8 flex-none truncate pr-2 text-left font-bold leading-none lg:w-28 ${
+    dense ? "text-caption" : "text-sm"
+  }`;
   return (
-    <li className={`flex items-center ${dense ? "h-7" : "h-10"}`}>
-      <span
-        aria-hidden="true"
-        className={`w-8 flex-none truncate pr-2 font-bold leading-none lg:w-28 ${
-          dense ? "text-caption" : "text-sm"
-        }`}
-      >
-        <span className="lg:hidden">{initial}</span>
-        <span className="hidden lg:inline">{thread.displayName}</span>
-      </span>
+    <li
+      className={`focus-ease flex items-center ${dense ? "h-7" : "h-10"}`}
+      style={{ opacity: focus === "dimmed" ? 0.4 : 1 }}
+    >
+      {onFocus ? (
+        <button
+          type="button"
+          aria-pressed={focus === "lifted"}
+          aria-label={t("cloth.focus", { name: thread.displayName })}
+          onClick={() => onFocus(focus === "lifted" ? null : thread.accountId)}
+          className={`${nameClass} -my-2 min-h-11 ${
+            focus === "lifted"
+              ? "underline decoration-2 underline-offset-4"
+              : ""
+          }`}
+        >
+          {name}
+        </button>
+      ) : (
+        <span aria-hidden="true" className={nameClass}>
+          {name}
+        </span>
+      )}
       <span className="sr-only">{threadLabel(thread)}</span>
-      <ThreadSegments
-        segments={thread.segments}
-        span={span}
-        color={color}
-        ply={ply}
-        dense={dense}
-      />
+      <span
+        className="weave-in focus-ease flex h-full flex-1"
+        style={{
+          animationDelay: `${Math.min(order, 8) * 70}ms`,
+          transform: focus === "lifted" ? "scaleY(1.4)" : undefined,
+        }}
+      >
+        <ThreadSegments
+          segments={thread.segments}
+          span={span}
+          color={color}
+          ply={ply}
+          dense={dense}
+        />
+      </span>
     </li>
   );
 }
@@ -236,6 +278,8 @@ export function DayCloth({
   span,
   band,
   threads,
+  focused = null,
+  onFocus,
 }: DayClothProps) {
   const dense = threads.length >= DENSE_FROM;
   const onTop = threads.filter((thread) => onTopThroughout(thread, band));
@@ -272,6 +316,15 @@ export function DayCloth({
               initial={initials[index] ?? "?"}
               span={span}
               dense={dense}
+              order={index}
+              focus={
+                focused === null
+                  ? null
+                  : focused === thread.accountId
+                    ? "lifted"
+                    : "dimmed"
+              }
+              onFocus={onFocus}
             />
           ))}
         </ul>
@@ -289,6 +342,7 @@ export function DayCloth({
       </p>
       <p className="mt-0.5 text-pretty pl-8 text-caption text-mute lg:pl-28">
         {t("cloth.legend")}
+        {onFocus ? ` · ${t("cloth.focusHint")}` : ""}
       </p>
     </figure>
   );

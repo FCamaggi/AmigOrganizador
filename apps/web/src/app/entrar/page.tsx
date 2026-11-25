@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import { TopBar } from "@/components/top-bar";
-import { t } from "@/i18n/t";
+import { type MessageKey, t } from "@/i18n/t";
 import { buttonClasses, shellClasses } from "@/lib/ui";
 import { signInWithGoogle } from "@/server/actions";
 import { authMode, googleEnabled, safeNext } from "@/server/auth/config";
@@ -26,14 +26,15 @@ async function SignInScreen({
   const params = await searchParams;
   const next = safeNext(typeof params.next === "string" ? params.next : null);
   const callbackError = params.error !== undefined;
-  const back = next;
+  const back = next === "/grupos/nuevo" ? "/" : next;
+  const intro = signInIntro(next);
   return (
     <>
       <TopBar backHref={back} backLabel={t("answer.back")} />
       <h1 className="mt-4 font-extrabold text-[1.75rem] leading-tight">
-        {t("signin.title")}
+        {t(intro.title)}
       </h1>
-      <p className="mt-1.5 text-mute">{t("signin.body")}</p>
+      <p className="mt-1.5 text-mute">{t(intro.body)}</p>
 
       {callbackError ? (
         <p className="mt-3 font-bold text-danger text-sm" role="alert">
@@ -82,6 +83,21 @@ async function SignInScreen({
       </Link>
     </>
   );
+}
+
+/**
+ * Says why sign-in is asked for: someone who tapped "Crear grupo" or opened
+ * an invite should not land on a generic login with no context.
+ */
+function signInIntro(next: string): {
+  readonly title: MessageKey;
+  readonly body: MessageKey;
+} {
+  if (next === "/grupos/nuevo")
+    return { title: "signin.create.title", body: "signin.create.body" };
+  if (next.startsWith("/g/"))
+    return { title: "signin.join.title", body: "signin.join.body" };
+  return { title: "signin.title", body: "signin.body" };
 }
 
 /** Google's "G", required on Google sign-in buttons by its branding rules. */
