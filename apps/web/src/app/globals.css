@@ -17,6 +17,14 @@
   --color-thread-ink: #23263a;
 }
 
+/* Font stacks are read by plain CSS (body, h1, h2) as well as utilities, so
+   they must always be emitted, or the titles silently fall back to Figtree. */
+@theme static {
+  --font-ui: var(--font-figtree), system-ui, sans-serif;
+  --font-display: var(--font-bricolage), var(--font-figtree), sans-serif;
+  --font-rope: var(--font-knot-rope), var(--font-bricolage), sans-serif;
+}
+
 @theme {
   --color-ground: #e9ebe8;
   --color-surface: #fbfbfa;
@@ -33,9 +41,6 @@
   --color-madder-active: #85231d;
   --color-indigo: #2f4fa2;
   --color-danger: #a3221a;
-
-  --font-ui: var(--font-figtree), system-ui, sans-serif;
-  --font-display: var(--font-bricolage), var(--font-figtree), sans-serif;
 
   --text-caption: 0.75rem;
 
@@ -76,6 +81,12 @@
   h2 {
     font-family: var(--font-display);
     letter-spacing: -0.015em;
+  }
+
+  /* Large titles speak in rope. Its glyphs carry their own spacing. */
+  h1 {
+    font-family: var(--font-rope);
+    letter-spacing: 0;
   }
 
   ::selection {

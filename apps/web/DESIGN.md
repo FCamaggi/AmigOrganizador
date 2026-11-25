@@ -25,25 +25,25 @@ colors:
   thread-ink: "#23263a"
 typography:
   display-hero:
-    fontFamily: "Bricolage Grotesque, Figtree, sans-serif"
+    fontFamily: "Knot Rope, Bricolage Grotesque, sans-serif"
     fontSize: "2.5rem"
     fontWeight: 800
     lineHeight: 1.05
     letterSpacing: "-0.015em"
   display-decision:
-    fontFamily: "Bricolage Grotesque, Figtree, sans-serif"
+    fontFamily: "Knot Rope, Bricolage Grotesque, sans-serif"
     fontSize: "1.625rem"
     fontWeight: 800
     lineHeight: 1.08
     letterSpacing: "-0.02em"
   headline-group:
-    fontFamily: "Bricolage Grotesque, Figtree, sans-serif"
+    fontFamily: "Knot Rope, Bricolage Grotesque, sans-serif"
     fontSize: "2rem"
     fontWeight: 800
     lineHeight: 1.05
     letterSpacing: "-0.02em"
   title-page:
-    fontFamily: "Bricolage Grotesque, Figtree, sans-serif"
+    fontFamily: "Knot Rope, Bricolage Grotesque, sans-serif"
     fontSize: "1.75rem"
     fontWeight: 800
     lineHeight: 1.25
@@ -242,10 +242,11 @@ Eight dyed-wool colours, defined once in `@amigo/core` (`THREAD_COLORS`) and dra
 
 ## Typography
 
+**Rope Font:** Knot Rope, the brand's own face: monoline rounded letters with the yarn's twist cut in as diagonal stripes, built from generated glyph sheets (`Knot-Lana/`), one drawn weight (falls back to Bricolage Grotesque)
 **Display Font:** Bricolage Grotesque (falls back to Figtree, then sans-serif)
 **Body Font:** Figtree (falls back to system-ui, sans-serif)
 
-**Character:** Figtree carries the interface with a friendly, round, legible voice; Bricolage Grotesque sets names and big numbers, where the woven world speaks loudest. All `h1` and `h2` are Bricolage with tightened tracking (-0.015em); body text uses tabular numerals so times and counts align.
+**Character:** Figtree carries the interface with a friendly, round, legible voice. Knot Rope sets every `h1` (hero, page titles, group name) and the decided day: the brand speaks in rope at title size. Bricolage Grotesque sets the smaller `h2` section headings with tightened tracking (-0.015em), where rope stripes would turn to noise; body text uses tabular numerals so times and counts align. Font stacks live in a static theme block so plain CSS always resolves them.
 
 ### Hierarchy
 - **Display Hero** (800, 2.5rem growing to 3rem at `sm` and 3.75rem at `lg`, line-height 1.05): the signed-out home headline only.
@@ -261,7 +262,7 @@ Eight dyed-wool colours, defined once in `@amigo/core` (`THREAD_COLORS`) and dra
 - **Counts** scale with rank in option rows: 1.25rem for the best option, 1.125rem for the second, 1rem at 85% ink for the rest.
 
 ### Named Rules
-**The Names Are Display Rule.** Bricolage is for group names, the decided day and the hero; anything you tap or read in a list is Figtree.
+**The Rope Is For Titles Rule.** Knot Rope appears at 1.625rem and up only (h1, the decided day); section headings stay Bricolage and anything you tap or read in a list is Figtree. Rope is drawn in flat ink: no yarn fill until a 2D wool tile exists.
 
 ## Layout
 

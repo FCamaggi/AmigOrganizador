@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Bricolage_Grotesque, Figtree } from "next/font/google";
+import localFont from "next/font/local";
 import { ServiceWorker } from "@/components/service-worker";
 import { t } from "@/i18n/t";
 import "./globals.css";
@@ -14,6 +15,15 @@ const figtree = Figtree({
 const bricolage = Bricolage_Grotesque({
   subsets: ["latin"],
   variable: "--font-bricolage",
+  display: "swap",
+});
+// Knot Rope: the brand's twisted-rope display face, built from glyph sheets in
+// Knot-Lana/. One drawn weight, declared as a range so the browser never fakes
+// a bold. Large titles only: below ~24px its twist stripes turn to noise.
+const rope = localFont({
+  src: "../assets/fonts/KnotRope.woff2",
+  variable: "--font-knot-rope",
+  weight: "100 900",
   display: "swap",
 });
 
@@ -42,7 +52,10 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="es-CL" className={`${figtree.variable} ${bricolage.variable}`}>
+    <html
+      lang="es-CL"
+      className={`${figtree.variable} ${bricolage.variable} ${rope.variable}`}
+    >
       <body>
         {children}
         <ServiceWorker />

@@ -385,7 +385,7 @@ export function GroupBoard({
           >
             <h2
               id="decision-heading"
-              className="font-extrabold text-[1.625rem] leading-[1.08] tracking-[-0.02em] sm:text-[1.875rem]"
+              className="font-rope font-extrabold text-[1.625rem] leading-[1.08] tracking-[-0.02em] sm:text-[1.875rem]"
             >
               {selected.dayLabel} · {formatTime(selected.start)}
             </h2>

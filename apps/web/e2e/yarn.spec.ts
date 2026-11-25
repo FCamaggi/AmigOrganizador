@@ -23,3 +23,21 @@ test("sticky footers lie on the cloth, not on a flat band", async ({
     await footer.evaluate((node) => getComputedStyle(node).backgroundImage),
   ).toContain("/yarn/cloth-");
 });
+
+test("titles speak in Knot Rope and section headings in Bricolage", async ({
+  page,
+}) => {
+  await page.goto("/grupos/nuevo");
+  const families = await page.evaluate(async () => {
+    await document.fonts.ready;
+    const h1 = document.querySelector("h1");
+    return {
+      h1: h1 ? getComputedStyle(h1).fontFamily : "",
+      ropeLoaded: [...document.fonts].some(
+        (font) => /rope/i.test(font.family) && font.status === "loaded",
+      ),
+    };
+  });
+  expect(families.h1.toLowerCase()).toContain("rope");
+  expect(families.ropeLoaded).toBe(true);
+});
